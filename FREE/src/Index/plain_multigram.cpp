@@ -26,7 +26,19 @@ static void insert_or_increment(std::unordered_map<T, long double, hash_T> & kgr
 // Algorithm 3.1 Multigram Index
 void free::PlainMultigram::build_index(int upper_k) {
     select_grams(upper_k);
-    // TODO: build index
+    for (auto i = 0; i < k_dataset_size_; i++) {
+        auto line = k_dataset_[i];
+        for (auto pos = 0; pos < line.size(); pos++) {
+            for (auto k = 1; k <= upper_k && k + pos <= line.size(); k++) {
+                const curr_substr = line.(pos, k);
+                if ((auto temp_pos = k_index_keys_.find(curr_substr)) != k_index_keys_.end()) {
+                    k_index_[curr_substr].push_back(i);
+                    // any longer ones will not be in the index; increment to next pos
+                    break;
+                }
+            }
+        }
+    }   
 }
 
 void free::PlainMultigram::select_grams(int upper_k) {
