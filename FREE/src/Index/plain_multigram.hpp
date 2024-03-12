@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 namespace free_index {
+static const std::vector<long> k_empty_pos_list_;
 
 class PlainMultigram {
  public:
@@ -18,20 +19,27 @@ class PlainMultigram {
       : k_dataset_(dataset), k_dataset_size_(dataset.size()), k_threshold_(sel_threshold) {}
     ~PlainMultigram() {}
 
-    void build_index(int upper_k);
-
+    virtual void build_index(int upper_k);
     void print_index();
+    
+    const std::vector<long> & get_line_pos_at(std::string key) const { 
+        if (auto it = k_index_.find(key); it != k_index_.end()) {
+            return it->second;
+        }
+        return k_empty_pos_list_;
+    }
 
+ protected:
+    void select_grams(int upper_k);
+    void fill_posting(int upper_k);
+    std::unordered_set<std::string> k_index_keys_;
+    
  private:
     // the index structure should be stored here
     const std::vector<std::string> &k_dataset_;
     const long double k_dataset_size_;
     const double k_threshold_;
     std::unordered_map<std::string, std::vector<long>> k_index_;
-    std::unordered_set<std::string> k_index_keys_;
-
-    void select_grams(int upper_k);
-    void fill_posting(int upper_k);
 
     /**Select Grams Helpers**/
     void get_kgrams_not_indexed(
