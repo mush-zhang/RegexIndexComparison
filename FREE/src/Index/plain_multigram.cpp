@@ -1,4 +1,5 @@
-#include <plain_multigram.hpp>
+#include "plain_multigram.hpp"
+#include <iostream>
 
 // https://www.geeksforgeeks.org/how-to-use-unordered_map-efficiently-in-c/
 // umap.reserve(1024); // RESERVING SPACE BEFOREHAND
@@ -39,6 +40,17 @@ void free::PlainMultigram::build_index(int upper_k) {
             }
         }
     }   
+}
+
+void free::PlainMultigram::print_index() {
+    for (const auto & [key, val] : k_index_) {
+        std::cout << key << ":" << std::endl;
+        std::cout << "[";
+        for (auto idx : val) {
+            std::cout << idx << ",";
+        }
+        std::cout << "]";
+    }
 }
 
 void free::PlainMultigram::select_grams(int upper_k) {

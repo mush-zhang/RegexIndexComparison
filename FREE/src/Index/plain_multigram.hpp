@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 
 namespace free {
 
@@ -17,6 +18,7 @@ class PlainMultigram {
 
     void build_index(int upper_k);
 
+    void print_index();
 
  private:
     // the index structure should be stored here
