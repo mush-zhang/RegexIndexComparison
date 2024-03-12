@@ -1,6 +1,7 @@
 #include "hash_pair.hpp"
+#include <functional>
 
-struct hash_pair hash_pair;
+// struct hash_pair hash_pair;
 
 template <typename T>
 void hash_combine (size_t& seed, const T& val) {
@@ -30,3 +31,5 @@ size_t hash_pair::operator()(const std::pair<T1, T2>& p) const
 {
     return hash_val(p.first, p.second);
 }
+
+template size_t hash_pair::operator()<char>(const std::pair<char, char>& p) const;

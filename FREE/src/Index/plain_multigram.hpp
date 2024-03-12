@@ -1,3 +1,5 @@
+#include "hash_pair.hpp"
+
 #ifndef FREE_INDEX_PLAIN_MULTIGRAM_HPP_
 #define FREE_INDEX_PLAIN_MULTIGRAM_HPP_
 
@@ -6,7 +8,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace free {
+namespace free_index {
 
 class PlainMultigram {
  public:
@@ -14,7 +16,7 @@ class PlainMultigram {
     PlainMultigram(const std::vector<std::string> &&) = delete;
     PlainMultigram(const std::vector<std::string> & dataset, double sel_threshold)
       : k_dataset_(dataset), k_dataset_size_(dataset.size()), k_threshold_(sel_threshold) {}
-    ~PlainMultigram();
+    ~PlainMultigram() {}
 
     void build_index(int upper_k);
 
@@ -26,17 +28,18 @@ class PlainMultigram {
     const long double k_dataset_size_;
     const double k_threshold_;
     std::unordered_map<std::string, std::vector<long>> k_index_;
-    std::unordered_set<std::string, std::vector<long>> k_index_keys_;
+    std::unordered_set<std::string> k_index_keys_;
 
     void select_grams(int upper_k);
+    void fill_posting(int upper_k);
 
     /**Select Grams Helpers**/
     void get_kgrams_not_indexed(
-            std::unordered_set<std::string> & kgrams,
+            std::unordered_map<std::string, long double> & kgrams,
             const std::unordered_set<std::string> & expand, size_t k);
     void get_uni_bigram(
-        std::unordered_map<char, long> & unigrams,
-        std::unordered_map<std::pair<char, char>, long, hash_pair> & bigrams);
+        std::unordered_map<char, long double> & unigrams,
+        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);
 
     void insert_kgram_into_index(
         const std::unordered_map<std::string, long double> & kgrams,
@@ -48,6 +51,6 @@ class PlainMultigram {
     /**Select Grams Helpers End**/
 };
 
-} // namespace free
+} // namespace free_index
 
 #endif // FREE_INDEX_PLAIN_MULTIGRAM_HPP_

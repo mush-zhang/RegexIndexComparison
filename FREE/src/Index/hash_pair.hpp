@@ -2,6 +2,7 @@
 #define FREE_INDEX_HASH_PAIR_HPP_
 
 #include <cstddef>
+#include <utility>
 
 // ------------------------------------------------------------------------------------------------------
 //  Tuple Hash Functions
