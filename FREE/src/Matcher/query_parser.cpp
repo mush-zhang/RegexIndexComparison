@@ -222,14 +222,12 @@ void free_matcher::QueryParser::print_plan() {
     std::cout << "#################### END PLAN #######################" << std::endl;
 }
 
-void remove_null_node(std::unique_ptr<QueryPlanNode> & parent, 
-                      std::unique_ptr<QueryPlanNode> & node, bool is_left);
+void remove_null_node(std::unique_ptr<QueryPlanNode> & node);
 
-void remove_null_node_and(std::unique_ptr<QueryPlanNode> & parent, std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+void remove_null_node_and(std::unique_ptr<QueryPlanNode> & node) {
     // Assume node is not nullptr
-    // check 
-    remove_null_node(node, node->left_, true);
-    remove_null_node(node, node->right_, false);
+    remove_null_node(node->left_);
+    remove_null_node(node->right_);
 
     if (node->left_->is_null() && node->right_->is_null()) {
         // let current node be null
@@ -237,26 +235,17 @@ void remove_null_node_and(std::unique_ptr<QueryPlanNode> & parent, std::unique_p
     } else if (node->left_->is_null()) {
         node->left_.release();
         node = std::move(node->right_);
-        // if (parent) {
-        //     if (is_left) parent->left_ = node->right_;
-        //     else parent->right_ = node->right_;
-        // }
-
     } else if (node->right_->is_null()) {
         node->right_.release();
         node = std::move(node->left_);
-        // if (parent) {
-        //     if (is_left) parent->left_ = node->left_;
-        //     else parent->right_ = node->left_;
-        // }
     }
 }
 
-void remove_null_node_or(std::unique_ptr<QueryPlanNode> & parent, std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+void remove_null_node_or(std::unique_ptr<QueryPlanNode> & node) {
     // Assume node is not nullptr
     // check 
-    remove_null_node(node, node->left_, true);
-    remove_null_node(node, node->right_, false);
+    remove_null_node(node->left_);
+    remove_null_node(node->right_);
 
     if (node->left_->is_null() || node->right_->is_null()) {
         // let current node be null
@@ -264,16 +253,15 @@ void remove_null_node_or(std::unique_ptr<QueryPlanNode> & parent, std::unique_pt
     } 
 }
 
-void remove_null_node(std::unique_ptr<QueryPlanNode> & parent, 
-                      std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
     if (!node || node->get_type() == free_matcher::NodeType::kLiteralNode ||
         node->get_type() == free_matcher::NodeType::kNullNode) {
         return;
     }
     if (node->get_type() == free_matcher::NodeType::kAndNode) {
-        remove_null_node_and(parent, node, is_left);
+        remove_null_node_and(node);
     } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
-        remove_null_node_or(parent, node, is_left);
+        remove_null_node_or(node);
     } else {
         std::cout << "Invalid node type my friend" << std::endl;
     }
@@ -282,6 +270,5 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & parent,
 
 // Remove Null node according to rule in table 2
 void free_matcher::QueryParser::remove_null() {
-    std::unique_ptr<QueryPlanNode> temp_null = nullptr;
-    remove_null_node(temp_null, k_query_plan_, false);
+    remove_null_node(k_query_plan_);
 }
