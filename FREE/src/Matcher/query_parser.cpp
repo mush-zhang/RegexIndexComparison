@@ -15,7 +15,7 @@ const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+'
 const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', 'D', 'l', 'p',
                                                  's', 'S', 'u', 'x'};
 
-enum OP { k_And_, k_Or_ };
+enum OP { kAnd, kOr };
 
 // forward declaration
 std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op);
@@ -95,11 +95,11 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
 
     std::string l_char, r_char;
     char op_char;
-    if (op == k_And_) {
+    if (op == kAnd) {
         l_char = "(";
         r_char = ")";
         op_char = '&';
-    } else if (op == k_Or_) {
+    } else if (op == kOr) {
         l_char = "|";
         r_char = "|";
         op_char = '|';        
@@ -175,14 +175,14 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
     std::unique_ptr<QueryPlanNode> temp_null = nullptr;
     std::unique_ptr<QueryPlanNode> & curr = temp_null;
 
-    curr = build_rooted_op_plan(reg_str, k_And_);
+    curr = build_rooted_op_plan(reg_str, kAnd);
 
     // check if it is a OR of constant literals
     if (curr) {
         return std::move(curr);
     }
     // std::cout << " No and found; finding or" << std::endl;
-    curr = build_rooted_op_plan(reg_str, k_Or_);
+    curr = build_rooted_op_plan(reg_str, kOr);
 
     if (curr) {
         return std::move(curr);
@@ -221,4 +221,9 @@ void free_matcher::QueryParser::print_plan() {
     std::cout << "#################### BEGIN PLAN #######################" << std::endl;
     print_plan_helper("", k_query_plan_, false);
     std::cout << "#################### END PLAN #######################" << std::endl;
+}
+
+// Remove Null node according to rule in table 2
+void free_matcher::QueryParser::remove_null() {
+    
 }
