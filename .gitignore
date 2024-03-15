@@ -35,4 +35,6 @@
 *.vscode*
 
 # My personal notes
+*/.*.txt
+*\.*.txt
 .*.txt
