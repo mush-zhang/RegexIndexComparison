@@ -10,6 +10,7 @@ class AndNode: public QueryPlanNode {
     ~AndNode() {}
     using QueryPlanNode::QueryPlanNode;
     std::string to_string() override { return "AND"; }
+    NodeType get_type() override { return NodeType::kAnd; }
 
 };
 

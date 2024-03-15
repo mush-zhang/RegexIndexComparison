@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#include "types.hpp"
+
 namespace free_matcher {
 
 class QueryPlanNode {
@@ -15,7 +17,8 @@ class QueryPlanNode {
 
     virtual std::string to_string() { return ""; }
     virtual bool is_null() { return false; }
-    
+    virtual NodeType get_type() { return NodeType::kInvalid; }
+
     std::unique_ptr<QueryPlanNode> left_; 
     std::unique_ptr<QueryPlanNode> right_; 
 };
