@@ -196,8 +196,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
     return make_const_node(reg_str);
 }
 
-void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str, 
-                                                    bool remove_null) {
+void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str) {
     // parse the string and pick out the literal component
     std::string curr_str(reg_str);
     k_query_plan_.reset(build_rooted_plan(curr_str).release());
@@ -205,15 +204,15 @@ void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str,
 
 void print_plan_helper(const std::string& prefix, 
                        const std::unique_ptr<QueryPlanNode> & node, 
-                       bool isLeft) {
+                       bool is_left) {
     if (node) {
         std::cout << prefix;
-        std::cout << (isLeft ? "|--" : "L--");
+        std::cout << (is_left ? "|--" : "L--");
         // print the value of the node
         std::cout << node->to_string() << std::endl;
         // enter the next tree level - left and right branch
-        print_plan_helper(prefix + (isLeft ? "|   " : "    "), node->right_, true);
-        print_plan_helper(prefix + (isLeft ? "|   " : "    "), node->left_, false);
+        print_plan_helper(prefix + (is_left ? "|   " : "    "), node->right_, true);
+        print_plan_helper(prefix + (is_left ? "|   " : "    "), node->left_, false);
     }
 }
 
@@ -223,7 +222,66 @@ void free_matcher::QueryParser::print_plan() {
     std::cout << "#################### END PLAN #######################" << std::endl;
 }
 
+void remove_null_node(std::unique_ptr<QueryPlanNode> & parent, 
+                      std::unique_ptr<QueryPlanNode> & node, bool is_left);
+
+void remove_null_node_and(std::unique_ptr<QueryPlanNode> & parent, std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+    // Assume node is not nullptr
+    // check 
+    remove_null_node(node, node->left_, true);
+    remove_null_node(node, node->right_, false);
+
+    if (node->left_->is_null() && node->right_->is_null()) {
+        // let current node be null
+        node = make_const_node("");
+    } else if (node->left_->is_null()) {
+        node->left_.release();
+        node = std::move(node->right_);
+        // if (parent) {
+        //     if (is_left) parent->left_ = node->right_;
+        //     else parent->right_ = node->right_;
+        // }
+
+    } else if (node->right_->is_null()) {
+        node->right_.release();
+        node = std::move(node->left_);
+        // if (parent) {
+        //     if (is_left) parent->left_ = node->left_;
+        //     else parent->right_ = node->left_;
+        // }
+    }
+}
+
+void remove_null_node_or(std::unique_ptr<QueryPlanNode> & parent, std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+    // Assume node is not nullptr
+    // check 
+    remove_null_node(node, node->left_, true);
+    remove_null_node(node, node->right_, false);
+
+    if (node->left_->is_null() || node->right_->is_null()) {
+        // let current node be null
+        node = make_const_node("");
+    } 
+}
+
+void remove_null_node(std::unique_ptr<QueryPlanNode> & parent, 
+                      std::unique_ptr<QueryPlanNode> & node, bool is_left) {
+    if (!node || node->get_type() == free_matcher::NodeType::kLiteralNode ||
+        node->get_type() == free_matcher::NodeType::kNullNode) {
+        return;
+    }
+    if (node->get_type() == free_matcher::NodeType::kAndNode) {
+        remove_null_node_and(parent, node, is_left);
+    } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
+        remove_null_node_or(parent, node, is_left);
+    } else {
+        std::cout << "Invalid node type my friend" << std::endl;
+    }
+
+} 
+
 // Remove Null node according to rule in table 2
 void free_matcher::QueryParser::remove_null() {
-    
+    std::unique_ptr<QueryPlanNode> temp_null = nullptr;
+    remove_null_node(temp_null, k_query_plan_, false);
 }

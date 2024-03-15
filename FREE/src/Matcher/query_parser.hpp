@@ -17,7 +17,7 @@ class QueryParser {
     ~QueryParser() {}
 
     void generate_query_plan(const std::string & reg_str);
-
+    void remove_null();
     void print_plan();
 
  private:
