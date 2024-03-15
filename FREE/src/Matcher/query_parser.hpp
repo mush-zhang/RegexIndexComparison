@@ -16,15 +16,12 @@ class QueryParser {
     QueryParser() {}
     ~QueryParser() {}
 
-    // std::unique_ptr<QueryPlanNode> make_const_node(const std::string & token);
-    // std::unique_ptr<QueryPlanNode> make_op_node(char op);
-
     void generate_query_plan(const std::string & reg_str);
 
     void print_plan();
 
  private:
-    std::unique_ptr<QueryPlanNode> k_query_plan_;
+    std::unique_ptr<QueryPlanNode> k_query_plan_;    
 };
 
 } // namespace free_matcher
