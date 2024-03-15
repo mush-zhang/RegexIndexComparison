@@ -4,11 +4,11 @@
 namespace free_matcher {
 
 enum NodeType {
-    kInvalid,
-    kAnd,
-    kOr,
-    kLiteral,
-    kNull
+    kInvalidNode,
+    kAndNode,
+    kOrNode,
+    kLiteralNode,
+    kNullNode
 };
 
 } // namespace free_matcher

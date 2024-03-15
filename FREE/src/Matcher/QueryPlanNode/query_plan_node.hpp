@@ -17,7 +17,7 @@ class QueryPlanNode {
 
     virtual std::string to_string() { return ""; }
     virtual bool is_null() { return false; }
-    virtual NodeType get_type() { return NodeType::kInvalid; }
+    virtual NodeType get_type() { return NodeType::kInvalidNode; }
 
     std::unique_ptr<QueryPlanNode> left_; 
     std::unique_ptr<QueryPlanNode> right_; 

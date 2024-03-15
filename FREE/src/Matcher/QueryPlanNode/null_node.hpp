@@ -12,7 +12,7 @@ class NullNode: public QueryPlanNode {
     bool is_null() override { return true; }
 
     std::string to_string() override { return "NULL"; }    
-    NodeType get_type() override { return NodeType::kNull; }
+    NodeType get_type() override { return NodeType::kNullNode; }
 };
 
 } // namespace free_matcher

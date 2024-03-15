@@ -11,7 +11,7 @@ class OrNode: public QueryPlanNode {
     using QueryPlanNode::QueryPlanNode;
 
     std::string to_string() override { return "OR"; }
-    NodeType get_type() override { return NodeType::kOr; }
+    NodeType get_type() override { return NodeType::kOrNode; }
 
 };
 
