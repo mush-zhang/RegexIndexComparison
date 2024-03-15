@@ -14,7 +14,8 @@ class QueryPlanNode {
     ~QueryPlanNode() {}
 
     virtual std::string to_string() { return ""; }
-
+    virtual bool is_null() { return false; }
+    
     std::unique_ptr<QueryPlanNode> left_; 
     std::unique_ptr<QueryPlanNode> right_; 
 };

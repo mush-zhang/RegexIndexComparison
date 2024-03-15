@@ -18,8 +18,8 @@ const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', '
 enum OP { k_And_, k_Or_ };
 
 // forward declaration
-std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op);
-std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str);
+std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op, bool remove_null);
+std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str, bool remove_null);
 
 bool char_escaped(const std::string &line, std::size_t pos) {
     auto temp_pos = pos;
@@ -73,17 +73,19 @@ std::unique_ptr<QueryPlanNode> make_op_node(char op, std::unique_ptr<QueryPlanNo
     return nullptr;
 }
 
-void make_or_assign_node(std::string & str, char op_char, std::unique_ptr<QueryPlanNode> & curr) {
+void make_or_assign_node(std::string & str, char op_char, std::unique_ptr<QueryPlanNode> & curr, bool remove_null) {
     if (!curr) {
-        curr = build_rooted_plan(str);
+        curr = build_rooted_plan(str, remove_null);
     }
     else {
-        auto temp = build_rooted_plan(str);
-        curr = make_op_node(op_char, std::move(curr), std::move(temp));
+        auto temp = build_rooted_plan(str, remove_null);
+        if (!(remove_null && temp->is_null())) {
+            curr = make_op_node(op_char, std::move(curr), std::move(temp));
+        }
     }
 }
 
-std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op) {
+std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op, bool remove_null) {
 
     // std::cout << "build_rooted_op_plan(" << reg_str << "," << op << ")" << std::endl;
 
@@ -112,7 +114,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
             // if it is not escaped: it is a beginning of a capture group
             std::string curr_str = reg_str.substr(prev_pos, pos-prev_pos);
             if (!curr_str.empty()) {
-                make_or_assign_node(curr_str, op_char, curr);
+                make_or_assign_node(curr_str, op_char, curr, remove_null);
             }
 
             pos++;
@@ -128,7 +130,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
                         (reg_str.at(pos2+1) != '*' && reg_str.at(pos2+1) != '?')) {
                         // Another rooted plan for the substr in capture group
                         auto sub_btw_brackets = reg_str.substr(pos, pos2-pos);
-                        make_or_assign_node(sub_btw_brackets, op_char, curr);
+                        make_or_assign_node(sub_btw_brackets, op_char, curr, remove_null);
                     } else {
                         curr = make_const_node("");
                     }
@@ -139,7 +141,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
 
             if (pos2 == std::string::npos) {
                 auto sub_btw_brackets = reg_str.substr(pos);
-                make_or_assign_node(sub_btw_brackets, op_char, curr);
+                make_or_assign_node(sub_btw_brackets, op_char, curr, remove_null);
                 break;
             } else {
                 pos2++;
@@ -160,7 +162,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
     }
     if (pos2 != -1) {
         auto sub_btw_brackets = reg_str.substr(pos2);
-        make_or_assign_node(sub_btw_brackets, op_char, curr);
+        make_or_assign_node(sub_btw_brackets, op_char, curr, remove_null);
     }
 
     // if not found, it can be a const or a OR
@@ -168,21 +170,21 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
 }
 
 // Let us define a rooted component be: literal or capture group
-std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
+std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str, bool remove_null) {
     // std::cout << "build_rooted_plan(" << reg_str << ")" << std::endl;
     size_t pos = 0;
     size_t prev_pos = 0;
     std::unique_ptr<QueryPlanNode> temp_null = nullptr;
     std::unique_ptr<QueryPlanNode> & curr = temp_null;
 
-    curr = build_rooted_op_plan(reg_str, k_And_);
+    curr = build_rooted_op_plan(reg_str, k_And_, remove_null);
 
     // check if it is a OR of constant literals
     if (curr) {
         return std::move(curr);
     }
     // std::cout << " No and found; finding or" << std::endl;
-    curr = build_rooted_op_plan(reg_str, k_Or_);
+    curr = build_rooted_op_plan(reg_str, k_Or_, remove_null);
 
     if (curr) {
         return std::move(curr);
@@ -196,14 +198,16 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
     return make_const_node(reg_str);
 }
 
-void free_matcher::QueryParser::generate_query_plan(
-        const std::string & reg_str) {
+void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str, 
+                                                    bool remove_null) {
     // parse the string and pick out the literal component
     std::string curr_str(reg_str);
-    k_query_plan_.reset(build_rooted_plan(curr_str).release());
+    k_query_plan_.reset(build_rooted_plan(curr_str, remove_null).release());
 }
 
-void print_plan_helper(const std::string& prefix, const std::unique_ptr<QueryPlanNode> & node, bool isLeft) {
+void print_plan_helper(const std::string& prefix, 
+                       const std::unique_ptr<QueryPlanNode> & node, 
+                       bool isLeft) {
     if (node) {
         std::cout << prefix;
         std::cout << (isLeft ? "|--" : "L--");

@@ -81,7 +81,6 @@ void simple_index_threshold() {
            pi.get_line_pos_at("4.").empty() &&
            pi.get_line_pos_at("5.").empty() &&  
             "Dot+alphabet should have been removed due to prefix free");
-   
 }
 
 void simple_presuf() {
@@ -116,13 +115,18 @@ void simple_presuf() {
            compare_pos_list(pi.get_line_pos_at("e"), {4}) &&
            compare_pos_list(pi.get_line_pos_at("f"), {5}) &&  
             "Alphabet char should have their respecting line idx and ony the one line idx");
-    
-
 }
 
 void simple_query_parser() {
+    std::string reg_query = "(Bill|William)(.*)Clinton";
     auto qp = free_matcher::QueryParser();
-    qp.generate_query_plan("(Bill|William)(.*)Clinton");
+
+    // Should be same as Figure 6(b)
+    qp.generate_query_plan(reg_query, false);
+    qp.print_plan();
+
+    // Should be same as Figure 6(c)
+    qp.generate_query_plan(reg_query);
     qp.print_plan();
 }
 
@@ -136,7 +140,6 @@ int main() {
     std::cout << "-------------------------------------------" << std::endl;
     std::cout << "-------------------------------------------" << std::endl;
     simple_query_parser();    
-
 
     return 0;
 }

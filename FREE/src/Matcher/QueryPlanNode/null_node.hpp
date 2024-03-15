@@ -9,6 +9,8 @@ class NullNode: public QueryPlanNode {
  public:
     NullNode() {}
     ~NullNode() {}
+    bool is_null() override { return true; }
+
     std::string to_string() override { return "NULL"; }    
 };
 
