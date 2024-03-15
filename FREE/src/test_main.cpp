@@ -1,4 +1,4 @@
-#include "Index/plain_multigram.hpp"
+#include "Index/multigram_index.hpp"
 #include "Index/presuf_shell.hpp"
 #include "Matcher/query_parser.hpp"
 
@@ -23,7 +23,7 @@ void simple_index() {
         "5.fffff"
     });
 
-    auto pi = free_index::PlainMultigram(test_dataset, 1);
+    auto pi = free_index::MultigramIndex(test_dataset, 1);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -59,7 +59,7 @@ void simple_index_threshold() {
         "5.fffff"
     });
 
-    auto pi = free_index::PlainMultigram(test_dataset, 0.9);
+    auto pi = free_index::MultigramIndex(test_dataset, 0.9);
 
     // try build index of uni and bigrams only
     pi.build_index(2);

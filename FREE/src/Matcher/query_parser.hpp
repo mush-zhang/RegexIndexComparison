@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "query_plan_node.hpp"
+#include "../Index/multigram_index.hpp"
 
 namespace free_matcher {
 
@@ -18,10 +19,12 @@ class QueryParser {
 
     void generate_query_plan(const std::string & reg_str);
     void remove_null();
+    void index_filtering();
     void print_plan();
 
  private:
-    std::unique_ptr<QueryPlanNode> k_query_plan_;    
+    std::unique_ptr<QueryPlanNode> query_plan_;
+    free_index::MultigramIndex*  k_index_;
 };
 
 } // namespace free_matcher

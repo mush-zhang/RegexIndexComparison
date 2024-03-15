@@ -199,7 +199,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
 void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str) {
     // parse the string and pick out the literal component
     std::string curr_str(reg_str);
-    k_query_plan_.reset(build_rooted_plan(curr_str).release());
+    query_plan_.reset(build_rooted_plan(curr_str).release());
 }
 
 void print_plan_helper(const std::string& prefix, 
@@ -218,7 +218,7 @@ void print_plan_helper(const std::string& prefix,
 
 void free_matcher::QueryParser::print_plan() {
     std::cout << "#################### BEGIN PLAN #######################" << std::endl;
-    print_plan_helper("", k_query_plan_, false);
+    print_plan_helper("", query_plan_, false);
     std::cout << "#################### END PLAN #######################" << std::endl;
 }
 
@@ -270,5 +270,5 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
 
 // Remove Null node according to rule in table 2
 void free_matcher::QueryParser::remove_null() {
-    remove_null_node(k_query_plan_);
+    remove_null_node(query_plan_);
 }

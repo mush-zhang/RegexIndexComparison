@@ -1,4 +1,4 @@
-#include "plain_multigram.hpp"
+#include "multigram_index.hpp"
 #include <iostream>
 #include <chrono>
 
@@ -26,7 +26,7 @@ static void insert_or_increment(std::unordered_map<T, long double, hash_T> & kgr
 /**-----------------------------Helpers End----------------------------------**/
 
 // Algorithm 3.1 Multigram Index
-void free_index::PlainMultigram::build_index(int upper_k) {
+void free_index::MultigramIndex::build_index(int upper_k) {
     auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_k);
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -40,7 +40,7 @@ void free_index::PlainMultigram::build_index(int upper_k) {
     std::cout << "Index Building End in " << elapsed << std::endl;
 }
 
-void free_index::PlainMultigram::print_index() {
+void free_index::MultigramIndex::print_index() {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
     std::cout << ", size of index: " << k_index_.size() << std::endl;
@@ -54,7 +54,7 @@ void free_index::PlainMultigram::print_index() {
     }
 }
 
-void free_index::PlainMultigram::fill_posting(int upper_k) {
+void free_index::MultigramIndex::fill_posting(int upper_k) {
     for (auto i = 0; i < k_dataset_size_; i++) {
         auto line = k_dataset_[i];
         for (auto pos = 0; pos < line.size(); pos++) {
@@ -74,7 +74,7 @@ void free_index::PlainMultigram::fill_posting(int upper_k) {
 }
 
 
-void free_index::PlainMultigram::select_grams(int upper_k) {
+void free_index::MultigramIndex::select_grams(int upper_k) {
     gram_set expand; // stores useless prefix
 
     // Opimization page 6
@@ -106,7 +106,7 @@ void free_index::PlainMultigram::select_grams(int upper_k) {
 //    line [3]: get all k-grams in database whose (k-1)-prefix in expand
 // We also record M(key), the number of data units which contains key
 //    for selectivity calculation defined in Definition 3.1
-void free_index::PlainMultigram::get_kgrams_not_indexed(std::unordered_map<std::string, long double> & kgrams,
+void free_index::MultigramIndex::get_kgrams_not_indexed(std::unordered_map<std::string, long double> & kgrams,
                                             const std::unordered_set<std::string> & expand,
                                             size_t k) {
     // get all grams whose prefix in expand
@@ -123,7 +123,7 @@ void free_index::PlainMultigram::get_kgrams_not_indexed(std::unordered_map<std::
     }
 } 
 
-void free_index::PlainMultigram::get_uni_bigram(
+void free_index::MultigramIndex::get_uni_bigram(
         std::unordered_map<char, long double> & unigrams,
         std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) {
     for (const auto & line : k_dataset_) {
@@ -147,7 +147,7 @@ void free_index::PlainMultigram::get_uni_bigram(
     }
 }
 
-void free_index::PlainMultigram::insert_uni_bigram_into_index(
+void free_index::MultigramIndex::insert_uni_bigram_into_index(
         const std::unordered_map<char, long double> & unigrams,
         const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
         std::unordered_set<std::string> & expand) {
@@ -174,7 +174,7 @@ void free_index::PlainMultigram::insert_uni_bigram_into_index(
     }
 }
 
-void free_index::PlainMultigram::insert_kgram_into_index(
+void free_index::MultigramIndex::insert_kgram_into_index(
         const std::unordered_map<std::string, long double> & kgrams,
         std::unordered_set<std::string> & expand) {
     // for each gram, if selectivity <= threshold, insert to index
@@ -191,7 +191,7 @@ void free_index::PlainMultigram::insert_kgram_into_index(
 /** Would work better if the dataset is not entirely in memory **/
 
 
-// void free_index::PlainMultigram::get_kgrams_with_count(
+// void free_index::MultigramIndex::get_kgrams_with_count(
 //         std::unordered_map<std::string, long double> & kgrams, size_t k) {
 //     for (const auto & line : k_dataset_) {
 //         gram_set visited_kgrams;
@@ -206,7 +206,7 @@ void free_index::PlainMultigram::insert_kgram_into_index(
 //     }
 // }
 
-// void free_index::PlainMultigram::get_kgrams_with_count(
+// void free_index::MultigramIndex::get_kgrams_with_count(
 //         std::unordered_map<std::string, long double> & kgrams, 
 //         const std::unordered_set<std::string> expand,
 //         size_t k) {
@@ -224,7 +224,7 @@ void free_index::PlainMultigram::insert_kgram_into_index(
 
 // // expand stores the expand set for lower_k-1; 
 // // it will store the expand for upper_k when the function returns
-// void free_index::PlainMultigram::build_index(std::unordered_set<std::string> & expand, 
+// void free_index::MultigramIndex::build_index(std::unordered_set<std::string> & expand, 
 //                                        int lower_k, int upper_k) {
 //     size_t k = lower_k;
 //     std::vector<gram_count_map> curr_kgrams(upper_k - lower_k + 1);
@@ -247,7 +247,7 @@ void free_index::PlainMultigram::insert_kgram_into_index(
 //     }
 // }
 
-// void free_index::PlainMultigram::select_grams(int upper_k) {
+// void free_index::MultigramIndex::select_grams(int upper_k) {
 //     // gram_set expand(); // stores useless prefix
 
 //     // // Opimization page 6

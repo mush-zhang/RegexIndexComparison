@@ -1,7 +1,7 @@
 #include "hash_pair.hpp"
 
-#ifndef FREE_INDEX_PLAIN_MULTIGRAM_HPP_
-#define FREE_INDEX_PLAIN_MULTIGRAM_HPP_
+#ifndef FREE_INDEX_MULTIGRAM_INDEX_HPP_
+#define FREE_INDEX_MULTIGRAM_INDEX_HPP_
 
 #include <vector>
 #include <string>
@@ -11,13 +11,14 @@
 namespace free_index {
 static const std::vector<long> k_empty_pos_list_;
 
-class PlainMultigram {
+class MultigramIndex {
  public:
-    PlainMultigram() = delete;
-    PlainMultigram(const std::vector<std::string> &&) = delete;
-    PlainMultigram(const std::vector<std::string> & dataset, double sel_threshold)
+    MultigramIndex() = delete;
+    MultigramIndex(const std::vector<std::string> &&) = delete;
+    MultigramIndex(const std::vector<std::string> & dataset, double sel_threshold)
       : k_dataset_(dataset), k_dataset_size_(dataset.size()), k_threshold_(sel_threshold) {}
-    ~PlainMultigram() {}
+    
+    ~MultigramIndex() {}
 
     virtual void build_index(int upper_k);
     void print_index();
@@ -61,4 +62,4 @@ class PlainMultigram {
 
 } // namespace free_index
 
-#endif // FREE_INDEX_PLAIN_MULTIGRAM_HPP_
+#endif // FREE_INDEX_MULTIGRAM_INDEX_HPP_
