@@ -1,3 +1,0 @@
-g++ -O3 -std=c++17 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -flto -DARMA_NO_DEBUG Index/plain_multigram.cpp main.cpp -o main
-
- g++ -O3 -std=c++17 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -flto -DARMA_NO_DEBUG Index/*.cpp test_main.cpp -o test_main.out
