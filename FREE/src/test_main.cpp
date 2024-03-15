@@ -1,5 +1,7 @@
 #include "Index/plain_multigram.hpp"
 #include "Index/presuf_shell.hpp"
+#include "Matcher/query_parser.hpp"
+
 #include <iostream> 
 #include <cassert>
 
@@ -118,6 +120,12 @@ void simple_presuf() {
 
 }
 
+void simple_query_parser() {
+    auto qp = free_matcher::QueryParser();
+    qp.generate_query_plan("(Bill|William)(.*)Clinton");
+    qp.print_plan();
+}
+
 int main() {
 
     simple_index();
@@ -126,6 +134,9 @@ int main() {
     std::cout << "-------------------------------------------" << std::endl;
     simple_presuf();
     std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------" << std::endl;
+    simple_query_parser();    
+
 
     return 0;
 }
