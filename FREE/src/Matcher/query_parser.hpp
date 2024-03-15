@@ -17,7 +17,7 @@ class QueryParser {
     ~QueryParser() {}
 
     // In benchmarking, assume remove null in first pass along the way for optimized performance
-    void generate_query_plan(const std::string & reg_str, bool remove_null = true);
+    void generate_query_plan(const std::string & reg_str);
     void print_plan();
 
  private:

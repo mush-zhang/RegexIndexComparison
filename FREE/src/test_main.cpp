@@ -122,12 +122,12 @@ void simple_query_parser() {
     auto qp = free_matcher::QueryParser();
 
     // Should be same as Figure 6(b)
-    qp.generate_query_plan(reg_query, false);
-    qp.print_plan();
-
-    // Should be same as Figure 6(c)
     qp.generate_query_plan(reg_query);
     qp.print_plan();
+
+    // // Should be same as Figure 6(c)
+    // qp.remove_null();
+    // qp.print_plan();
 }
 
 int main() {
