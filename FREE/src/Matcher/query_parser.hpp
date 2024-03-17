@@ -24,7 +24,7 @@ class QueryParser {
 
  private:
     std::unique_ptr<QueryPlanNode> query_plan_;
-    free_index::MultigramIndex*  k_index_;
+    free_index::MultigramIndex* k_index_;
 };
 
 } // namespace free_matcher

@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -21,6 +22,10 @@ class MultigramIndex {
     ~MultigramIndex() {}
 
     virtual void build_index(int upper_k);
+
+    // return all substrings of the given string that are keys in the index
+    std::vector<std::string> find_all_indexed(const std::string line);
+
     void print_index();
     
     const std::vector<long> & get_line_pos_at(std::string key) const { 
@@ -33,12 +38,13 @@ class MultigramIndex {
  protected:
     void select_grams(int upper_k);
     void fill_posting(int upper_k);
-    std::unordered_set<std::string> k_index_keys_;
+    std::set<std::string> k_index_keys_;
     
  private:
     // the index structure should be stored here
     const std::vector<std::string> &k_dataset_;
     const long double k_dataset_size_;
+    /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
     std::unordered_map<std::string, std::vector<long>> k_index_;
 

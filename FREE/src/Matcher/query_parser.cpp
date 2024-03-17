@@ -272,3 +272,8 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
 void free_matcher::QueryParser::remove_null() {
     remove_null_node(query_plan_);
 }
+
+// Remove Null node according to rule in table 2
+void free_matcher::QueryParser::index_filtering() {
+    return;
+}
