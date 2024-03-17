@@ -5,6 +5,8 @@
 #include <iostream> 
 #include <cassert>
 
+const double k_number_repeat = 10;
+
 template <typename T>
 bool compare_lists(const std::vector<T> & a, const std::vector<T> & b) {
     if (a.size() != b.size()) return false;
@@ -22,13 +24,13 @@ void make_dataset_with_keys(const std::vector<std::string> & keys, std::vector<s
                 if (i == 0 && j == key.size()-1) {
                     break;
                 }
-                for (size_t k = 0; k < 10; k++) {
+                for (size_t k = 0; k < k_number_repeat; k++) {
                     dataset_container.push_back(key.substr(i, j-i+1));
                 }
             }
         }
     }
-    threshold_constainer = 9.0/dataset_container.size();
+    threshold_constainer = (k_number_repeat-1)/dataset_container.size();
 }
 
 void simple_index() {
@@ -193,14 +195,49 @@ void simple_query_plan_by_index() {
     qp.generate_query_plan(reg_query);
     // Should be same as Figure 7(a)
     qp.remove_null();
-    std::cout << "here" << std::endl;
     qp.rewrite_by_index();
-    std::cout << "after here" << std::endl;
     qp.print_plan();
 
     // Should be same as Figure 7(b)
     qp.remove_null();
     qp.print_plan();
+}
+
+void simple_lines_by_plan() {
+    std::vector<std::string> test_keys({
+        "Will",
+        "liam",
+        "Clint",
+        "nton"
+    });
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_keys, test_dataset, threshold);
+    threshold = 4.0/(42.0+test_dataset.size());
+    for (size_t i = 0; i < k_number_repeat; i++) {
+        test_dataset.push_back("linto");
+        test_dataset.push_back("illi");
+        test_dataset.push_back("ton");
+        test_dataset.push_back("llia");
+    }
+    test_dataset.push_back("William");
+    test_dataset.push_back("Clinton");
+    auto pi = free_index::PresufShell(test_dataset, threshold);
+    pi.build_index(5);
+    pi.print_index();
+    std::string reg_query = "(Bill|William)(.*)Clinton";
+    auto qp = free_matcher::QueryParser(&pi);
+
+    qp.generate_query_plan(reg_query);
+    qp.rewrite_by_index();
+    // Should be same as Figure 7(b)
+    qp.remove_null();
+    qp.print_plan();
+
+    auto idx_list = qp.get_index_by_plan();
+    assert(compare_lists(idx_list, {455}) && 
+           "Line 455 Clinton should be the only result");
 }
 
 int main() {
@@ -218,6 +255,7 @@ int main() {
     simple_query_parser();    
     std::cout << "\t SIMPLE QUERY PLAN BY INDEX-------------------------------------------" << std::endl;
     simple_query_plan_by_index();
-
+    std::cout << "\t SIMPLE LINES BY PLAN-------------------------------------------" << std::endl;
+    simple_lines_by_plan();
     return 0;
 }

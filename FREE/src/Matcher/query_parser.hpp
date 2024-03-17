@@ -21,14 +21,15 @@ class QueryParser {
     void generate_query_plan(const std::string & reg_str);
     void remove_null();
     void rewrite_by_index();
+    std::vector<long> get_index_by_plan();
     void print_plan();
 
  private:
     std::unique_ptr<QueryPlanNode> query_plan_;
     free_index::MultigramIndex* k_index_ = nullptr;
-
+    bool rewrote_by_index_ = false;
     void rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node);
-
+    std::vector<long> get_index_by_node(std::unique_ptr<QueryPlanNode> & node);
 };
 
 } // namespace free_matcher

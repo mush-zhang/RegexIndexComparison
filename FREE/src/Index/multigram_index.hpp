@@ -28,7 +28,7 @@ class MultigramIndex {
 
     void print_index();
     
-    const std::vector<long> & get_line_pos_at(std::string key) const { 
+    const std::vector<long> & get_line_pos_at(const std::string & key) const { 
         if (auto it = k_index_.find(key); it != k_index_.end()) {
             return it->second;
         }
@@ -46,6 +46,7 @@ class MultigramIndex {
     const long double k_dataset_size_;
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
+    /**Key is multigram, value is a sorted (ascending) list of line indices**/
     std::unordered_map<std::string, std::vector<long>> k_index_;
 
     /**Select Grams Helpers**/

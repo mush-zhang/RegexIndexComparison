@@ -293,4 +293,86 @@ void free_matcher::QueryParser::rewrite_by_index() {
         std::cerr << "No index provided; plan stays untouched." << std::endl;
     }
     rewrite_node_by_index(query_plan_);
+    rewrote_by_index_ = query_plan_ == nullptr;
+}
+
+void sorted_lists_union(const std::vector<long> & l, const std::vector<long> & r,
+                       std::vector<long> & result) {
+    size_t i = 0, j = 0;
+    while (i < l.size() && j < r.size()) {
+        long candidate;
+        if (l[i] < r[j]) {
+            candidate = l[i++];
+        } else {
+            candidate = r[j++];
+            if (l[i] == r[j]) i++;
+        } 
+        if (candidate != result.back()) {
+            result.push_back(candidate);
+        }
+    } 
+    // there can be at most one of l and r that has remaining elements
+    if (i < l.size()) {
+        if(l[i] != result.back()) {
+            result.push_back(l[i++]);
+        } 
+        while (i < l.size()) {
+            result.push_back(l[i++]);
+        }
+    } 
+    if (j < r.size()) {
+        if (r[j] != result.back()) {
+            result.push_back(r[j++]);
+        } 
+        while (j < r.size()) {
+            result.push_back(r[j++]);
+        }
+    }
+}
+
+void sorted_lists_intersection(const std::vector<long> & l, 
+                               const std::vector<long> & r,
+                               std::vector<long> & result) {
+    size_t i = 0, j = 0;
+    while (i < l.size() && j < r.size()) {
+        long candidate;
+        if (l[i] < r[j]) {
+            i++;
+        } else if (l[i] > r[j]) {
+            j++;
+        } else {
+            result.push_back(l[i]);
+            i++; 
+            j++;
+        }
+    } 
+}
+
+std::vector<long> free_matcher::QueryParser::get_index_by_node(
+        std::unique_ptr<QueryPlanNode> & node) {
+    std::vector<long> result;
+
+    if (!node || node->is_null() ||
+        node->get_type() == free_matcher::NodeType::kInvalidNode) {
+        return result;
+    }
+    if (node->get_type() == free_matcher::NodeType::kLiteralNode) {
+        return k_index_->get_line_pos_at(node->to_string());
+    }
+    auto left_idxs = get_index_by_node(node->left_);
+    auto right_idxs = get_index_by_node(node->right_);
+
+    if (node->get_type() == free_matcher::NodeType::kAndNode) {
+        sorted_lists_intersection(left_idxs, right_idxs, result);
+    } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
+        sorted_lists_union(left_idxs, right_idxs, result);        
+    } 
+    return result;
+} 
+
+std::vector<long> free_matcher::QueryParser::get_index_by_plan() {
+    if (!rewrote_by_index_) {
+        rewrite_by_index();
+    }
+    return get_index_by_node(query_plan_);
 }
