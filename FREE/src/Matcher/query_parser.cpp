@@ -18,8 +18,8 @@ const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', '
 enum OP { kAnd, kOr };
 
 // forward declaration
-std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op);
-std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str);
+std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str, OP op);
+std::unique_ptr<QueryPlanNode> build_rooted_plan(const std::string & reg_str);
 
 bool char_escaped(const std::string &line, std::size_t pos) {
     auto temp_pos = pos;
@@ -33,9 +33,11 @@ bool char_escaped(const std::string &line, std::size_t pos) {
     return num_escaped % 2 == 1;
 }
 
-void remove_escape(std::string & line) {
+std::string remove_escape(const std::string & line) {
     // remove escape (trick method. should only remove single \ and turning \\ to \)
-    line.erase(std::remove(line.begin(), line.end(), '\\'), line.end());
+    std::string result(line);
+    result.erase(std::remove(result.begin(), result.end(), '\\'), result.end());
+    return result;
 }
 
 bool check_special(const std::string & reg_str) {
@@ -73,7 +75,7 @@ std::unique_ptr<QueryPlanNode> make_op_node(char op, std::unique_ptr<QueryPlanNo
     return nullptr;
 }
 
-void make_or_assign_node(std::string & str, char op_char, std::unique_ptr<QueryPlanNode> & curr) {
+void make_or_assign_node(const std::string & str, char op_char, std::unique_ptr<QueryPlanNode> & curr) {
     if (!curr) {
         curr = build_rooted_plan(str);
     }
@@ -83,15 +85,12 @@ void make_or_assign_node(std::string & str, char op_char, std::unique_ptr<QueryP
     }
 }
 
-std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op) {
-
-    // std::cout << "build_rooted_op_plan(" << reg_str << "," << op << ")" << std::endl;
-
+std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str, OP op) {
     size_t pos = 0;
     size_t prev_pos = 0;
     int pos2 = -1;
-    std::unique_ptr<QueryPlanNode> temp_null = nullptr;
-    std::unique_ptr<QueryPlanNode> & curr = temp_null;
+    std::unique_ptr<QueryPlanNode> k_nullptr = nullptr;
+    std::unique_ptr<QueryPlanNode> & curr = k_nullptr;
 
     std::string l_char, r_char;
     char op_char;
@@ -108,7 +107,6 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
     while ((pos = reg_str.find(l_char, pos)) != std::string::npos) {
         // check if it is escaped
         if (!char_escaped(reg_str, pos)) {
-            // std::cout << "First delim at " << pos << " of " << reg_str << std::endl;
             // if it is not escaped: it is a beginning of a capture group
             std::string curr_str = reg_str.substr(prev_pos, pos-prev_pos);
             if (!curr_str.empty()) {
@@ -117,13 +115,10 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
 
             pos++;
             pos2 = pos;
-            // std::cout << "After first Delim, Looing for next node at  " << pos2 << " of " << reg_str << std::endl;
-
             // should exists a matching bracket in our case
             //  TODO not supporting multi-level brackets currently
             while ((pos2 = reg_str.find(r_char, pos2)) != std::string::npos) {
                 if (!char_escaped(reg_str, pos2)) {
-                    // std::cout << "Second delim at " << pos2 << " of " << reg_str << std::endl;
                     if (pos2 == reg_str.size() - 1 || 
                         (reg_str.at(pos2+1) != '*' && reg_str.at(pos2+1) != '?')) {
                         // Another rooted plan for the substr in capture group
@@ -150,8 +145,6 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
                     pos2++;
                 }
             }
-            // std::cout << "After second Delim, looking for next node at " << pos2 << " of " << reg_str << std::endl;
-
             prev_pos = pos2;
             pos = pos2;
         } else {
@@ -168,12 +161,11 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(std::string & reg_str, OP op
 }
 
 // Let us define a rooted component be: literal or capture group
-std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
-    // std::cout << "build_rooted_plan(" << reg_str << ")" << std::endl;
+std::unique_ptr<QueryPlanNode> build_rooted_plan(const std::string & reg_str) {
     size_t pos = 0;
     size_t prev_pos = 0;
-    std::unique_ptr<QueryPlanNode> temp_null = nullptr;
-    std::unique_ptr<QueryPlanNode> & curr = temp_null;
+    std::unique_ptr<QueryPlanNode> k_nullptr = nullptr;
+    std::unique_ptr<QueryPlanNode> & curr = k_nullptr;
 
     curr = build_rooted_op_plan(reg_str, kAnd);
 
@@ -181,19 +173,17 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(std::string & reg_str) {
     if (curr) {
         return std::move(curr);
     }
-    // std::cout << " No and found; finding or" << std::endl;
     curr = build_rooted_op_plan(reg_str, kOr);
 
     if (curr) {
         return std::move(curr);
     }
-    // std::cout << " No or found; returning const " << reg_str << std::endl;
     // if still null, it is a constant
     if (check_special(reg_str)) {
         return std::move(make_const_node(""));
     }
-    remove_escape(reg_str);
-    return make_const_node(reg_str);
+    auto new_reg = remove_escape(reg_str);
+    return make_const_node(new_reg);
 }
 
 void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str) {
@@ -263,9 +253,8 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
     } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
         remove_null_node_or(node);
     } else {
-        std::cout << "Invalid node type my friend" << std::endl;
+        std::cerr << "Invalid node type my friend" << std::endl;
     }
-
 } 
 
 // Remove Null node according to rule in table 2
@@ -273,7 +262,35 @@ void free_matcher::QueryParser::remove_null() {
     remove_null_node(query_plan_);
 }
 
-// Remove Null node according to rule in table 2
-void free_matcher::QueryParser::index_filtering() {
-    return;
+void free_matcher::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node) {
+    if (!node || node->is_null()) {
+        return;
+    }
+
+    if (node->get_type() == free_matcher::NodeType::kAndNode || 
+        node->get_type() == free_matcher::NodeType::kOrNode) {
+        rewrite_node_by_index(node->left_);
+        rewrite_node_by_index(node->right_);
+    } else if (node->get_type() == free_matcher::NodeType::kLiteralNode) {
+        auto all_keys = k_index_->find_all_indexed(node->to_string());
+        if (all_keys.empty()) {
+            node = make_const_node("");
+        } else {
+            std::unique_ptr<QueryPlanNode> k_nullptr = nullptr;
+            std::unique_ptr<QueryPlanNode> & curr = k_nullptr;
+            for (const auto key : all_keys) {
+                make_or_assign_node(key, '&', curr);
+            }
+            node = std::move(curr);
+        }
+    } else {
+        std::cerr << "Invalid node type my friend" << std::endl;
+    }
+} 
+
+void free_matcher::QueryParser::rewrite_by_index() {
+    if (!k_index_) {
+        std::cerr << "No index provided; plan stays untouched." << std::endl;
+    }
+    rewrite_node_by_index(query_plan_);
 }

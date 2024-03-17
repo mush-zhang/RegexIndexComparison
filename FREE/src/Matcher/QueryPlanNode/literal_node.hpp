@@ -10,7 +10,7 @@ class LiteralNode: public QueryPlanNode {
     LiteralNode() {}
     ~LiteralNode() {}
     LiteralNode(const std::string & token) : literal_(token) {}
-    std::string to_string() override { return literal_; }
+    const std::string & to_string() override { return literal_; }
     NodeType get_type() override { return NodeType::kLiteralNode; }
 
  private:

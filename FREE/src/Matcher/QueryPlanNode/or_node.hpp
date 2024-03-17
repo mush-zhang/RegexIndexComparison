@@ -10,9 +10,11 @@ class OrNode: public QueryPlanNode {
     ~OrNode() {}
     using QueryPlanNode::QueryPlanNode;
 
-    std::string to_string() override { return "OR"; }
+    const std::string & to_string() override { return k_or_node_name_; }
     NodeType get_type() override { return NodeType::kOrNode; }
 
+ private:
+    inline static const std::string k_or_node_name_ = "OR";
 };
 
 } // namespace free_matcher

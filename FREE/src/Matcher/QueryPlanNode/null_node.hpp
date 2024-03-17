@@ -11,8 +11,10 @@ class NullNode: public QueryPlanNode {
     ~NullNode() {}
     bool is_null() override { return true; }
 
-    std::string to_string() override { return "NULL"; }    
+    const std::string & to_string() override { return k_null_node_name_; }    
     NodeType get_type() override { return NodeType::kNullNode; }
+ private:
+    inline static const std::string k_null_node_name_ = "NULL";
 };
 
 } // namespace free_matcher

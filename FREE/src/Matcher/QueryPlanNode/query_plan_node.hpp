@@ -15,12 +15,14 @@ class QueryPlanNode {
         : left_(std::move(l)), right_(std::move(r)) {}
     ~QueryPlanNode() {}
 
-    virtual std::string to_string() { return ""; }
+    virtual const std::string & to_string() { return k_generic_node_name_; }
     virtual bool is_null() { return false; }
     virtual NodeType get_type() { return NodeType::kInvalidNode; }
 
     std::unique_ptr<QueryPlanNode> left_; 
     std::unique_ptr<QueryPlanNode> right_; 
+ private:
+    inline static const std::string k_generic_node_name_ = "";
 };
 
 } // namespace free_matcher

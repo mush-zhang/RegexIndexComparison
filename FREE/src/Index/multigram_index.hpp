@@ -24,7 +24,7 @@ class MultigramIndex {
     virtual void build_index(int upper_k);
 
     // return all substrings of the given string that are keys in the index
-    std::vector<std::string> find_all_indexed(const std::string line);
+    std::vector<std::string> find_all_indexed(const std::string & line);
 
     void print_index();
     

@@ -189,7 +189,7 @@ void free_index::MultigramIndex::insert_kgram_into_index(
 }
 
 
-std::vector<std::string> free_index::MultigramIndex::find_all_indexed(const std::string line) {
+std::vector<std::string> free_index::MultigramIndex::find_all_indexed(const std::string & line) {
     std::vector<std::string> found_keys;
     for (size_t i = 0; i < line.size(); i++) {
         auto curr_c = line.at(i);

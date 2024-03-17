@@ -188,28 +188,36 @@ void simple_query_plan_by_index() {
     pi.build_index(5);
     
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_matcher::QueryParser();
+    auto qp = free_matcher::QueryParser(&pi);
 
     qp.generate_query_plan(reg_query);
     // Should be same as Figure 7(a)
     qp.remove_null();
-    // qp.index...
+    std::cout << "here" << std::endl;
+    qp.rewrite_by_index();
+    std::cout << "after here" << std::endl;
     qp.print_plan();
 
+    // Should be same as Figure 7(b)
+    qp.remove_null();
+    qp.print_plan();
 }
 
 int main() {
-
+    std::cout << "BEGIN INDEX TESTS -------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE INDEX-------------------------------------------" << std::endl;
     simple_index();
-    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE INDEX THRESHOLD-------------------------------------------" << std::endl;
     simple_index_threshold();
-    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE PRESUF-------------------------------------------" << std::endl;
     simple_presuf();
-    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE FIND KEYS-------------------------------------------" << std::endl;
     simple_find_keys();
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "BEGIN PARSER TESTS-------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE QUERY PARSER-------------------------------------------" << std::endl;
     simple_query_parser();    
+    std::cout << "\t SIMPLE QUERY PLAN BY INDEX-------------------------------------------" << std::endl;
+    simple_query_plan_by_index();
 
     return 0;
 }

@@ -15,16 +15,20 @@ namespace free_matcher {
 class QueryParser {
  public:
     QueryParser() {}
+    QueryParser(free_index::MultigramIndex* index) : k_index_(index) {}
     ~QueryParser() {}
 
     void generate_query_plan(const std::string & reg_str);
     void remove_null();
-    void index_filtering();
+    void rewrite_by_index();
     void print_plan();
 
  private:
     std::unique_ptr<QueryPlanNode> query_plan_;
-    free_index::MultigramIndex* k_index_;
+    free_index::MultigramIndex* k_index_ = nullptr;
+
+    void rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node);
+
 };
 
 } // namespace free_matcher
