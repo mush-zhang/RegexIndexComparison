@@ -47,6 +47,64 @@ bool check_special(const std::string & reg_str) {
     return false;
 }
 
-// std::vector<
+std::vector<std::string> extract_literals(const std::string & reg_str) {
+    std::vector<std::string> result;
+
+    size_t pos = 0;
+    size_t prev_pos = 0;
+    int pos2 = -1;
+
+    while ((pos = reg_str.find("(", pos)) != std::string::npos) {
+        // check if it is escaped
+        if (!char_escaped(reg_str, pos)) {
+            // if it is not escaped: it is a beginning of a capture group
+            result.push_back(remove_escape(reg_str.substr(prev_pos, pos-prev_pos)));
+
+            pos++;
+            pos2 = pos;
+            while ((pos2 = reg_str.find(")", pos2)) != std::string::npos) {
+                if (!char_escaped(reg_str, pos2)) {
+                    if (pos2 == reg_str.size() - 1 || reg_str.at(pos2+1) != '+') {
+                        // Another rooted plan for the substr in capture group
+                        auto sub_btw_brackets = reg_str.substr(pos, pos2-pos);
+                        // check if there is special char
+                        if (!check_special(sub_btw_brackets)) {
+                            result.push_back(remove_escape(sub_btw_brackets));
+                        }
+                    } 
+                    break;
+                }
+                pos2++;
+            } 
+
+            if (pos2 == std::string::npos) {
+                auto sub_btw_brackets = reg_str.substr(pos);
+                if (!check_special(sub_btw_brackets)) {
+                    result.push_back(remove_escape(sub_btw_brackets));
+                }
+                break;
+            } else {
+                pos2++; // passed the ")"
+                if (pos2 < reg_str.size() && reg_str.at(pos2) == ')' &&
+                    (reg_str.at(pos2+1) == '+' || 
+                     reg_str.at(pos2+1) == '*' || 
+                     reg_str.at(pos2+1) == '?')) {
+                    pos2++;
+                }
+            }
+            prev_pos = pos2;
+            pos = pos2;
+        } else {
+            pos++;
+        }
+    }
+    if (pos2 != -1) {
+        auto sub_btw_brackets = reg_str.substr(pos2);
+        result.push_back(remove_escape(sub_btw_brackets));
+    } else {
+        result.push_back(remove_escape(reg_str));
+    }
+    return result;
+} 
 
 #endif // UTILS_REG_UTILS_HPP_
