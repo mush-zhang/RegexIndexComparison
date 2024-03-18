@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace free_index {
+namespace free {
 static const std::vector<long> k_empty_pos_list_;
 
 class MultigramIndex {
@@ -71,6 +71,6 @@ class MultigramIndex {
     /**Select Grams Helpers End**/
 };
 
-} // namespace free_index
+} // namespace free
 
 #endif // FREE_INDEX_MULTIGRAM_INDEX_HPP_

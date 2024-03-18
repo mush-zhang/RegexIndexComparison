@@ -3,7 +3,7 @@
 
 #include "query_plan_node.hpp"
 
-namespace free_matcher {
+namespace free {
 
 class OrNode: public QueryPlanNode {
  public:
@@ -17,6 +17,6 @@ class OrNode: public QueryPlanNode {
     inline static const std::string k_or_node_name_ = "OR";
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERYPLANNODE_OR_NODE_HPP_

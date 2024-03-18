@@ -3,7 +3,7 @@
 
 #include "query_plan_node.hpp"
 
-namespace free_matcher {
+namespace free {
 
 class AndNode: public QueryPlanNode {
  public:
@@ -15,6 +15,6 @@ class AndNode: public QueryPlanNode {
     inline static const std::string k_and_node_name_ = "AND";
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERYPLANNODE_AND_NODE_HPP_

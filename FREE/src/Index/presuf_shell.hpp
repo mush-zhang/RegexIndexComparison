@@ -3,7 +3,7 @@
 #ifndef FREE_INDEX_PRESUF_SHELL_HPP_
 #define FREE_INDEX_PRESUF_SHELL_HPP_
 
-namespace free_index {
+namespace free {
 
 class PresufShell: public MultigramIndex {
  public:
@@ -18,6 +18,6 @@ class PresufShell: public MultigramIndex {
     void compute_suffix_free_set();
 };
 
-} // namespace free_index
+} // namespace free
 
 #endif // FREE_INDEX_PRESUF_SHELL_HPP_

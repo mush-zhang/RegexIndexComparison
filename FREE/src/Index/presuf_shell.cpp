@@ -4,7 +4,7 @@
 #include <chrono>
 
 // Section 3.2 Observation 3.13 proof
-void free_index::PresufShell::build_index(int upper_k) {
+void free::PresufShell::build_index(int upper_k) {
     auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_k);
     compute_suffix_free_set();
@@ -21,7 +21,7 @@ void free_index::PresufShell::build_index(int upper_k) {
 
 // Reverse the strings in the prefix free set X identified by 
 //   algorithm 3.1 and then sort them in lexicographic order.
-void free_index::PresufShell::compute_suffix_free_set() {
+void free::PresufShell::compute_suffix_free_set() {
     if (k_index_keys_.size() < 2) return;
 
     std::unordered_map<std::string, std::string> rev_to_ori;

@@ -3,7 +3,7 @@
 
 #include "query_plan_node.hpp"
 
-namespace free_matcher {
+namespace free {
 
 class LiteralNode: public QueryPlanNode {
  public:
@@ -17,6 +17,6 @@ class LiteralNode: public QueryPlanNode {
     std::string literal_;
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_

@@ -5,7 +5,7 @@
 #include "query_plan_node.hpp"
 #include "../Index/multigram_index.hpp"
 
-namespace free_matcher {
+namespace free {
 
 /**
  * @brief Parse query to plan tree; 
@@ -15,7 +15,7 @@ namespace free_matcher {
 class QueryParser {
  public:
     QueryParser() {}
-    QueryParser(free_index::MultigramIndex* index) : k_index_(index) {}
+    QueryParser(MultigramIndex* index) : k_index_(index) {}
     ~QueryParser() {}
 
     void generate_query_plan(const std::string & reg_str);
@@ -26,12 +26,12 @@ class QueryParser {
 
  private:
     std::unique_ptr<QueryPlanNode> query_plan_;
-    free_index::MultigramIndex* k_index_ = nullptr;
+    MultigramIndex* k_index_ = nullptr;
     bool rewrote_by_index_ = false;
     void rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node);
     std::vector<long> get_index_by_node(std::unique_ptr<QueryPlanNode> & node);
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERY_PARSER_HPP_

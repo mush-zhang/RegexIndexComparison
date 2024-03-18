@@ -7,13 +7,13 @@
 #include "../Index/multigram_index.hpp"
 #include "../Index/presuf_shell.hpp"
 
-namespace free_matcher {
+namespace free {
 
 class QueryMatcher {
  public:
     QueryMatcher() {};
     QueryMatcher(const std::vector<std::string> & dataset, double sel_threshold): k_dataset_(dataset) {
-        index_ = std::make_shared<free_index::MultigramIndex>(dataset, sel_threshold);
+        index_ = std::make_shared<MultigramIndex>(dataset, sel_threshold);
         index_->build_index();
     }
 
@@ -21,7 +21,7 @@ class QueryMatcher {
                  const std::vector<std::string> & regs) 
                  : QueryMatcher(dataset, sel_threshold), k_reg_strings_(regs) {}
     
-    QueryMatcher(free_index::MultigramIndex * index, 
+    QueryMatcher(MultigramIndex * index, 
                  const std::vector<std::string> & regs) 
                  : k_dataset_(index->get_dataset()), k_reg_strings_(regs), index_(index) {
         for (const auto & reg : k_regexes) {
@@ -66,12 +66,12 @@ class QueryMatcher {
  private:
     const std::vector<std::string> & k_dataset_;
     const std::vector<std::string> & k_reg_strings_;
-    std::shared_ptr<free_index::MultigramIndex> index_;
+    std::shared_ptr<MultigramIndex> index_;
 
     std::unordered_map<std::string, 
                        std::pair<std::unique_ptr<QueryParser>, std::unique_ptr<RE2>> reg_evals_;
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERY_MATCHER_HPP_

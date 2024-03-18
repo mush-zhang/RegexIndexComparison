@@ -43,7 +43,7 @@ void simple_index() {
         "5.fffff"
     });
 
-    auto pi = free_index::MultigramIndex(test_dataset, 1);
+    auto pi = free::MultigramIndex(test_dataset, 1);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -79,7 +79,7 @@ void simple_index_threshold() {
         "5.fffff"
     });
 
-    auto pi = free_index::MultigramIndex(test_dataset, 0.9);
+    auto pi = free::MultigramIndex(test_dataset, 0.9);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -113,7 +113,7 @@ void simple_presuf() {
         "5.fffff"
     });
 
-    auto pi = free_index::PresufShell(test_dataset, 0.9);
+    auto pi = free::PresufShell(test_dataset, 0.9);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -149,7 +149,7 @@ void simple_find_keys() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
 
@@ -163,7 +163,7 @@ void simple_find_keys() {
 void simple_query_parser() {
     std::string reg_query = "(Bill|William)(.*)Clinton";
     
-    auto qp = free_matcher::QueryParser();
+    auto qp = free::QueryParser();
 
     // Should be same as Figure 6(b)
     qp.generate_query_plan(reg_query);
@@ -186,11 +186,11 @@ void simple_query_plan_by_index() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_matcher::QueryParser(&pi);
+    auto qp = free::QueryParser(&pi);
 
     qp.generate_query_plan(reg_query);
     // Should be same as Figure 7(a)
@@ -223,11 +223,11 @@ void simple_lines_by_plan() {
     }
     test_dataset.push_back("William");
     test_dataset.push_back("Clinton");
-    auto pi = free_index::PresufShell(test_dataset, threshold);
+    auto pi = free::PresufShell(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_matcher::QueryParser(&pi);
+    auto qp = free::QueryParser(&pi);
 
     qp.generate_query_plan(reg_query);
     qp.rewrite_by_index();

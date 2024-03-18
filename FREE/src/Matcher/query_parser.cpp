@@ -4,11 +4,11 @@
 #include <iostream>
 #include <unordered_set>
 
-using QueryPlanNode = free_matcher::QueryPlanNode;
-using AndNode = free_matcher::AndNode;
-using OrNode = free_matcher::OrNode;
-using NullNode = free_matcher::NullNode;
-using LiteralNode = free_matcher::LiteralNode;
+using QueryPlanNode = free::QueryPlanNode;
+using AndNode = free::AndNode;
+using OrNode = free::OrNode;
+using NullNode = free::NullNode;
+using LiteralNode = free::LiteralNode;
 
 //The true special/meta chars: '{', '}', '['. ']', '(', ')', '^', '$', '.', '*', '+', '?', '|'
 const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+', '?', '|'};
@@ -65,8 +65,8 @@ std::unique_ptr<QueryPlanNode> make_const_node(const std::string & token) {
     }
 }
 
-std::unique_ptr<QueryPlanNode> make_op_node(char op, std::unique_ptr<QueryPlanNode> l, 
-                                            std::unique_ptr<QueryPlanNode> r) {
+std::unique_ptr<QueryPlanNode> make_op_node(char op, 
+        std::unique_ptr<QueryPlanNode> l, std::unique_ptr<QueryPlanNode> r) {
     if (op == '&') {
         return std::make_unique<AndNode>(std::move(l), std::move(r));
     } else if (op == '|') {
@@ -75,7 +75,8 @@ std::unique_ptr<QueryPlanNode> make_op_node(char op, std::unique_ptr<QueryPlanNo
     return nullptr;
 }
 
-void make_or_assign_node(const std::string & str, char op_char, std::unique_ptr<QueryPlanNode> & curr) {
+void make_or_assign_node(const std::string & str, char op_char, 
+        std::unique_ptr<QueryPlanNode> & curr) {
     if (!curr) {
         curr = build_rooted_plan(str);
     }
@@ -186,7 +187,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(const std::string & reg_str) {
     return make_const_node(new_reg);
 }
 
-void free_matcher::QueryParser::generate_query_plan(const std::string & reg_str) {
+void free::QueryParser::generate_query_plan(const std::string & reg_str) {
     // parse the string and pick out the literal component
     std::string curr_str(reg_str);
     query_plan_.reset(build_rooted_plan(curr_str).release());
@@ -206,7 +207,7 @@ void print_plan_helper(const std::string& prefix,
     }
 }
 
-void free_matcher::QueryParser::print_plan() {
+void free::QueryParser::print_plan() {
     std::cout << "#################### BEGIN PLAN #######################" << std::endl;
     print_plan_helper("", query_plan_, false);
     std::cout << "#################### END PLAN #######################" << std::endl;
@@ -233,7 +234,6 @@ void remove_null_node_and(std::unique_ptr<QueryPlanNode> & node) {
 
 void remove_null_node_or(std::unique_ptr<QueryPlanNode> & node) {
     // Assume node is not nullptr
-    // check 
     remove_null_node(node->left_);
     remove_null_node(node->right_);
 
@@ -244,13 +244,13 @@ void remove_null_node_or(std::unique_ptr<QueryPlanNode> & node) {
 }
 
 void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
-    if (!node || node->get_type() == free_matcher::NodeType::kLiteralNode ||
-        node->get_type() == free_matcher::NodeType::kNullNode) {
+    if (!node || node->is_null() ||
+        node->get_type() == free::NodeType::kLiteralNode) {
         return;
     }
-    if (node->get_type() == free_matcher::NodeType::kAndNode) {
+    if (node->get_type() == free::NodeType::kAndNode) {
         remove_null_node_and(node);
-    } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
+    } else if (node->get_type() == free::NodeType::kOrNode) {
         remove_null_node_or(node);
     } else {
         std::cerr << "Invalid node type my friend" << std::endl;
@@ -258,20 +258,20 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
 } 
 
 // Remove Null node according to rule in table 2
-void free_matcher::QueryParser::remove_null() {
+void free::QueryParser::remove_null() {
     remove_null_node(query_plan_);
 }
 
-void free_matcher::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node) {
+void free::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node) {
     if (!node || node->is_null()) {
         return;
     }
 
-    if (node->get_type() == free_matcher::NodeType::kAndNode || 
-        node->get_type() == free_matcher::NodeType::kOrNode) {
+    if (node->get_type() == free::NodeType::kAndNode || 
+        node->get_type() == free::NodeType::kOrNode) {
         rewrite_node_by_index(node->left_);
         rewrite_node_by_index(node->right_);
-    } else if (node->get_type() == free_matcher::NodeType::kLiteralNode) {
+    } else if (node->get_type() == free::NodeType::kLiteralNode) {
         auto all_keys = k_index_->find_all_indexed(node->to_string());
         if (all_keys.empty()) {
             node = make_const_node("");
@@ -288,7 +288,7 @@ void free_matcher::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanN
     }
 } 
 
-void free_matcher::QueryParser::rewrite_by_index() {
+void free::QueryParser::rewrite_by_index() {
     if (!k_index_) {
         std::cerr << "No index provided; plan stays untouched." << std::endl;
     }
@@ -296,8 +296,8 @@ void free_matcher::QueryParser::rewrite_by_index() {
     rewrote_by_index_ = query_plan_ == nullptr;
 }
 
-void sorted_lists_union(const std::vector<long> & l, const std::vector<long> & r,
-                       std::vector<long> & result) {
+void sorted_lists_union(const std::vector<long> & l, 
+        const std::vector<long> & r, std::vector<long> & result) {
     size_t i = 0, j = 0;
     while (i < l.size() && j < r.size()) {
         long candidate;
@@ -331,8 +331,7 @@ void sorted_lists_union(const std::vector<long> & l, const std::vector<long> & r
 }
 
 void sorted_lists_intersection(const std::vector<long> & l, 
-                               const std::vector<long> & r,
-                               std::vector<long> & result) {
+        const std::vector<long> & r, std::vector<long> & result) {
     size_t i = 0, j = 0;
     while (i < l.size() && j < r.size()) {
         long candidate;
@@ -348,29 +347,29 @@ void sorted_lists_intersection(const std::vector<long> & l,
     } 
 }
 
-std::vector<long> free_matcher::QueryParser::get_index_by_node(
+std::vector<long> free::QueryParser::get_index_by_node(
         std::unique_ptr<QueryPlanNode> & node) {
     std::vector<long> result;
 
     if (!node || node->is_null() ||
-        node->get_type() == free_matcher::NodeType::kInvalidNode) {
+        node->get_type() == free::NodeType::kInvalidNode) {
         return result;
     }
-    if (node->get_type() == free_matcher::NodeType::kLiteralNode) {
+    if (node->get_type() == free::NodeType::kLiteralNode) {
         return k_index_->get_line_pos_at(node->to_string());
     }
     auto left_idxs = get_index_by_node(node->left_);
     auto right_idxs = get_index_by_node(node->right_);
 
-    if (node->get_type() == free_matcher::NodeType::kAndNode) {
+    if (node->get_type() == free::NodeType::kAndNode) {
         sorted_lists_intersection(left_idxs, right_idxs, result);
-    } else if (node->get_type() == free_matcher::NodeType::kOrNode) {
+    } else if (node->get_type() == free::NodeType::kOrNode) {
         sorted_lists_union(left_idxs, right_idxs, result);        
     } 
     return result;
 } 
 
-std::vector<long> free_matcher::QueryParser::get_index_by_plan() {
+std::vector<long> free::QueryParser::get_index_by_plan() {
     if (!rewrote_by_index_) {
         rewrite_by_index();
     }

@@ -6,7 +6,7 @@
 
 #include "types.hpp"
 
-namespace free_matcher {
+namespace free {
 
 class QueryPlanNode {
  public:
@@ -25,6 +25,6 @@ class QueryPlanNode {
     inline static const std::string k_generic_node_name_ = "";
 };
 
-} // namespace free_matcher
+} // namespace free
 
 #endif // FREE_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
