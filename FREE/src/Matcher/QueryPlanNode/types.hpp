@@ -1,7 +1,7 @@
 #ifndef FREE_MATCHER_QUERYPLANNODE_TYPES_HPP_
 #define FREE_MATCHER_QUERYPLANNODE_TYPES_HPP_
 
-namespace free {
+namespace free_index {
 
 enum NodeType {
     kInvalidNode,
@@ -11,6 +11,6 @@ enum NodeType {
     kNullNode
 };
 
-} // namespace free
+} // namespace free_index
 
 #endif // FREE_MATCHER_QUERYPLANNODE_TYPES_HPP_

@@ -3,7 +3,7 @@
 
 #include "query_plan_node.hpp"
 
-namespace free {
+namespace free_index {
 
 class NullNode: public QueryPlanNode {
  public:
@@ -17,6 +17,6 @@ class NullNode: public QueryPlanNode {
     inline static const std::string k_null_node_name_ = "NULL";
 };
 
-} // namespace free
+} // namespace free_index
 
 #endif // FREE_MATCHER_QUERYPLANNODE_NULL_NODE_HPP_

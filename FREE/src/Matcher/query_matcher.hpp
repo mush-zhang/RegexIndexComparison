@@ -7,7 +7,7 @@
 #include "../Index/multigram_index.hpp"
 #include "../Index/presuf_shell.hpp"
 
-namespace free {
+namespace free_index {
 
 class QueryMatcher {
  public:
@@ -72,6 +72,6 @@ class QueryMatcher {
                        std::pair<std::unique_ptr<QueryParser>, std::unique_ptr<RE2>> reg_evals_;
 };
 
-} // namespace free
+} // namespace free_index
 
 #endif // FREE_MATCHER_QUERY_MATCHER_HPP_

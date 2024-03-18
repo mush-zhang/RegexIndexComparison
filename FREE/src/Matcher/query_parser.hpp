@@ -5,7 +5,7 @@
 #include "query_plan_node.hpp"
 #include "../Index/multigram_index.hpp"
 
-namespace free {
+namespace free_index {
 
 /**
  * @brief Parse query to plan tree; 
@@ -32,6 +32,6 @@ class QueryParser {
     std::vector<long> get_index_by_node(std::unique_ptr<QueryPlanNode> & node);
 };
 
-} // namespace free
+} // namespace free_index
 
 #endif // FREE_MATCHER_QUERY_PARSER_HPP_
