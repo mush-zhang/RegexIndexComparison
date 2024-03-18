@@ -35,6 +35,10 @@ class MultigramIndex {
         return k_empty_pos_list_;
     }
 
+    const std::vector<std::string> & get_dataset() const {
+        return k_dataset_;
+    }
+
  protected:
     void select_grams(int upper_k);
     void fill_posting(int upper_k);
