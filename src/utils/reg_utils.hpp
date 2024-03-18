@@ -1,6 +1,11 @@
 #ifndef UTILS_REG_UTILS_HPP_
 #define UTILS_REG_UTILS_HPP_
 
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <algorithm>
+
 //The true special/meta chars: '{', '}', '['. ']', '(', ')', '^', '$', '.', '*', '+', '?', '|'
 const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+', '?', '|'};
 const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', 'D', 'l', 'p',
@@ -41,5 +46,7 @@ bool check_special(const std::string & reg_str) {
     }
     return false;
 }
+
+// std::vector<
 
 #endif // UTILS_REG_UTILS_HPP_

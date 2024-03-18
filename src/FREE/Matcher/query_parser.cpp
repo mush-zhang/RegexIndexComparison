@@ -1,9 +1,7 @@
 #include "query_parser.hpp"
 #include "../../utils/reg_utils.hpp"
 
-#include <algorithm>
 #include <iostream>
-#include <unordered_set>
 
 using QueryPlanNode = free_index::QueryPlanNode;
 using AndNode = free_index::AndNode;
