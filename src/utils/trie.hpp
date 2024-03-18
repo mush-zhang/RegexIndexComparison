@@ -1,5 +1,5 @@
-#ifndef FREE_INDEX_TRIE_HPP_
-#define FREE_INDEX_TRIE_HPP_
+#ifndef UTILS_TRIE_HPP_
+#define UTILS_TRIE_HPP_
 
 #include <string>
 #include <ext/pb_ds/assoc_container.hpp>
@@ -33,4 +33,4 @@ typedef __gnu_pbds::trie<std::string, mapped_type, cmp_fn, tag_type,
 //     }
 // }
 
-#endif // FREE_INDEX_TRIE_HPP_
+#endif // UTILS_TRIE_HPP_
