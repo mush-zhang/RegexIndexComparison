@@ -1,3 +1,0 @@
-[submodule "src/utils/rax"]
-	path = src/utils/rax
-	url = https://github.com/antirez/rax.git
