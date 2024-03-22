@@ -2,22 +2,15 @@
 #include <iostream>
 #include <chrono>
 #include <cstring>
+#include <alogrithm>
 #include "../../utils/reg_utils.hpp"
 
-// Algorithm 2 in Figure 3
-void best_index::NaiveIndex::build_index(int upper_k) {
-    // auto start = std::chrono::high_resolution_clock::now();
-    select_grams(upper_k);
-    // auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
-    //     std::chrono::high_resolution_clock::now() - start).count();
-    // std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
+// #include "../../utils/trie.hpp"
 
-    // start = std::chrono::high_resolution_clock::now();
-    // fill_posting(upper_k);
-    // elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
-    //     std::chrono::high_resolution_clock::now() - start).count();
-    // std::cout << "Index Building End in " << elapsed << std::endl;
-}
+extern "C" {
+    #include "../../utils/rax/rax.h"
+    #include "../../utils/rax/rc4rand.h"
+};
 
 void best_index::NaiveIndex::print_index() {
     std::cout << "size of dataset: " << k_dataset_size_;
@@ -33,39 +26,19 @@ void best_index::NaiveIndex::print_index() {
     }
 }
 
-/** In c++20; we probably not going to use it
-    As S, M1 are sparse
-
-    #include <iostream>
-    #include <vector>
-    #include <ranges>
-
-    int main() {
-        std::vector<int> a = {1, 2, 3};
-        std::vector<int> b = {10, 20};
-
-        auto cartesian_view = std::views::cartesian_product(a, b);
-
-        for (const auto& pair : cartesian_view) {
-            int result = std::get<0>(pair) * std::get<0>(pair) + std::get<1>(pair) * std::get<1>(pair);
-            std::cout << "Result: " << result << std::endl;
-        }
-
-        return 0;
-    }
-**/
-
-int best_index::NaiveIndex::insert_gram(const std::string & l) {
+// TODO: measure the performance of rax and trie_type
+int insert_gram_to_tree(rax * const gram_tree, 
+                                                const std::string & l) {
     char cl[l.size()+1];
     strcpy(cl, l.c_str());
     unsigned char* ucl = reinterpret_cast<unsigned char*>(cl);
-    return raxTryInsert(gram_tree_, &ucl[0], l.size(), NULL, NULL);
+    return raxTryInsert(gram_tree, &ucl[0], l.size(), NULL, NULL);
 }
 
-std::vector<std::string> best_index::NaiveIndex::generate_path_labels() {
+std::vector<std::string> generate_path_labels(const rax * const gram_tree) {
     std::vector<std::string> path_labels;
     raxIterator iter;
-    raxStart(&iter, gram_tree_);
+    raxStart(&iter, gram_tree);
     raxSeek(&iter,"^",NULL,0);
 
     while(raxNext(&iter)) {
@@ -84,15 +57,17 @@ std::vector<std::string> best_index::NaiveIndex::generate_path_labels() {
  *       so that we tranverse the dataset only once
  *       Or else if we generate the prefix set for each single suffix on the fly
  *       it will take several scans on the dataset; will only be fine if dataset is small
+ *       I feel it is similar to FREE in generating prefix free kinda set with threshold limit
  **/
-std::unordered_set<std::string> best_index::NaiveIndex::candidate_gram_set_gen() {
-    std::unordered_set<std::string> result;
+std::set<std::string> best_index::NaiveIndex::candidate_gram_set_gen(
+        std::vector<std::vector<std::string>> & query_literals) {
+    rax *gram_tree = raxNew();
+    std::set<std::string> result;
     // 1. Build suffix tree using all queries
-    for (const auto & q : k_queries_) {
-        std::vector<std::string> literals = extract_literals(q);
+    for (const auto & literals : query_literals) {
         for (const auto & l : literals) {
             for (size_t i = 0; i < l.size(); i++) {
-                insert_gram(l.substr(i, l.size() - i));
+                insert_gram_to_tree(l.substr(i, l.size() - i));
             }
         }
     }
@@ -138,23 +113,192 @@ std::unordered_set<std::string> best_index::NaiveIndex::candidate_gram_set_gen()
         if (val > threshold_count) continue;
         if (prev_key.empty() ||                           // first to insert
             prev_key != key.substr(0, prev_key.size())) { // or prev not prefix
-            
             prev_key = key;
-            k_index_keys_.insert(key);
+            result.insert(key);
         }
     }
+    delete gram_tree;
 
     return result;
 }
 
-// Algorithm 2 in Figure 3
-// Basic greedy gram selection algorightm
+void grams_in_string(const std::string & l, 
+                     const std::set<std::string> & candidates,
+                     std::vector<std::set<unsigned int>> & g_list, 
+                     size_t idx) {
+    for (size_t i = 0; i < l.size(); i++) {
+        auto curr_c = l.at(i);
+        std::string curr_key = l.substr(i,1);
+        auto lower_it = candidates.lower_bound(curr_key);
+
+        for (auto & it = lower_it; it != candidates.end() && curr_key.at(0) == curr_c; ++it) {
+            // check if the current key is the same with curren substr
+            curr_key = it->first;
+            if (curr_key == l.substr(i, curr_key.size())) {
+                g_list[idx].insert(it - candidates.first());
+            }
+        }
+    }
+}
+
+void grams_in_literals(const std::vector<std::string> & literals, 
+                       const std::set<std::string> & candidates,
+                       std::vector<std::set<unsigned int>> & g_list,
+                       size_t idx) {
+
+    for (const auto & l : literals) {
+        grams_in_string(l, candidates, g_list, idx);
+    }
+}
+
+bool index_covered(const std::set<unsigned int> & index, 
+                   const std::vector<std::set<unsigned int>> & gr_list,
+                   const std::vector<std::set<unsigned int>> & qg_list,
+                   size_t r_j, size_t q_k) {
+    for (auto g_idx : index) {
+        // the pair (q_k, r_j) is covered by current g iff
+        // r_j not in G-R-list[g] AND g in Q-G-list[q_k]
+        if (gr_list[g_idx].find(r_j) == gr_list[g_idx].end() &&
+            qg_list[q_k].find(g) != qg_list[q_k].end()) {
+            
+            return true;
+        }
+    }
+    return false;
+}
+
+// TODO: to speed up, it is possible to store all covered pairs
+bool all_covered(const std::set<unsigned int> & rc, const std::set<unsigned int> & index, 
+        const std::vector<std::set<unsigned int>> & gr_list,
+        const std::vector<std::set<unsigned int>> & qg_list, size_t query_size){
+    for (size_t k = 0; k < query_size; k++) {
+        for (auto j : rc) {
+            if (!index_covered(index, gr_list, qg_list, j, k)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Algorithm 3 in Figure 4
+// Improved greedy gram selection algorightm
+//   TODO: no point of seperating select gram and build index;
+//         only do that if we need some consistent interface later for experiments
 void best_index::NaiveIndex::select_grams(int upper_k) {
+    auto start = std::chrono::high_resolution_clock::now();
+    std::vector<std::vector<std::string>> query_literals;
+    for (const auto & q : k_queries_) {
+        std::vector<std::string> literals = extract_literals(q);
+        query_literals.push_back(literals);
+    }
     /** referring to the implementation detail in section 2.2
         Example 3 and the paragraph above **/
     auto candidates = candidate_gram_set_gen();
-    // Generate M2
-    
+    size_t candidates_size = candidates.size();
+    /**
+     * Q-G-list: vector in order of q, where each element is
+     *      set of idx of g \in candidates s.t. g \in q
+     */
+    std::vector<std::set<unsigned int>> qg_list(k_queries_size_);
+    for (size_t i = 0; i < k_queries_size_; i++) {
+        const auto & literals = query_literals[i];
+        grams_in_literals(literals, candidates, gq_list, i);
+    }
+    /**
+     * G-R-list: vector in order of g, where each element is
+     *      set of idx of r \in candidates s.t. g \in r
+     *   Note: to avoid multiple scans of the dataset, 
+     *        build Q-R-list first
+     * R_c: set of idx of r s.t. \exists some g \in r
+     */
+    std::vector<std::set<unsigned int>> qr_list(k_dataset_size_);
+    for (size_t i = 0; i < k_dataset_size_; i++) {
+        grams_in_string(k_dataset_[i], candidates, qr_list, i);
+    }
+    // TODO: check if using sorted vector is better. 
+    //       for gr_list elements and rc.
+    std::vector<std::set<unsigned int>> gr_list(candidates_size);
+    std::set<unsigned int> rc;
+    for (size_t i = 0; i < k_dataset_size_; i++) {
+        const std::set<unsigned int> & set_of_exists_grams;
+        if (!set_of_exists_grams.empty()) {
+            rc.insert(i);
+        }
+        for (unsigned int g_idx : set_of_exists_grams) {
+            gr_list[g_idx].insert(i);
+        }
+    }
+    /**
+     * I : index key idx; 
+     *     the actual string should be stored in k_index_keys_
+     *     use intermediate i to reduce hash/storage overhead
+     *     of string over int
+     */
+    std::set<unsigned int> index;
+    std::vector<long double> benefit(candidates_size);
+    // While some (q,r) uncovered AND space available
+    while (!all_covered && (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
+        // for every g \in G\I, set benefit[g] = 0
+        std::fill(benefit.begin(), benefit.end(), 0);
+        // for every query q \in Q
+        for (size_t k = 0; k < k_queries_size_; k++) {
+            // for every record r in R_c
+            for (auto j : rc) {
+                // for each gram g \in Q-G-list[q_k]\I
+                //  TODO: would std::set_difference perform better
+                for (auto g_idx : qg_list[k]) {
+                    // ... and if 1. g not in r_j 
+                    //        AND 2. (q_k, r_j) not covered by any g \in I
+                    if (index.find(g_idx) == index.end() &&
+                        gr_list[g_idx].find(j) == gr_list[g_idx].end() &&
+                        (!index_cover(index, gr_list, qg_list, j, k)) ) {
+                        
+                        benefit[g_idx]++;
+                    }
+                }
+            }
+        }
+        // if exists some g with benefit g > 0 then
+        if (std::any_of(benefit.cbegin(), benefit.cend(), [](unsigned i) { return i > 0; })) {
+            long double max_util = 0;
+            size_t max_idx = 0;
+            // for every candidate g, calculate utility g
+            for (size_t i = 0; i < candidates_size; i++) {
+                /**
+                 * Utility = benefit/cost;
+                 *      use numbre of records containing g as cost
+                 *      by referring to footnote 3 and example 6 and 9
+                 */
+                long double curr_util = benefit[i]/(gr_list[i].size());
+                if (curr_util > max_util) {
+                    max_util = curr_util;
+                    max_idx = i;
+                }
+            }
+            // I = I union {g_max} where g_max has max utility
+            index.insert(max_idx);
+        } else {
+            break;
+        }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
+
+    start = std::chrono::high_resolution_clock::now();
+    for (auto idx : index) {
+        k_index_keys_.insert(candidates[idx]);
+        k_index_.insert({candidates[idx], gr_list[idx]});
+    }
+    elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Index Building End in " << elapsed << std::endl;
+}
+
+// Algorithm 2 in Figure 3
+void best_index::NaiveIndex::build_index(int upper_k) {
+    select_grams(upper_k);
 }
 
 std::vector<std::string> best_index::NaiveIndex::find_all_indexed(const std::string & line) {

@@ -6,18 +6,7 @@
 #include <vector>
 #include <string>
 #include <set>
-#include <unordered_set>
-#include <map>
 #include <unordered_map>
-
-#include "../../utils/trie.hpp"
-
-extern "C" {
-    // rax *raxNew(void);
-    // int raxTryInsert(rax *rax, unsigned char *s, size_t len, void *data, void **old);
-    #include "../../utils/rax/rax.h"
-    #include "../../utils/rax/rc4rand.h"
-};
 
 namespace best_index {
 static const std::vector<long> k_empty_pos_list_;
@@ -28,11 +17,10 @@ class NaiveIndex {
     NaiveIndex(const std::vector<std::string> &&) = delete;
     NaiveIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
-               double sel_threshold)
+               double sel_threshold, int max_num_keys=-1)
       : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
-        k_queries_(queries), k_threshold_(sel_threshold) {
-            gram_tree_ = raxNew();
-        }
+        k_queries_(queries), k_queries_size_(queries.size()),
+        k_threshold_(sel_threshold), k_max_num_keys_(max_num_keys) {}
     
     ~NaiveIndex() { if (gram_tree_) delete gram_tree_; }
 
@@ -60,40 +48,23 @@ class NaiveIndex {
     std::set<std::string> k_index_keys_;
     
  private:
-
     const long double k_dataset_size_;
+    const long double k_queries_size_;
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
+    const int k_max_num_keys_;
     const std::vector<std::string> & k_queries_;
-    // the index structure should be stored here
     const std::vector<std::string> & k_dataset_;
-    // trie_type gram_tree_;
-    rax *gram_tree_ = nullptr;
 
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
     std::unordered_map<std::string, std::vector<long>> k_index_;
 
-    std::unordered_set<std::string> candidate_gram_set_gen();
     std::vector<std::string> find_all_indexed(const std::string & line);
-    int insert_gram(const std::string & l);
-    std::vector<std::string> generate_path_labels();
 
-    // /**Select Grams Helpers**/
-    // // TODO: return types
-    // // Calculate the gram query cover - 
-    // //   number of lines enabled/eliminated by the gram for a query
-    // //   essentially #I{g \in q} * #r_{g \not in r}
-    // gram_cover(const std::string & gram, const std::string & line);
-    // // Calculate the cover - number of lines enabled/eliminated by the gram
-    // //   essentially #q_{g \in q} * #r_{g \not in r}
-    // gram_cover(const std::string & gram);
-    // // Calculate the index cover - number of lines enabled/eliminated by the set of grams
-    // //   essentially calculated incrementally:
-    // //   from the one with largest gram cover, 
-    // //   recalculate incremental gram covers as we add each gram in the index/set
-    // index_cover(const std::set<std::string> & index);
+    /** Helpers **/
+    std::set<std::string> candidate_gram_set_gen();
 
-    /**Select Grams Helpers End**/
+
 };
 
 } // namespace best_index
