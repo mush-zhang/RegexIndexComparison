@@ -20,9 +20,9 @@ class SingleThreadedIndex {
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), k_max_num_keys_(max_num_keys) {}
     
-    ~SingleThreadedIndex() { if (gram_tree_) delete gram_tree_; }
+    ~SingleThreadedIndex() {}
 
-    virtual void build_index(int upper_k);
+    virtual void build_index();
 
     // // return all substrings of the given string that are keys in the index
     // std::vector<std::string> find_all_indexed(const std::string & line);
@@ -41,8 +41,7 @@ class SingleThreadedIndex {
     // }
 
  protected:
-    void select_grams(int upper_k);
-    // void fill_posting(int upper_k);
+    void select_grams();
     std::set<std::string> k_index_keys_;
     
  private:
@@ -55,12 +54,13 @@ class SingleThreadedIndex {
     const std::vector<std::string> & k_dataset_;
 
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
-    std::unordered_map<std::string, std::vector<long>> k_index_;
+    std::unordered_map<std::string, std::vector<unsigned int>> k_index_;
 
     std::vector<std::string> find_all_indexed(const std::string & line);
 
     /** Helpers **/
-    std::set<std::string> candidate_gram_set_gen();
+    std::vector<std::string> candidate_gram_set_gen(
+      std::vector<std::vector<std::string>> & query_literals);
 
 
 };

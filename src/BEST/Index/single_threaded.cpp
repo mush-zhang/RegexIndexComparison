@@ -2,7 +2,8 @@
 #include <iostream>
 #include <chrono>
 #include <cstring>
-#include <alogrithm>
+#include <map>
+#include <algorithm>
 #include "../../utils/reg_utils.hpp"
 
 // #include "../../utils/trie.hpp"
@@ -26,6 +27,17 @@ void best_index::SingleThreadedIndex::print_index() {
     }
 }
 
+template<class T, class U>
+bool sorted_list_contains(const std::vector<T>& container, const U& v)
+{
+    auto it = std::lower_bound(
+        container.begin(),
+        container.end(),
+        v,
+        [](const T& l, const U& r){ return l < r; });
+    return it != container.end() && *it == v;
+}
+
 // TODO: measure the performance of rax and trie_type
 int insert_gram_to_tree(rax * const gram_tree, 
                                                 const std::string & l) {
@@ -35,7 +47,7 @@ int insert_gram_to_tree(rax * const gram_tree,
     return raxTryInsert(gram_tree, &ucl[0], l.size(), NULL, NULL);
 }
 
-std::vector<std::string> generate_path_labels(const rax * const gram_tree) {
+std::vector<std::string> generate_path_labels(rax * const gram_tree) {
     std::vector<std::string> path_labels;
     raxIterator iter;
     raxStart(&iter, gram_tree);
@@ -59,20 +71,20 @@ std::vector<std::string> generate_path_labels(const rax * const gram_tree) {
  *       it will take several scans on the dataset; will only be fine if dataset is small
  *       I feel it is similar to FREE in generating prefix free kinda set with threshold limit
  **/
-std::set<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
+std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals) {
     rax *gram_tree = raxNew();
-    std::set<std::string> result;
+    std::vector<std::string> result;
     // 1. Build suffix tree using all queries
     for (const auto & literals : query_literals) {
         for (const auto & l : literals) {
             for (size_t i = 0; i < l.size(); i++) {
-                insert_gram_to_tree(l.substr(i, l.size() - i));
+                insert_gram_to_tree(gram_tree, l.substr(i, l.size() - i));
             }
         }
     }
     // 2. get all path labels in sorted list I guess
-    auto path_labels = generate_path_labels();
+    auto path_labels = generate_path_labels(gram_tree);
 
     // 3. get all prefixes of path labels; 
     //    store them in an ordered map
@@ -87,9 +99,9 @@ std::set<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
 
     // 3.5 iterate once on the dataset and 
     //     count the number of occurrance of each multigram
-    int threshold_count = k_threshold_ * k_dataset_size_;
     // Note:
     // intially I thought of doing: if count > threshold count, then erase the key
+    int threshold_count = k_threshold_ * k_dataset_size_;
     for (const auto & line : k_dataset_) {
         for (size_t i = 0; i < line.size(); i++) {
             auto curr_c = line.at(i);
@@ -114,7 +126,7 @@ std::set<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
         if (prev_key.empty() ||                           // first to insert
             prev_key != key.substr(0, prev_key.size())) { // or prev not prefix
             prev_key = key;
-            result.insert(key);
+            result.push_back(key);
         }
     }
     delete gram_tree;
@@ -123,26 +135,26 @@ std::set<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
 }
 
 void grams_in_string(const std::string & l, 
-                     const std::set<std::string> & candidates,
+                     const std::vector<std::string> & candidates,
                      std::vector<std::set<unsigned int>> & g_list, 
                      size_t idx) {
     for (size_t i = 0; i < l.size(); i++) {
         auto curr_c = l.at(i);
         std::string curr_key = l.substr(i,1);
-        auto lower_it = candidates.lower_bound(curr_key);
+        auto lower_it = std::lower_bound(candidates.cbegin(), candidates.cend(), curr_key);
 
-        for (auto & it = lower_it; it != candidates.end() && curr_key.at(0) == curr_c; ++it) {
+        for (auto & it = lower_it; it != candidates.cend() && curr_key.at(0) == curr_c; ++it) {
             // check if the current key is the same with curren substr
-            curr_key = it->first;
+            curr_key = *it;
             if (curr_key == l.substr(i, curr_key.size())) {
-                g_list[idx].insert(it - candidates.first());
+                g_list[idx].insert(it - candidates.cbegin());
             }
         }
     }
 }
 
 void grams_in_literals(const std::vector<std::string> & literals, 
-                       const std::set<std::string> & candidates,
+                       const std::vector<std::string> & candidates,
                        std::vector<std::set<unsigned int>> & g_list,
                        size_t idx) {
 
@@ -152,14 +164,14 @@ void grams_in_literals(const std::vector<std::string> & literals,
 }
 
 bool index_covered(const std::set<unsigned int> & index, 
-                   const std::vector<std::set<unsigned int>> & gr_list,
+                   const std::vector<std::vector<unsigned int>> & gr_list,
                    const std::vector<std::set<unsigned int>> & qg_list,
                    size_t r_j, size_t q_k) {
     for (auto g_idx : index) {
         // the pair (q_k, r_j) is covered by current g iff
         // r_j not in G-R-list[g] AND g in Q-G-list[q_k]
-        if (gr_list[g_idx].find(r_j) == gr_list[g_idx].end() &&
-            qg_list[q_k].find(g) != qg_list[q_k].end()) {
+        if (!sorted_list_contains(gr_list[g_idx], r_j) &&
+            qg_list[q_k].find(g_idx) != qg_list[q_k].end()) {
             
             return true;
         }
@@ -168,8 +180,8 @@ bool index_covered(const std::set<unsigned int> & index,
 }
 
 // TODO: to speed up, it is possible to store all covered pairs
-bool all_covered(const std::set<unsigned int> & rc, const std::set<unsigned int> & index, 
-        const std::vector<std::set<unsigned int>> & gr_list,
+bool all_covered(const std::vector<unsigned int> & rc, const std::set<unsigned int> & index, 
+        const std::vector<std::vector<unsigned int>> & gr_list,
         const std::vector<std::set<unsigned int>> & qg_list, size_t query_size){
     for (size_t k = 0; k < query_size; k++) {
         for (auto j : rc) {
@@ -185,7 +197,7 @@ bool all_covered(const std::set<unsigned int> & rc, const std::set<unsigned int>
 // Improved greedy gram selection algorightm
 //   TODO: no point of seperating select gram and build index;
 //         only do that if we need some consistent interface later for experiments
-void best_index::SingleThreadedIndex::select_grams(int upper_k) {
+void best_index::SingleThreadedIndex::select_grams() {
     auto start = std::chrono::high_resolution_clock::now();
     std::vector<std::vector<std::string>> query_literals;
     for (const auto & q : k_queries_) {
@@ -194,7 +206,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     }
     /** referring to the implementation detail in section 2.2
         Example 3 and the paragraph above **/
-    auto candidates = candidate_gram_set_gen();
+    std::vector<std::string> candidates = candidate_gram_set_gen(query_literals);
     size_t candidates_size = candidates.size();
     /**
      * Q-G-list: vector in order of q, where each element is
@@ -203,30 +215,29 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     std::vector<std::set<unsigned int>> qg_list(k_queries_size_);
     for (size_t i = 0; i < k_queries_size_; i++) {
         const auto & literals = query_literals[i];
-        grams_in_literals(literals, candidates, gq_list, i);
+        grams_in_literals(literals, candidates, qg_list, i);
     }
     /**
      * G-R-list: vector in order of g, where each element is
      *      set of idx of r \in candidates s.t. g \in r
      *   Note: to avoid multiple scans of the dataset, 
-     *        build Q-R-list first
+     *        build R-G-list first
      * R_c: set of idx of r s.t. \exists some g \in r
      */
-    std::vector<std::set<unsigned int>> qr_list(k_dataset_size_);
+    std::vector<std::set<unsigned int>> rg_list(k_dataset_size_);
     for (size_t i = 0; i < k_dataset_size_; i++) {
-        grams_in_string(k_dataset_[i], candidates, qr_list, i);
+        grams_in_string(k_dataset_[i], candidates, rg_list, i);
     }
-    // TODO: check if using sorted vector is better. 
-    //       for gr_list elements and rc.
-    std::vector<std::set<unsigned int>> gr_list(candidates_size);
-    std::set<unsigned int> rc;
+    // Using sorted vector for gr_list elements and rc.
+    std::vector<std::vector<unsigned int>> gr_list(candidates_size);
+    std::vector<unsigned int> rc;
     for (size_t i = 0; i < k_dataset_size_; i++) {
-        const std::set<unsigned int> & set_of_exists_grams;
+        const std::set<unsigned int> & set_of_exists_grams = rg_list[i];
         if (!set_of_exists_grams.empty()) {
-            rc.insert(i);
+            rc.push_back(i);
         }
         for (unsigned int g_idx : set_of_exists_grams) {
-            gr_list[g_idx].insert(i);
+            gr_list[g_idx].push_back(i);
         }
     }
     /**
@@ -251,8 +262,8 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
                     // ... and if 1. g not in r_j 
                     //        AND 2. (q_k, r_j) not covered by any g \in I
                     if (index.find(g_idx) == index.end() &&
-                        gr_list[g_idx].find(j) == gr_list[g_idx].end() &&
-                        (!index_cover(index, gr_list, qg_list, j, k)) ) {
+                        !sorted_list_contains(gr_list[g_idx], j) &&
+                        (!index_covered(index, gr_list, qg_list, j, k)) ) {
                         
                         benefit[g_idx]++;
                     }
@@ -297,8 +308,8 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
 }
 
 // Algorithm 2 in Figure 3
-void best_index::SingleThreadedIndex::build_index(int upper_k) {
-    select_grams(upper_k);
+void best_index::SingleThreadedIndex::build_index() {
+    select_grams();
 }
 
 std::vector<std::string> best_index::SingleThreadedIndex::find_all_indexed(const std::string & line) {
@@ -320,4 +331,3 @@ std::vector<std::string> best_index::SingleThreadedIndex::find_all_indexed(const
     // }
     return found_keys;
 }
-

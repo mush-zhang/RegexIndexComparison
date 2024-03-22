@@ -1,7 +1,8 @@
-#include "Index/naive.hpp"
+#include "Index/single_threaded.hpp"
 
 #include <iostream> 
 #include <cassert>
+#include <unordered_set>
 
 const double k_number_repeat = 10;
 
@@ -42,30 +43,11 @@ void simple_index() {
     });
     std::vector<std::string> test_dataset;
 
-    auto pi = best_index::NaiveIndex(test_dataset, test_query, 1);
+    auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1);
 
     // try build index of uni and bigrams only
-    pi.build_index(2);
+    pi.build_index();
     pi.print_index();
-
-    // assert(compare_lists(pi.get_line_pos_at("0"), {0}) && 
-    //        compare_lists(pi.get_line_pos_at("1"), {1}) && 
-    //        compare_lists(pi.get_line_pos_at("2"), {2}) && 
-    //        compare_lists(pi.get_line_pos_at("3"), {3}) && 
-    //        compare_lists(pi.get_line_pos_at("4"), {4}) &&
-    //        compare_lists(pi.get_line_pos_at("5"), {5}) &&  
-    //         "Line index should be in keys");
-
-    // assert(compare_lists(pi.get_line_pos_at("a"), {0}) && 
-    //        compare_lists(pi.get_line_pos_at("b"), {1}) && 
-    //        compare_lists(pi.get_line_pos_at("c"), {2}) && 
-    //        compare_lists(pi.get_line_pos_at("d"), {3}) && 
-    //        compare_lists(pi.get_line_pos_at("e"), {4}) &&
-    //        compare_lists(pi.get_line_pos_at("f"), {5}) &&  
-    //         "Alphabet char should have their respecting line idx and ony the one line idx");
-    
-    // assert(compare_lists(pi.get_line_pos_at("."), {0, 1, 2, 3, 4, 5}) && 
-    //        "Char . in all 0-5 lines");
 }
 
 int main() {
