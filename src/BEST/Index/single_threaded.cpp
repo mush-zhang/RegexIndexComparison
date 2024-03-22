@@ -1,4 +1,4 @@
-#include "naive.hpp"
+#include "single_threaded.hpp"
 #include <iostream>
 #include <chrono>
 #include <cstring>
@@ -12,7 +12,7 @@ extern "C" {
     #include "../../utils/rax/rc4rand.h"
 };
 
-void best_index::NaiveIndex::print_index() {
+void best_index::SingleThreadedIndex::print_index() {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
     std::cout << ", size of index: " << k_index_.size() << std::endl;
@@ -59,7 +59,7 @@ std::vector<std::string> generate_path_labels(const rax * const gram_tree) {
  *       it will take several scans on the dataset; will only be fine if dataset is small
  *       I feel it is similar to FREE in generating prefix free kinda set with threshold limit
  **/
-std::set<std::string> best_index::NaiveIndex::candidate_gram_set_gen(
+std::set<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals) {
     rax *gram_tree = raxNew();
     std::set<std::string> result;
@@ -185,7 +185,7 @@ bool all_covered(const std::set<unsigned int> & rc, const std::set<unsigned int>
 // Improved greedy gram selection algorightm
 //   TODO: no point of seperating select gram and build index;
 //         only do that if we need some consistent interface later for experiments
-void best_index::NaiveIndex::select_grams(int upper_k) {
+void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     auto start = std::chrono::high_resolution_clock::now();
     std::vector<std::vector<std::string>> query_literals;
     for (const auto & q : k_queries_) {
@@ -297,11 +297,11 @@ void best_index::NaiveIndex::select_grams(int upper_k) {
 }
 
 // Algorithm 2 in Figure 3
-void best_index::NaiveIndex::build_index(int upper_k) {
+void best_index::SingleThreadedIndex::build_index(int upper_k) {
     select_grams(upper_k);
 }
 
-std::vector<std::string> best_index::NaiveIndex::find_all_indexed(const std::string & line) {
+std::vector<std::string> best_index::SingleThreadedIndex::find_all_indexed(const std::string & line) {
     std::vector<std::string> found_keys;
     // for (size_t i = 0; i < line.size(); i++) {
     //     auto curr_c = line.at(i);

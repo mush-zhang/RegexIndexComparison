@@ -1,7 +1,5 @@
-// #include "hash_pair.hpp"
-
-#ifndef BEST_INDEX_NAIVE_HPP_
-#define BEST_INDEX_NAIVE_HPP_
+#ifndef BEST_INDEX_SINGLE_THREADED_HPP_
+#define BEST_INDEX_SINGLE_THREADED_HPP_
 
 #include <vector>
 #include <string>
@@ -11,18 +9,18 @@
 namespace best_index {
 static const std::vector<long> k_empty_pos_list_;
 
-class NaiveIndex {
+class SingleThreadedIndex {
  public:
-    NaiveIndex() = delete;
-    NaiveIndex(const std::vector<std::string> &&) = delete;
-    NaiveIndex(const std::vector<std::string> & dataset, 
+    SingleThreadedIndex() = delete;
+    SingleThreadedIndex(const std::vector<std::string> &&) = delete;
+    SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
                double sel_threshold, int max_num_keys=-1)
       : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), k_max_num_keys_(max_num_keys) {}
     
-    ~NaiveIndex() { if (gram_tree_) delete gram_tree_; }
+    ~SingleThreadedIndex() { if (gram_tree_) delete gram_tree_; }
 
     virtual void build_index(int upper_k);
 
@@ -69,4 +67,4 @@ class NaiveIndex {
 
 } // namespace best_index
 
-#endif // BEST_INDEX_NAIVE_HPP_
+#endif // BEST_INDEX_SINGLE_THREADED_HPP_
