@@ -41,7 +41,12 @@ void simple_index() {
         "Franc",
         "kane",
     });
-    std::vector<std::string> test_dataset;
+    std::vector<std::string> test_dataset({
+        "an",
+        "York",
+        "Franc",
+        "kane",
+    });;
 
     auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1);
 

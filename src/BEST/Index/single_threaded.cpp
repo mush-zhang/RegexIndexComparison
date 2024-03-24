@@ -249,7 +249,8 @@ void best_index::SingleThreadedIndex::select_grams() {
     std::set<unsigned int> index;
     std::vector<long double> benefit(candidates_size);
     // While some (q,r) uncovered AND space available
-    while (!all_covered && (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
+    while (!all_covered(rc, index, gr_list, qg_list, k_queries_size_) && 
+            (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
         // for every g \in G\I, set benefit[g] = 0
         std::fill(benefit.begin(), benefit.end(), 0);
         // for every query q \in Q
