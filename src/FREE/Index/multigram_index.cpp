@@ -36,20 +36,6 @@ void free_index::MultigramIndex::build_index(int upper_k) {
     std::cout << "Index Building End in " << elapsed << std::endl;
 }
 
-// void free_index::MultigramIndex::print_index() {
-//     std::cout << "size of dataset: " << k_dataset_size_;
-//     std::cout << ", size of keys: " << k_index_keys_.size();
-//     std::cout << ", size of index: " << k_index_.size() << std::endl;
-//     for (const auto & key : k_index_keys_) {
-//         std::cout << key << ": ";
-//         std::cout << "[";
-//         for (auto idx : k_index_[key]) {
-//             std::cout << idx << ",";
-//         }
-//         std::cout << "]"  << std::endl;
-//     }
-// }
-
 void free_index::MultigramIndex::fill_posting(int upper_k) {
     for (auto i = 0; i < k_dataset_size_; i++) {
         auto line = k_dataset_[i];
@@ -183,25 +169,4 @@ void free_index::MultigramIndex::insert_kgram_into_index(
         }
     }
 }
-
-
-// std::vector<std::string> free_index::MultigramIndex::find_all_indexed(const std::string & line) {
-//     std::vector<std::string> found_keys;
-//     for (size_t i = 0; i < line.size(); i++) {
-//         auto curr_c = line.at(i);
-//         std::string curr_key = line.substr(i,1);
-//         auto lower_it = k_index_keys_.lower_bound(curr_key);
-
-//         for (auto & it = lower_it; it != k_index_keys_.end() && curr_key.at(0) == curr_c; ++it) {
-//             // check if the current key is the same with curren substr
-//             curr_key = *it;
-//             if (curr_key == line.substr(i, curr_key.size())) {
-//                 found_keys.emplace_back(curr_key);
-//                 // break as it is a prefix free set
-//                 break;
-//             }
-//         }
-//     }
-//     return found_keys;
-// }
 
