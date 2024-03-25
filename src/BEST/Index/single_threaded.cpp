@@ -13,19 +13,19 @@ extern "C" {
     #include "../../utils/rax/rc4rand.h"
 };
 
-void best_index::SingleThreadedIndex::print_index() {
-    std::cout << "size of dataset: " << k_dataset_size_;
-    std::cout << ", size of keys: " << k_index_keys_.size();
-    std::cout << ", size of index: " << k_index_.size() << std::endl;
-    for (const auto & key : k_index_keys_) {
-        std::cout << key << ": ";
-        std::cout << "[";
-        for (auto idx : k_index_[key]) {
-            std::cout << idx << ",";
-        }
-        std::cout << "]"  << std::endl;
-    }
-}
+// void best_index::SingleThreadedIndex::print_index() {
+//     std::cout << "size of dataset: " << k_dataset_size_;
+//     std::cout << ", size of keys: " << k_index_keys_.size();
+//     std::cout << ", size of index: " << k_index_.size() << std::endl;
+//     for (const auto & key : k_index_keys_) {
+//         std::cout << key << ": ";
+//         std::cout << "[";
+//         for (auto idx : k_index_[key]) {
+//             std::cout << idx << ",";
+//         }
+//         std::cout << "]"  << std::endl;
+//     }
+// }
 
 template<class T, class U>
 bool sorted_list_contains(const std::vector<T>& container, const U& v)
@@ -197,7 +197,7 @@ bool all_covered(const std::vector<unsigned int> & rc, const std::set<unsigned i
 // Improved greedy gram selection algorightm
 //   TODO: no point of seperating select gram and build index;
 //         only do that if we need some consistent interface later for experiments
-void best_index::SingleThreadedIndex::select_grams() {
+void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     auto start = std::chrono::high_resolution_clock::now();
     std::vector<std::vector<std::string>> query_literals;
     for (const auto & q : k_queries_) {
@@ -309,26 +309,7 @@ void best_index::SingleThreadedIndex::select_grams() {
 }
 
 // Algorithm 2 in Figure 3
-void best_index::SingleThreadedIndex::build_index() {
+void best_index::SingleThreadedIndex::build_index(int upper_k) {
     select_grams();
 }
 
-std::vector<std::string> best_index::SingleThreadedIndex::find_all_indexed(const std::string & line) {
-    std::vector<std::string> found_keys;
-    // for (size_t i = 0; i < line.size(); i++) {
-    //     auto curr_c = line.at(i);
-    //     std::string curr_key = line.substr(i,1);
-    //     auto lower_it = k_index_keys_.lower_bound(curr_key);
-
-    //     for (auto & it = lower_it; it != k_index_keys_.end() && curr_key.at(0) == curr_c; ++it) {
-    //         // check if the current key is the same with curren substr
-    //         curr_key = *it;
-    //         if (curr_key == line.substr(i, curr_key.size())) {
-    //             found_keys.emplace_back(curr_key);
-    //             // break as it is a prefix free set
-    //             break;
-    //         }
-    //     }
-    // }
-    return found_keys;
-}

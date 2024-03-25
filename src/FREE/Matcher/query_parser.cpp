@@ -254,11 +254,11 @@ void free_index::QueryParser::rewrite_by_index() {
     rewrote_by_index_ = query_plan_ == nullptr;
 }
 
-void sorted_lists_union(const std::vector<long> & l, 
-        const std::vector<long> & r, std::vector<long> & result) {
+void sorted_lists_union(const std::vector<unsigned int> & l, 
+        const std::vector<unsigned int> & r, std::vector<unsigned int> & result) {
     size_t i = 0, j = 0;
     while (i < l.size() && j < r.size()) {
-        long candidate;
+        unsigned int candidate;
         if (l[i] < r[j]) {
             candidate = l[i++];
         } else {
@@ -288,11 +288,10 @@ void sorted_lists_union(const std::vector<long> & l,
     }
 }
 
-void sorted_lists_intersection(const std::vector<long> & l, 
-        const std::vector<long> & r, std::vector<long> & result) {
+void sorted_lists_intersection(const std::vector<unsigned int> & l, 
+        const std::vector<unsigned int> & r, std::vector<unsigned int> & result) {
     size_t i = 0, j = 0;
     while (i < l.size() && j < r.size()) {
-        long candidate;
         if (l[i] < r[j]) {
             i++;
         } else if (l[i] > r[j]) {
@@ -305,9 +304,9 @@ void sorted_lists_intersection(const std::vector<long> & l,
     } 
 }
 
-std::vector<long> free_index::QueryParser::get_index_by_node(
+std::vector<unsigned int> free_index::QueryParser::get_index_by_node(
         std::unique_ptr<QueryPlanNode> & node) {
-    std::vector<long> result;
+    std::vector<unsigned int> result;
 
     if (!node || node->is_null() ||
         node->get_type() == free_index::NodeType::kInvalidNode) {
@@ -327,7 +326,7 @@ std::vector<long> free_index::QueryParser::get_index_by_node(
     return result;
 } 
 
-std::vector<long> free_index::QueryParser::get_index_by_plan() {
+std::vector<unsigned int> free_index::QueryParser::get_index_by_plan() {
     if (!rewrote_by_index_) {
         rewrite_by_index();
     }
