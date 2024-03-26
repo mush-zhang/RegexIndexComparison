@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstring>
 #include <map>
+#include <random>
 #include <algorithm>
 #include "../../utils/reg_utils.hpp"
 
@@ -12,20 +13,6 @@ extern "C" {
     #include "../../utils/rax/rax.h"
     #include "../../utils/rax/rc4rand.h"
 };
-
-// void best_index::SingleThreadedIndex::print_index() {
-//     std::cout << "size of dataset: " << k_dataset_size_;
-//     std::cout << ", size of keys: " << k_index_keys_.size();
-//     std::cout << ", size of index: " << k_index_.size() << std::endl;
-//     for (const auto & key : k_index_keys_) {
-//         std::cout << key << ": ";
-//         std::cout << "[";
-//         for (auto idx : k_index_[key]) {
-//             std::cout << idx << ",";
-//         }
-//         std::cout << "]"  << std::endl;
-//     }
-// }
 
 template<class T, class U>
 bool sorted_list_contains(const std::vector<T>& container, const U& v)
@@ -61,6 +48,123 @@ std::vector<std::string> generate_path_labels(rax * const gram_tree) {
     return path_labels;
 }
 
+std::set<std::string> diff_union(const std::set<std::string> & q1_grams, 
+                                   const std::set<std::string> & q2_grams) {
+    // Calcuate G_n = (G_1 - G_2) \union (G_2 - G_1)
+    std::set<std::string> result;
+    std::set_difference(q1_grams.begin(), q1_grams.end(), 
+                        q2_grams.begin(), q2_grams.end(),
+                        std::inserter(result, result.end()));
+    std::set_difference(q2_grams.begin(), q2_grams.end(), 
+                        q1_grams.begin(), q1_grams.end(),
+                        std::inserter(result, result.end())); 
+    return result;   
+}   
+
+std::set<std::string> intersect(const std::set<std::string> & q1_grams, 
+                                   const std::set<std::string> & q2_grams) {
+    // Calcuate G_d = G_1 \intersect G_2
+    std::set<std::string> result;
+    std::set_intersection(q1_grams.begin(), q1_grams.end(), 
+                          q2_grams.begin(), q2_grams.end(),
+                          std::inserter(result, result.end()));
+    return result;   
+} 
+
+unsigned int cardinality_not_in(const std::set<std::string> & g_set, 
+                                const std::map<std::string, unsigned int> & pre_suf_count) {
+    unsigned int g_cadinality_sum = 0;
+    for (const auto & g : g_set) {
+        g_cadinality_sum += pre_suf_count[g];
+    }
+    return g_cadinality_sum;
+}
+
+double max_dev_dist1(const std::set<std::string> & q1_grams, 
+                     const std::set<std::string> & q2_grams,
+                     const std::map<std::string, unsigned int> & pre_suf_count) {
+    std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
+    unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
+
+    std::set<std::string> gd_set = intersect(q1_grams, q2_grams);
+    unsigned int gd_cadinality_sum = cardinality_not_in(gd_set, pre_suf_count);
+
+    return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
+}
+
+double max_dev_dist2(const std::set<std::string> & q1_grams, 
+                     const std::set<std::string> & q2_grams,
+                     const std::map<std::string, unsigned int> & pre_suf_count) {
+    std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
+    unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
+    unsigned int gd_cadinality_sum = cardinality_not_in(q2, pre_suf_count);
+
+    return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
+}
+
+double max_dev_dist3(const std::set<std::string> & q1_grams, 
+                     const std::set<std::string> & q2_grams,
+                     const std::map<std::string, unsigned int> & pre_suf_count) {
+    std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
+    return (double)cardinality_not_in(gn_set, pre_suf_count);
+}
+
+void k_medians(const std::vector<std::vector<double>> & dist_mtx, 
+        int query_size_old, int query_size_new) {
+    // 1. randomly pick k queries as centriods
+    std::vector<unsigned int> centriods;
+    // Note: random sample function from here: https://stackoverflow.com/a/73133364
+    //       does it perform better than pre-buidling the 0-k_query_size_ array?
+    centriods.resize(query_size_new);
+    std::ranges::sample(std::views::iota(0, query_size_old), centriods.begin(), 
+                        query_size_new, std::mt19937{std::random_device{}()}); 
+
+    bool centriod_final = false;
+    while(centriod_final) {
+        centriod_not_final = 
+    }
+    // 2. assign data points to nearest centriods
+
+    // compute the new median as centriods for each cluster
+
+    // 
+}
+
+/**
+ * Described in section 4: Workload Reduction
+ *  Essentially reducing the number of queries for gram selection,
+ *  and thus reducing the space and time complexity as they are both
+ *  proportional to |Q|*|R|
+ */
+void best_index::SingleThreadedIndex::workload_reduction(
+        const std::vector<std::vector<std::string>> & query_literals,
+        const std::map<std::string, unsigned int> & pre_suf_count) {
+    std::vector<std::set<std::string>> qg_gram_set(k_queries_size_);
+    for (size_t q_idx = 0; q_idx < k_queries_size_; q_idx++) {
+        const auto & literals = query_literals[q_idx];
+        for (const auto & l : literals) {
+            for (size_t i = 0; i < l.size(); i++) {
+                for (size_t j = i; j < l.size(); j++) {
+                    qg_gram_set[q_idx].insert(l.substr(i, j-i+1))
+                }
+            }
+        }
+    }
+
+    // compute pairwise distance in 2d matrix
+    std::vector<std::vector<double>> dist_mtx;
+    dist_mtx.assign(k_queries_size_, std::vector<double>(k_queries_size_));
+    for (size_t i = 0; i < k_queries_size_; i++) {
+        for (size_t j = 0; j < k_queries_size_; j++) {
+            if (i > j) {
+                dist_mtx[i][j] = dist_mtx[j][i];
+            } else {
+                dist_mtx[i][j] = max_dev_dist1(qg_gram_set[i], qg_gram_set[j], pre_suf_count);
+            }
+        }
+    }
+}
+
 /**Described in section 5: Candidate Set Generation
  * Note: it generate the set of prefixes of the set of all suffixes of the string set
  *       which isn't essentially the set of all substrings/multigrams.
@@ -73,6 +177,7 @@ std::vector<std::string> generate_path_labels(rax * const gram_tree) {
  **/
 std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals) {
+   
     rax *gram_tree = raxNew();
     std::vector<std::string> result;
     // 1. Build suffix tree using all queries
@@ -100,7 +205,7 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
     // 3.5 iterate once on the dataset and 
     //     count the number of occurrance of each multigram
     // Note:
-    // intially I thought of doing: if count > threshold count, then erase the key
+    // intially I thought of doing: once count > threshold count, then erase the key
     int threshold_count = k_threshold_ * k_dataset_size_;
     for (const auto & line : k_dataset_) {
         for (size_t i = 0; i < line.size(); i++) {
@@ -117,6 +222,8 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
             }
         }
     }
+
+    // 
 
     // 4. Get the smallest prefix of the remaining grams with
     //    selectivity less than c

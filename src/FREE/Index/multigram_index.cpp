@@ -55,7 +55,6 @@ void free_index::MultigramIndex::fill_posting(int upper_k) {
     }
 }
 
-
 void free_index::MultigramIndex::select_grams(int upper_k) {
     gram_set expand; // stores useless prefix
 

@@ -5,6 +5,12 @@
 
 namespace best_index {
 
+/**
+ * Note: the orginal paper assumes b+tree for size constraint calculation.
+ *       Yet it does not actually build the index and measure query performance.
+ *       It uses the ARE (false positives related measurement) to measure the.
+ *       effectiveness of index
+ */
 class SingleThreadedIndex  : public NGramInvertedIndex {
  public:
     SingleThreadedIndex() = delete;
@@ -25,8 +31,8 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     void select_grams(int upper_k=-1) override;
     
  private:
-    const long double k_queries_size_;
-    const std::vector<std::string> & k_queries_;
+    long double k_queries_size_;
+    std::vector<std::string> & k_queries_;
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
