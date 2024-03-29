@@ -50,7 +50,42 @@ void simple_index() {
 
     auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1);
 
-    // try build index of uni and bigrams only
+    pi.build_index();
+    pi.print_index();
+}
+
+void simple_wl_red_index() {
+    std::vector<std::string> test_query({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });
+    std::vector<std::string> test_dataset({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });;
+
+    auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4);
+
     pi.build_index();
     pi.print_index();
 }
@@ -59,6 +94,9 @@ int main() {
     std::cout << "BEGIN INDEX TESTS -------------------------------------------" << std::endl;
     std::cout << "\t GRAM CANDIDATE SET -------------------------------------------" << std::endl;
     simple_index();
-    
+    std::cout << "\t END GRAM CANDIDATE SET -------------------------------------------" << std::endl;
+    std::cout << "\t WORKLOAD REDUCTION -------------------------------------------" << std::endl;
+    simple_wl_red_index();    
+    std::cout << "\t END WORKLOAD REDUCTION -------------------------------------------" << std::endl;
     return 0;
 }

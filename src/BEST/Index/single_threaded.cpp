@@ -2,8 +2,8 @@
 #include <iostream>
 #include <chrono>
 #include <cstring>
-#include <map>
 #include <random>
+#include <ranges>
 #include <algorithm>
 #include "../../utils/reg_utils.hpp"
 
@@ -75,7 +75,7 @@ unsigned int cardinality_not_in(const std::set<std::string> & g_set,
                                 const std::map<std::string, unsigned int> & pre_suf_count) {
     unsigned int g_cadinality_sum = 0;
     for (const auto & g : g_set) {
-        g_cadinality_sum += pre_suf_count[g];
+        g_cadinality_sum += pre_suf_count.at(g);
     }
     return g_cadinality_sum;
 }
@@ -87,7 +87,7 @@ double max_dev_dist1(const std::set<std::string> & q1_grams,
     unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
 
     std::set<std::string> gd_set = intersect(q1_grams, q2_grams);
-    unsigned int gd_cadinality_sum = cardinality_not_in(gd_set, pre_suf_count);
+    unsigned int gd_cadinality_sum = 1 + cardinality_not_in(gd_set, pre_suf_count);
 
     return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
 }
@@ -97,7 +97,7 @@ double max_dev_dist2(const std::set<std::string> & q1_grams,
                      const std::map<std::string, unsigned int> & pre_suf_count) {
     std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
     unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
-    unsigned int gd_cadinality_sum = cardinality_not_in(q2, pre_suf_count);
+    unsigned int gd_cadinality_sum = 1 + cardinality_not_in(q2_grams, pre_suf_count);
 
     return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
 }
@@ -109,25 +109,86 @@ double max_dev_dist3(const std::set<std::string> & q1_grams,
     return (double)cardinality_not_in(gn_set, pre_suf_count);
 }
 
-void k_medians(const std::vector<std::vector<double>> & dist_mtx, 
+size_t argmin(const std::vector<double> & v) {
+    return std::distance(std::begin(v), 
+                         std::min_element(std::begin(v), std::end(v)));
+}
+
+std::vector<unsigned int> k_medians(const std::vector<std::vector<double>> & dist_mtx, 
         int query_size_old, int query_size_new) {
-    // 1. randomly pick k queries as centriods
-    std::vector<unsigned int> centriods;
+    // 1. randomly pick k queries as centroids
+    std::vector<unsigned int> centroids;
     // Note: random sample function from here: https://stackoverflow.com/a/73133364
     //       does it perform better than pre-buidling the 0-k_query_size_ array?
-    centriods.resize(query_size_new);
-    std::ranges::sample(std::views::iota(0, query_size_old), centriods.begin(), 
+    centroids.resize(query_size_new);
+    std::ranges::sample(std::views::iota(0, query_size_old), centroids.begin(), 
                         query_size_new, std::mt19937{std::random_device{}()}); 
 
-    bool centriod_final = false;
-    while(centriod_final) {
-        centriod_not_final = 
+    // c_dists: index [idx of centroid in centroids] 
+    //          value [distance from current node to the centroid]
+    std::vector<double> c_dists(query_size_new);
+    // closest_c_idxs: index [idx of a query] 
+    //                 value [current query idx of closet centroid in centroids]
+    std::vector<int> closest_c_idxs(query_size_old, -1);
+
+    bool centroid_final = false;
+    size_t max_iteration = 100000;
+
+    size_t curr_it = 0;
+    while(!centroid_final && curr_it++ < max_iteration) {
+        centroid_final = true;
+        // 2. assign data points to nearest centroids
+
+        // cmap: key [query idx centroid in centroids] 
+        //       value [list of query idx]
+        std::unordered_map<unsigned int, std::vector<size_t>> cmap;
+        cmap.reserve(query_size_new);
+        // q_dists: index [idx of a query] 
+        //          value [distance to the current query]
+        for (size_t q_idx = 0; q_idx < query_size_old; q_idx++) {
+            auto q_dists = dist_mtx[q_idx];
+            for (size_t i = 0; i < query_size_new; i++) {
+                c_dists[i] = q_dists[centroids[i]];
+            }
+            // curr_closest: [idx of closet centroid in centroids] 
+            auto curr_closest = centroids[argmin(c_dists)];
+            if (closest_c_idxs[q_idx] != curr_closest) {
+                centroid_final = false;
+                closest_c_idxs[q_idx] = curr_closest;
+            }
+            cmap[curr_closest].push_back(q_idx);
+        }
+
+        std::vector<size_t> fillables;
+        // 3. compute the new median as centroids for each cluster
+        for (size_t c_idx = 0; c_idx < query_size_new; c_idx++) {
+            auto q_idxs = cmap[centroids[c_idx]];
+            if (q_idxs.empty() || q_idxs.size() == 1) {
+                fillables.push_back(c_idx);
+            } else {
+                std::vector<double> dist_sums(q_idxs.size(), 0);
+                for (size_t i = 0; i < q_idxs.size(); i++) {
+                    for (size_t j = 0; j < q_idxs.size(); j++) {
+                        dist_sums[i] += dist_mtx[i][j];
+                    }
+                }
+                auto curr_c = argmin(dist_sums);
+                centroids[c_idx] = q_idxs[curr_c];
+            }
+        }
+        //3.5 empty cluster, choose a random centroid
+        std::set<unsigned int> centroids_set(centroids.begin(), centroids.end());
+        for (const auto & c_idx : fillables) {
+            std::uniform_int_distribution<int> uni_rand_int(0, query_size_old-1);
+            auto rng = std::mt19937{std::random_device{}()};
+            int curr_rand = uni_rand_int(rng);
+            while(centroids_set.contains(curr_rand)) {
+                curr_rand = uni_rand_int(rng);
+            }
+            centroids[c_idx] = curr_rand;
+        }
     }
-    // 2. assign data points to nearest centriods
-
-    // compute the new median as centriods for each cluster
-
-    // 
+    return centroids;
 }
 
 /**
@@ -137,15 +198,15 @@ void k_medians(const std::vector<std::vector<double>> & dist_mtx,
  *  proportional to |Q|*|R|
  */
 void best_index::SingleThreadedIndex::workload_reduction(
-        const std::vector<std::vector<std::string>> & query_literals,
-        const std::map<std::string, unsigned int> & pre_suf_count) {
+        std::vector<std::vector<std::string>> & query_literals,
+        std::map<std::string, unsigned int> & pre_suf_count) {
     std::vector<std::set<std::string>> qg_gram_set(k_queries_size_);
     for (size_t q_idx = 0; q_idx < k_queries_size_; q_idx++) {
         const auto & literals = query_literals[q_idx];
         for (const auto & l : literals) {
             for (size_t i = 0; i < l.size(); i++) {
                 for (size_t j = i; j < l.size(); j++) {
-                    qg_gram_set[q_idx].insert(l.substr(i, j-i+1))
+                    qg_gram_set[q_idx].insert(l.substr(i, j-i+1));
                 }
             }
         }
@@ -163,6 +224,23 @@ void best_index::SingleThreadedIndex::workload_reduction(
             }
         }
     }
+
+    // use k-median centroids as the representative query subset
+    auto centroids = k_medians(dist_mtx, k_queries_size_, k_reduced_queries_size_);
+
+    std::vector<std::vector<std::string>> new_query_literals(k_reduced_queries_size_);
+    std::map<std::string, unsigned int> new_pre_suf_count;
+
+    for (size_t i = 0; i < k_reduced_queries_size_; i++) {
+        auto curr_q_idx = centroids[i];
+        new_query_literals[i] = query_literals[curr_q_idx];
+        for (const auto & g_in_q : qg_gram_set[curr_q_idx]) {
+            new_pre_suf_count[g_in_q] = pre_suf_count[g_in_q];
+        }
+    }
+
+    query_literals.swap(new_query_literals);
+    pre_suf_count.swap(new_pre_suf_count);
 }
 
 /**Described in section 5: Candidate Set Generation
@@ -202,8 +280,8 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
         }
     }
 
-    // 3.5 iterate once on the dataset and 
-    //     count the number of occurrance of each multigram
+    // 4 iterate once on the dataset and 
+    //   count the number of occurrance of each multigram
     // Note:
     // intially I thought of doing: once count > threshold count, then erase the key
     int threshold_count = k_threshold_ * k_dataset_size_;
@@ -223,10 +301,18 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
         }
     }
 
-    // 
+    // 4.5 Optional: if we are doing workload reduction
+    //     reduce the k_queries_size_ and k_queries, 
+    //     also remove any multigrams in pre_suf_count that
+    //     are not in queries in the new query set
+    if (k_reduced_queries_size_ < k_queries_size_) {
+        workload_reduction(query_literals, pre_suf_count);
+    } 
 
     // 4. Get the smallest prefix of the remaining grams with
     //    selectivity less than c
+    // Note: checking the k-1 prefix is enough because pre_suf_count has
+    //       sorted keys.
     std::string prev_key = "";
     for (const auto & [key, val] : pre_suf_count) {
         if (val > threshold_count) continue;
@@ -311,16 +397,18 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
         std::vector<std::string> literals = extract_literals(q);
         query_literals.push_back(literals);
     }
+    
     /** referring to the implementation detail in section 2.2
         Example 3 and the paragraph above **/
-    std::vector<std::string> candidates = candidate_gram_set_gen(query_literals);
+    auto candidates = candidate_gram_set_gen(query_literals);
     size_t candidates_size = candidates.size();
+
     /**
      * Q-G-list: vector in order of q, where each element is
      *      set of idx of g \in candidates s.t. g \in q
      */
-    std::vector<std::set<unsigned int>> qg_list(k_queries_size_);
-    for (size_t i = 0; i < k_queries_size_; i++) {
+    std::vector<std::set<unsigned int>> qg_list(k_reduced_queries_size_);
+    for (size_t i = 0; i < k_reduced_queries_size_; i++) {
         const auto & literals = query_literals[i];
         grams_in_literals(literals, candidates, qg_list, i);
     }
@@ -356,12 +444,12 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     std::set<unsigned int> index;
     std::vector<long double> benefit(candidates_size);
     // While some (q,r) uncovered AND space available
-    while (!all_covered(rc, index, gr_list, qg_list, k_queries_size_) && 
+    while (!all_covered(rc, index, gr_list, qg_list, k_reduced_queries_size_) && 
             (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
         // for every g \in G\I, set benefit[g] = 0
         std::fill(benefit.begin(), benefit.end(), 0);
         // for every query q \in Q
-        for (size_t k = 0; k < k_queries_size_; k++) {
+        for (size_t k = 0; k < k_reduced_queries_size_; k++) {
             // for every record r in R_c
             for (auto j : rc) {
                 // for each gram g \in Q-G-list[q_k]\I
@@ -408,7 +496,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     start = std::chrono::high_resolution_clock::now();
     for (auto idx : index) {
         k_index_keys_.insert(candidates[idx]);
-        k_index_.insert({candidates[idx], gr_list[idx]});
+        k_index_[candidates[idx]] = gr_list[idx];
     }
     elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();

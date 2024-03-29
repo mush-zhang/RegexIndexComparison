@@ -18,18 +18,6 @@ class MultigramIndex : public NGramInvertedIndex {
 
     void build_index(int upper_k) override;
 
-    // // return all substrings of the given string that are keys in the index
-    // std::vector<std::string> find_all_indexed(const std::string & line);
-
-    // void print_index();
-    
-    // const std::vector<long> & get_line_pos_at(const std::string & key) const { 
-    //     if (auto it = k_index_.find(key); it != k_index_.end()) {
-    //         return it->second;
-    //     }
-    //     return k_empty_pos_list_;
-    // }
-
  protected:
     void select_grams(int upper_k) override;
     void fill_posting(int upper_k);

@@ -30,28 +30,28 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $? -o $@
+	$(CXX) $(CPPFLAGS) $^ -o $@
 
 $(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 $(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_MCH) $(FREE_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $? -o $@
+	$(CXX) $(CPPFLAGS) $^ -o $@
 
 $(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp 
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
  
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 utils/hash_pair.o: utils/hash_pair.cpp
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 inverted.o: ngram_inverted_index.cpp
-	$(CXX) -c $(CPPFLAGS) $? -o $@
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 .PHONY: clean
 clean:
