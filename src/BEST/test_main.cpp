@@ -84,10 +84,21 @@ void simple_wl_red_index() {
         "ka" //12
     });;
 
-    auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4);
+    auto pi1 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+    pi1.build_index();
+    pi1.print_index();
+    std::cout << "***********" << std::endl;
 
-    pi.build_index();
-    pi.print_index();
+    auto pi2 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist2);
+    pi2.build_index();
+    pi2.print_index();
+    std::cout << "***********" << std::endl;
+
+    auto pi3 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist3);
+    pi3.build_index();
+    pi3.print_index();
+    std::cout << "***********" << std::endl;
+
 }
 
 int main() {

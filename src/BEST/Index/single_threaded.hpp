@@ -15,6 +15,8 @@ namespace best_index {
  */
 class SingleThreadedIndex  : public NGramInvertedIndex {
  public:
+    enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
+
     SingleThreadedIndex() = delete;
     SingleThreadedIndex(const SingleThreadedIndex &&) = delete;
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
@@ -27,11 +29,13 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
-               double sel_threshold, long workload_reduced_size)
+               double sel_threshold, long workload_reduced_size,
+               dist_type dist_measure_type)
       : NGramInvertedIndex(dataset), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
-        k_reduced_queries_size_(workload_reduced_size) {}
+        k_reduced_queries_size_(workload_reduced_size),
+        dist_measure_type_(dist_measure_type) {}
     
     ~SingleThreadedIndex() {}
 
@@ -44,6 +48,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     void select_grams(int upper_k=-1) override;
     
  private:
+    dist_type dist_measure_type_ = dist_type::kInvalid;
     const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 

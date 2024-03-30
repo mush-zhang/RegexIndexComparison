@@ -5,6 +5,8 @@
 #include <random>
 #include <ranges>
 #include <algorithm>
+#include <stdexcept>
+
 #include "../../utils/reg_utils.hpp"
 
 // #include "../../utils/trie.hpp"
@@ -212,6 +214,23 @@ void best_index::SingleThreadedIndex::workload_reduction(
         }
     }
 
+    double (*max_dev_dist)(const std::set<std::string> &, 
+        const std::set<std::string> &,
+        const std::map<std::string, unsigned int> &){ nullptr };
+    switch (dist_measure_type_) {
+        case dist_type::kMaxDevDist1:
+            max_dev_dist = &max_dev_dist1;
+            break;
+        case dist_type::kMaxDevDist2:
+            max_dev_dist = &max_dev_dist2;
+            break;
+        case dist_type::kMaxDevDist3:
+            max_dev_dist = &max_dev_dist3;
+            break;
+        default:
+            throw std::invalid_argument( "Invalid MaxDevDist function type" );
+    }
+
     // compute pairwise distance in 2d matrix
     std::vector<std::vector<double>> dist_mtx;
     dist_mtx.assign(k_queries_size_, std::vector<double>(k_queries_size_));
@@ -220,7 +239,7 @@ void best_index::SingleThreadedIndex::workload_reduction(
             if (i > j) {
                 dist_mtx[i][j] = dist_mtx[j][i];
             } else {
-                dist_mtx[i][j] = max_dev_dist1(qg_gram_set[i], qg_gram_set[j], pre_suf_count);
+                dist_mtx[i][j] = max_dev_dist(qg_gram_set[i], qg_gram_set[j], pre_suf_count);
             }
         }
     }
