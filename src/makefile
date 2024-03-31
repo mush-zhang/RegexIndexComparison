@@ -19,7 +19,7 @@ BEST_MCH_DIR=$(BEST_BASE_DIR)/Matcher
 
 BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR) $(BEST_MCH_DIR)
 
-BEST_IDX=inverted.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o
+BEST_IDX=inverted.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
 DIRS=. utils $(FREE_DIRS) $(BEST_DIRS)
 
@@ -31,6 +31,9 @@ all: $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ -o $@
+
+$(BEST_IDX_DIR)/best_parallel.o: $(BEST_IDX_DIR)/parallelizable.cpp
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 $(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
