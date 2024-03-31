@@ -17,6 +17,12 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
  public:
     enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
 
+    struct job {
+        std::vector<std::set<unsigned int>> qg_list;
+        std::vector<std::vector<unsigned int>> gr_list;
+        std::vector<unsigned int> rc;
+    };
+
     SingleThreadedIndex() = delete;
     SingleThreadedIndex(const SingleThreadedIndex &&) = delete;
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
@@ -25,7 +31,8 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
       : NGramInvertedIndex(dataset), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
-        k_reduced_queries_size_(queries.size()) {}
+        k_reduced_queries_size_(queries.size()),
+        k_original_queries_(queries) {}
     
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
@@ -35,7 +42,8 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),
-        dist_measure_type_(dist_measure_type) {}
+        dist_measure_type_(dist_measure_type),
+        k_original_queries_(queries) {}
     
     ~SingleThreadedIndex() {}
 
@@ -46,13 +54,48 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
 
  protected:
     void select_grams(int upper_k=-1) override;
+
+    std::vector<std::vector<std::string>> get_query_literals();
+
+    std::map<std::string, unsigned int> get_all_gram_counts(
+        const std::vector<std::vector<std::string>> & query_literals);
     
+    std::unordered_map<unsigned int, std::vector<size_t>> k_medians(
+        const std::vector<std::vector<double>> & dist_mtx, 
+        int num_queries, int num_clusters);
+    
+    std::vector<std::set<std::string>> get_all_multigrams_per_query(
+        const std::vector<std::vector<std::string>> & query_literals);
+    
+    std::vector<std::vector<double>> calculate_pairwise_dist(
+        const std::vector<std::set<std::string>> & qg_gram_set,
+        const std::map<std::string, unsigned int> & pre_suf_count);
+    
+    void build_gr_list_rc(std::vector<std::vector<unsigned int>> & gr_list,
+        std::vector<unsigned int> & rc,
+        size_t candidates_size,
+        const std::vector<size_t> &r_idxs,
+        const std::vector<std::set<unsigned int>> & rg_list);
+
+    void build_gr_list_rc(std::vector<std::vector<unsigned int>> & gr_list,
+        std::vector<unsigned int> & rc,
+        size_t candidates_size,  
+        unsigned int dataset_size,
+        const std::vector<std::set<unsigned int>> & rg_list);
+    
+    void build_qg_list(std::vector<std::set<unsigned int>> & qg_list,
+        long double num_queries,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals);
+
  private:
     dist_type dist_measure_type_ = dist_type::kInvalid;
     const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
-    const long double k_reduced_queries_size_;
+    long double k_reduced_queries_size_;
+
+    const std::vector<std::string> & k_original_queries_;
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
@@ -62,7 +105,8 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, unsigned int> & pre_suf_count);
     std::vector<std::string> candidate_gram_set_gen(
-      std::vector<std::vector<std::string>> & query_literals);
+      std::vector<std::vector<std::string>> & query_literals,
+      std::map<std::string, unsigned int> & pre_suf_count);
 
 
 };
