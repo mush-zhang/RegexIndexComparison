@@ -53,7 +53,14 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     void set_max_num_keys(int max_num_keys) { k_max_num_keys_ = max_num_keys; }
 
  protected:
+    dist_type dist_measure_type_ = dist_type::kInvalid;
+    int k_max_num_keys_;
+
     void select_grams(int upper_k=-1) override;
+
+    std::vector<std::string> candidate_gram_set_gen(
+        std::vector<std::vector<std::string>> & query_literals,
+        std::map<std::string, unsigned int> & pre_suf_count);
 
     std::vector<std::vector<std::string>> get_query_literals();
 
@@ -88,8 +95,17 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals);
 
+    void indexed_grams_in_string(const std::string & l, 
+        const std::vector<std::string> & candidates,
+        std::vector<std::set<unsigned int>> & g_list, 
+        size_t idx);
+
+    void indexed_grams_in_literals(const std::vector<std::string> & literals, 
+        const std::vector<std::string> & candidates,
+        std::vector<std::set<unsigned int>> & g_list,
+        size_t idx);
+
  private:
-    dist_type dist_measure_type_ = dist_type::kInvalid;
     const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
@@ -99,16 +115,10 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
-    int k_max_num_keys_;
 
     /** Helpers **/
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, unsigned int> & pre_suf_count);
-    std::vector<std::string> candidate_gram_set_gen(
-      std::vector<std::vector<std::string>> & query_literals,
-      std::map<std::string, unsigned int> & pre_suf_count);
-
-
 };
 
 } // namespace best_index
