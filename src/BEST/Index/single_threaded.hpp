@@ -17,6 +17,15 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
  public:
     enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
 
+    /**
+     * Q-G-list: vector in order of q, where each element is
+     *      set of idx of g \in candidates s.t. g \in q
+     * G-R-list: vector in order of g, where each element is
+     *      set of idx of r \in candidates s.t. g \in r
+     *   Note: to avoid multiple scans of the dataset, 
+     *        build R-G-list first
+     * R_c: set of idx of r s.t. \exists some g \in r
+     */
     struct job {
         std::vector<std::set<unsigned int>> qg_list;
         std::vector<std::vector<unsigned int>> gr_list;
@@ -78,38 +87,23 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         const std::vector<std::set<std::string>> & qg_gram_set,
         const std::map<std::string, unsigned int> & pre_suf_count);
     
-    void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
-        size_t candidates_size,
-        const std::vector<size_t> & r_idxs,
-        const std::vector<std::set<unsigned int>> & rg_list);
-
-    void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
-        size_t candidates_size,  
-        unsigned int dataset_size,
-        const std::vector<std::set<unsigned int>> & rg_list);
-    
-    void build_qg_list(std::vector<std::set<unsigned int>> & qg_list,
-        long double num_queries,
-        const std::vector<std::string> & candidates, 
-        const std::vector<std::vector<std::string>> & query_literals);
-
-    void indexed_grams_in_string(const std::string & l, 
-        const std::vector<std::string> & candidates,
-        std::vector<std::set<unsigned int>> & g_list, 
-        size_t idx);
-
-    void indexed_grams_in_literals(const std::vector<std::string> & literals, 
-        const std::vector<std::string> & candidates,
-        std::vector<std::set<unsigned int>> & g_list,
-        size_t idx);
-    
-    bool index_covered(const std::set<unsigned int> & index, 
-        const best_index::SingleThreadedIndex::job job,
-        size_t r_j, size_t q_k);
+    void compute_benefit(std::vector<long double> & benefit, 
+        const std::set<unsigned int> & index, 
+        const best_index::SingleThreadedIndex::job & job, 
+        size_t num_queries);
     
     bool all_covered(const std::set<unsigned int> & index,
         const best_index::SingleThreadedIndex::job job,  
         size_t query_size);
+
+    void build_job(best_index::SingleThreadedIndex::job job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals);
+
+    void build_job_local(best_index::SingleThreadedIndex::job job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals,
+        const std::vector<size_t> r_list);
 
  private:
     const long double k_queries_size_;
@@ -125,6 +119,10 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     /** Helpers **/
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, unsigned int> & pre_suf_count);
+    
+    bool index_covered(const std::set<unsigned int> & index, 
+        const best_index::SingleThreadedIndex::job job,
+        size_t r_j, size_t q_k);
 };
 
 } // namespace best_index

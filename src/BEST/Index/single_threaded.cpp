@@ -365,8 +365,7 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
     return result;
 }
 
-void best_index::SingleThreadedIndex::indexed_grams_in_string(
-        const std::string & l, 
+void indexed_grams_in_string(const std::string & l, 
         const std::vector<std::string> & candidates,
         std::vector<std::set<unsigned int>> & g_list, 
         size_t idx) {
@@ -385,8 +384,7 @@ void best_index::SingleThreadedIndex::indexed_grams_in_string(
     }
 }
 
-void best_index::SingleThreadedIndex::indexed_grams_in_literals(
-        const std::vector<std::string> & literals, 
+void indexed_grams_in_literals(const std::vector<std::string> & literals, 
         const std::vector<std::string> & candidates,
         std::vector<std::set<unsigned int>> & g_list,
         size_t idx) {
@@ -427,6 +425,33 @@ bool best_index::SingleThreadedIndex::all_covered(
     return true;
 }
 
+void best_index::SingleThreadedIndex::compute_benefit(
+        std::vector<long double> & benefit, 
+        const std::set<unsigned int> & index, 
+        const best_index::SingleThreadedIndex::job & job, 
+        size_t num_queries) {
+    
+    std::fill(benefit.begin(), benefit.end(), 0);
+
+    // for every query q \in Q
+    for (size_t k = 0; k < num_queries; k++) {
+        // for every record r in R_c
+        for (auto j : job.rc) {
+            // for each gram g \in Q-G-list[q_k]\I
+            for (auto g_idx : job.qg_list[k]) {
+                // ... and if 1. g not in r_j 
+                //        AND 2. (q_k, r_j) not covered by any g \in I
+                if (index.find(g_idx) == index.end() &&
+                    !sorted_list_contains(job.gr_list[g_idx], j) &&
+                    (!index_covered(index, job, j, k)) ) {
+                    
+                    benefit[g_idx]++;
+                }
+            }
+        }
+    }
+}
+
 std::vector<std::vector<std::string>> 
 best_index::SingleThreadedIndex::get_query_literals() {
     std::vector<std::vector<std::string>> query_literals;
@@ -437,11 +462,10 @@ best_index::SingleThreadedIndex::get_query_literals() {
     return query_literals;
 }
 
-void best_index::SingleThreadedIndex::build_qg_list(
-        std::vector<std::set<unsigned int>> & qg_list,
-        long double num_queries,
+void build_qg_list(std::vector<std::set<unsigned int>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals) {
+    auto num_queries = query_literals.size();
     qg_list.assign(num_queries, std::set<unsigned int>());
     for (size_t q_idx = 0; q_idx < num_queries; q_idx++) {
         const auto & literals = query_literals[q_idx];
@@ -461,8 +485,7 @@ void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job job,
     }
 }
 
-void best_index::SingleThreadedIndex::build_gr_list_rc(
-        best_index::SingleThreadedIndex::job job, 
+void build_gr_list_rc(best_index::SingleThreadedIndex::job job, 
         size_t candidates_size,  
         unsigned int dataset_size,
         const std::vector<std::set<unsigned int>> & rg_list) {
@@ -472,10 +495,9 @@ void best_index::SingleThreadedIndex::build_gr_list_rc(
     }
 }
 
-void best_index::SingleThreadedIndex::build_gr_list_rc(
-        best_index::SingleThreadedIndex::job job, 
+void build_gr_list_rc(best_index::SingleThreadedIndex::job job, 
         size_t candidates_size,  
-        const std::vector<size_t> &r_idxs,
+        const std::vector<size_t> & r_idxs,
         const std::vector<std::set<unsigned int>> & rg_list) {
     
     // Using sorted vector for gr_list elements and rc.
@@ -483,6 +505,32 @@ void best_index::SingleThreadedIndex::build_gr_list_rc(
     for (const auto & r_idx : r_idxs) {
         build_gr_list_rc_helper(job, r_idx, rg_list);
     }
+}
+
+void best_index::SingleThreadedIndex::build_job(
+        best_index::SingleThreadedIndex::job job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals) {
+
+    build_qg_list(job.qg_list, candidates, query_literals);
+    std::vector<std::set<unsigned int>> rg_list(k_dataset_size_);
+    for (size_t i = 0; i < k_dataset_size_; i++) {
+        indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i);
+    }
+    build_gr_list_rc(job, candidates.size(), k_dataset_size_, rg_list);
+}
+
+void best_index::SingleThreadedIndex::build_job_local(
+        best_index::SingleThreadedIndex::job job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals,
+        const std::vector<size_t> r_list) {
+    build_qg_list(job.qg_list, candidates, query_literals);
+    std::vector<std::set<unsigned int>> rg_list(r_list.size());
+    for (auto & i : r_list) {
+        indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i);
+    }
+    build_gr_list_rc(job, candidates.size(), r_list, rg_list);
 }
 
 // Algorithm 3 in Figure 4
@@ -503,24 +551,6 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     best_index::SingleThreadedIndex::job job;
 
     /**
-     * Q-G-list: vector in order of q, where each element is
-     *      set of idx of g \in candidates s.t. g \in q
-     */
-    build_qg_list(job.qg_list, num_queries, candidates, query_literals);
-    std::vector<std::set<unsigned int>> rg_list(k_dataset_size_);
-    for (size_t i = 0; i < k_dataset_size_; i++) {
-        indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i);
-    }
-    /**
-     * G-R-list: vector in order of g, where each element is
-     *      set of idx of r \in candidates s.t. g \in r
-     *   Note: to avoid multiple scans of the dataset, 
-     *        build R-G-list first
-     * R_c: set of idx of r s.t. \exists some g \in r
-     */
-    build_gr_list_rc(job, candidates_size, k_dataset_size_, rg_list);
-
-    /**
      * I : index key idx; 
      *     the actual string should be stored in k_index_keys_
      *     use intermediate i to reduce hash/storage overhead
@@ -531,27 +561,9 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     // While some (q,r) uncovered AND space available
     while (!all_covered(index, job, num_queries) && 
             (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
-        // for every g \in G\I, set benefit[g] = 0
-        std::fill(benefit.begin(), benefit.end(), 0);
 
-        // for every query q \in Q
-        for (size_t k = 0; k < num_queries; k++) {
-            // for every record r in R_c
-            for (auto j : job.rc) {
-                // for each gram g \in Q-G-list[q_k]\I
-                //  TODO: would std::set_difference perform better
-                for (auto g_idx : job.qg_list[k]) {
-                    // ... and if 1. g not in r_j 
-                    //        AND 2. (q_k, r_j) not covered by any g \in I
-                    if (index.find(g_idx) == index.end() &&
-                        !sorted_list_contains(job.gr_list[g_idx], j) &&
-                        (!index_covered(index, job, j, k)) ) {
-                        
-                        benefit[g_idx]++;
-                    }
-                }
-            }
-        }
+        compute_benefit(benefit, index, job, num_queries);
+
         // if exists some g with benefit g > 0 then
         if (std::any_of(benefit.cbegin(), benefit.cend(), [](unsigned i) { return i > 0; })) {
             long double max_util = 0;
