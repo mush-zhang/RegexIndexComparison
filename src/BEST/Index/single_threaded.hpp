@@ -78,14 +78,12 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         const std::vector<std::set<std::string>> & qg_gram_set,
         const std::map<std::string, unsigned int> & pre_suf_count);
     
-    void build_gr_list_rc(std::vector<std::vector<unsigned int>> & gr_list,
-        std::vector<unsigned int> & rc,
+    void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
         size_t candidates_size,
-        const std::vector<size_t> &r_idxs,
+        const std::vector<size_t> & r_idxs,
         const std::vector<std::set<unsigned int>> & rg_list);
 
-    void build_gr_list_rc(std::vector<std::vector<unsigned int>> & gr_list,
-        std::vector<unsigned int> & rc,
+    void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
         size_t candidates_size,  
         unsigned int dataset_size,
         const std::vector<std::set<unsigned int>> & rg_list);
@@ -104,6 +102,14 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         const std::vector<std::string> & candidates,
         std::vector<std::set<unsigned int>> & g_list,
         size_t idx);
+    
+    bool index_covered(const std::set<unsigned int> & index, 
+        const best_index::SingleThreadedIndex::job job,
+        size_t r_j, size_t q_k);
+    
+    bool all_covered(const std::set<unsigned int> & index,
+        const best_index::SingleThreadedIndex::job job,  
+        size_t query_size);
 
  private:
     const long double k_queries_size_;
