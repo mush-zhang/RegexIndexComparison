@@ -1,49 +1,29 @@
 #include <thread>
+#include <future>
 #include <iostream>
 
 #include "parallelizable.hpp"
 #include "../../utils/utils.hpp"
 
-std::vector<std::set<std::string>> 
-best_index::ParallelizableIndex::get_all_multigrams_per_query(
-        const std::vector<std::vector<std::string>> & query_literals) {
-    auto query_size = query_literals.size();
-    std::vector<std::set<std::string>> qg_gram_set(query_size);
-    for (size_t q_idx = 0; q_idx < query_size; q_idx++) {
-        const auto & literals = query_literals[q_idx];
-        for (const auto & l : literals) {
-            for (size_t i = 0; i < l.size(); i++) {
-                for (size_t j = i; j < l.size(); j++) {
-                    qg_gram_set[q_idx].insert(l.substr(i, j-i+1));
-                }
-            }
+// TODO: add stop token to notify all asyncs once got a false
+//       https://www.geeksforgeeks.org/cpp-20-stop_token-header/
+bool best_index::ParallelizableIndex::multi_all_covered(
+        const std::set<unsigned int> & index, 
+        const std::vector<best_index::SingleThreadedIndex::job> & jobs,
+        size_t num_queries) {
+    std::vector<std::future<bool>> futures;
+    for (int i = 0; i < jobs.size(); i++) {
+        futures.push_back(std::async(std::launch::async, 
+            &best_index::ParallelizableIndex::all_covered, this,
+                std::cref(index), std::cref(jobs[i]), num_queries
+        ));
+    }
+    for (auto & future_ret : futures) {
+        if (!future_ret.get()) {
+            return false;
         }
     }
-    return qg_gram_set;
-}
-
-void run_job(std::vector<long double> & benefit, const std::set<unsigned int> & index, 
-        const best_index::SingleThreadedIndex::job & job, size_t num_queries) {
-    
-    std::fill(benefit.begin(), benefit.end(), 0);
-
-    // for every query q \in Q
-    for (size_t k = 0; k < num_queries; k++) {
-        // for every record r in R_c
-        for (auto j : job.rc) {
-            // for each gram g \in Q-G-list[q_k]\I
-            for (auto g_idx : job.qg_list[k]) {
-                // ... and if 1. g not in r_j 
-                //        AND 2. (q_k, r_j) not covered by any g \in I
-                if (index.find(g_idx) == index.end() &&
-                    !sorted_list_contains(job.gr_list[g_idx], j) &&
-                    (!index_covered(index, job.gr_list, job.qg_list, j, k)) ) {
-                    
-                    benefit[g_idx]++;
-                }
-            }
-        }
-    }
+    return true;
 }
 
 // Algorithm 4 in Figure 5
@@ -72,14 +52,19 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     // build gr_list, qg_list, rc for each partition
     std::vector<best_index::SingleThreadedIndex::job> jobs(cmap.size());
     size_t job_idx = 0;
+    // for (const auto & [key, r_list] : cmap) {
+    //     build_job(jobs[job_idx++], candidates, query_literals, r_list);
+    // }
+    std::vector<std::thread> job_building_threads;
     for (const auto & [key, r_list] : cmap) {
-        auto job = jobs[job_idx++];
-        build_qg_list(job.qg_list, num_queries, candidates, query_literals);
-        std::vector<std::set<unsigned int>> rg_list(r_list.size());
-        for (auto & i : r_list) {
-            indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i);
-        }
-        build_gr_list_rc(job.gr_list, job.rc, candidates_size, r_list, rg_list);
+        job_building_threads.push_back(std::thread(
+            &best_index::ParallelizableIndex::build_job_local, this,
+                std::ref(jobs[job_idx++]), std::cref(candidates), 
+                std::cref(query_literals), std::cref(r_list)
+        ));
+    }
+    for (auto & th : job_building_threads) {
+        th.join();
     }
 
     /**
@@ -94,8 +79,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     std::vector<std::vector<long double>> benefits_local(
             jobs.size(), std::vector<long double>(candidates_size));
     // While some (q,r) uncovered AND space available
-    // TODO: all_cover for each job
-    while (!all_covered(rc, index, gr_list, qg_list, num_queries) && 
+    while (!multi_all_covered(index, jobs, num_queries) && 
             (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
         // for every g \in G\I, set benefit_global[g] = 0
         std::fill(benefit_global.begin(), benefit_global.end(), 0);
@@ -103,7 +87,9 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
         std::vector<std::thread> threads;
         for (int i = 0; i < jobs.size(); i++) {
             threads.push_back(std::thread(
-                run_job, benefits_local[i], index, jobs[i], num_queries
+                &best_index::ParallelizableIndex::compute_benefit, this,
+                    std::ref(benefits_local[i]), std::cref(index), 
+                    std::cref(jobs[i]), num_queries
             ));
         }
         for (auto &th : threads) {
@@ -148,7 +134,13 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     start = std::chrono::high_resolution_clock::now();
     for (auto idx : index) {
         k_index_keys_.insert(candidates[idx]);
-        k_index_[candidates[idx]] = gr_list[idx];
+        for (const auto & job : jobs) {
+            k_index_[candidates[idx]].insert(
+                k_index_[candidates[idx]].end(), 
+                job.gr_list[idx].begin(), 
+                job.gr_list[idx].end()
+            );
+        }
     }
     elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
