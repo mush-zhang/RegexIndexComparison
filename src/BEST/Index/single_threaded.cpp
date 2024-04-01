@@ -396,7 +396,7 @@ void indexed_grams_in_literals(const std::vector<std::string> & literals,
 
 bool best_index::SingleThreadedIndex::index_covered(
         const std::set<unsigned int> & index, 
-        const best_index::SingleThreadedIndex::job job,
+        const best_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k) {
     for (auto g_idx : index) {
         // the pair (q_k, r_j) is covered by current g iff
@@ -413,7 +413,7 @@ bool best_index::SingleThreadedIndex::index_covered(
 // TODO: to speed up, it is possible to store all covered pairs
 bool best_index::SingleThreadedIndex::all_covered(
         const std::set<unsigned int> & index, 
-        const best_index::SingleThreadedIndex::job job, 
+        const best_index::SingleThreadedIndex::job & job, 
         size_t query_size) {
     for (size_t k = 0; k < query_size; k++) {
         for (auto j : job.rc) {
@@ -473,9 +473,8 @@ void build_qg_list(std::vector<std::set<unsigned int>> & qg_list,
     }
 }
 
-void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job job, 
-        size_t r_idx,
-        const std::vector<std::set<unsigned int>> & rg_list) {
+void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job & job, 
+        size_t r_idx, const std::vector<std::set<unsigned int>> & rg_list) {
     const std::set<unsigned int> & set_of_exists_grams = rg_list[r_idx];
     if (!set_of_exists_grams.empty()) {
         job.rc.push_back(r_idx);
@@ -485,7 +484,7 @@ void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job job,
     }
 }
 
-void build_gr_list_rc(best_index::SingleThreadedIndex::job job, 
+void build_gr_list_rc(best_index::SingleThreadedIndex::job & job, 
         size_t candidates_size,  
         unsigned int dataset_size,
         const std::vector<std::set<unsigned int>> & rg_list) {
@@ -495,7 +494,7 @@ void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
     }
 }
 
-void build_gr_list_rc(best_index::SingleThreadedIndex::job job, 
+void build_gr_list_rc(best_index::SingleThreadedIndex::job & job, 
         size_t candidates_size,  
         const std::vector<size_t> & r_idxs,
         const std::vector<std::set<unsigned int>> & rg_list) {
@@ -508,7 +507,7 @@ void build_gr_list_rc(best_index::SingleThreadedIndex::job job,
 }
 
 void best_index::SingleThreadedIndex::build_job(
-        best_index::SingleThreadedIndex::job job,
+        best_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals) {
 
@@ -521,7 +520,7 @@ void best_index::SingleThreadedIndex::build_job(
 }
 
 void best_index::SingleThreadedIndex::build_job_local(
-        best_index::SingleThreadedIndex::job job,
+        best_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> r_list) {
@@ -549,6 +548,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     size_t num_queries = query_literals.size();
 
     best_index::SingleThreadedIndex::job job;
+    build_job(job, candidates, query_literals);
 
     /**
      * I : index key idx; 

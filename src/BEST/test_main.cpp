@@ -1,4 +1,5 @@
 #include "Index/single_threaded.hpp"
+#include "Index/parallelizable.hpp"
 
 #include <iostream> 
 #include <cassert>
@@ -84,21 +85,60 @@ void simple_wl_red_index() {
         "ka" //12
     });;
 
-    auto pi1 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+    auto pi1 = best_index::SingleThreadedIndex(test_dataset, test_query, 
+        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
     pi1.build_index();
     pi1.print_index();
     std::cout << "***********" << std::endl;
 
-    auto pi2 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist2);
+    auto pi2 = best_index::SingleThreadedIndex(test_dataset, test_query, 
+        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist2);
     pi2.build_index();
     pi2.print_index();
     std::cout << "***********" << std::endl;
 
-    auto pi3 = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist3);
+    auto pi3 = best_index::SingleThreadedIndex(test_dataset, test_query, 
+        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist3);
     pi3.build_index();
     pi3.print_index();
     std::cout << "***********" << std::endl;
 
+}
+
+void simple_parallelizable() {
+    std::vector<std::string> test_query({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });
+    std::vector<std::string> test_dataset({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });;
+
+    auto pi = best_index::ParallelizableIndex(test_dataset, test_query, 1, 4, 
+        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+    pi.build_index();
+    pi.print_index();
 }
 
 int main() {
@@ -109,5 +149,8 @@ int main() {
     std::cout << "\t WORKLOAD REDUCTION -------------------------------------------" << std::endl;
     simple_wl_red_index();    
     std::cout << "\t END WORKLOAD REDUCTION -------------------------------------------" << std::endl;
+    std::cout << "\t PARALLEL INDEX -------------------------------------------" << std::endl;
+    simple_parallelizable();    
+    std::cout << "\t END PARALLEL INDEX -------------------------------------------" << std::endl;
     return 0;
 }

@@ -63,7 +63,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
 
  protected:
     dist_type dist_measure_type_ = dist_type::kInvalid;
-    int k_max_num_keys_;
+    int k_max_num_keys_ = -1;
 
     void select_grams(int upper_k=-1) override;
 
@@ -93,14 +93,14 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         size_t num_queries);
     
     bool all_covered(const std::set<unsigned int> & index,
-        const best_index::SingleThreadedIndex::job job,  
+        const best_index::SingleThreadedIndex::job & job,  
         size_t query_size);
 
-    void build_job(best_index::SingleThreadedIndex::job job,
+    void build_job(best_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals);
 
-    void build_job_local(best_index::SingleThreadedIndex::job job,
+    void build_job_local(best_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> r_list);
@@ -121,7 +121,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         std::map<std::string, unsigned int> & pre_suf_count);
     
     bool index_covered(const std::set<unsigned int> & index, 
-        const best_index::SingleThreadedIndex::job job,
+        const best_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k);
 };
 
