@@ -1,31 +1,37 @@
 #include <iostream>
-#include "ngram_inverted_index.hpp"
+#include "ngram_btree_index.hpp"
 
 static const std::vector<unsigned int> k_empty_pos_list_;
 
-void NGramInvertedIndex::print_index() {
+const std::vector<unsigned int> & NGramBtreeIndex::get_line_pos_at(
+        const std::string & key) {
+    auto it = k_index_keys_.find(key); 
+    if (it == k_index_keys_.end()) return k_empty_pos_list_;
+    
+    auto result = reinterpret_cast<std::vector<unsigned int>*>(
+        k_index_.btree_search(reinterpret_cast<entry_key_t>(std::addressof(*it))));
+
+    if (!result) return k_empty_pos_list_;
+    return *result;
+}
+
+void NGramBtreeIndex::print_index() {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
-    std::cout << ", size of index: " << k_index_.size() << std::endl;
+    std::cout << ", size of index: " << std::endl;
+    k_index_.printAll();
     for (const auto & key : k_index_keys_) {
         std::cout << key << ": ";
         std::cout << "[";
-        for (auto idx : k_index_[key]) {
+        auto idxs = get_line_pos_at(key);
+        for (auto idx : idxs) {
             std::cout << idx << ",";
         }
         std::cout << "]"  << std::endl;
     }
 }
 
-const std::vector<unsigned int> & NGramInvertedIndex::get_line_pos_at(
-        const std::string & key) { 
-    if (auto it = k_index_.find(key); it != k_index_.end()) {
-        return it->second;
-    }
-    return k_empty_pos_list_;
-}
-
-std::vector<std::string> NGramInvertedIndex::find_all_indexed(
+std::vector<std::string> NGramBtreeIndex::find_all_indexed(
         const std::string & line) {
     std::vector<std::string> found_keys;
     for (size_t i = 0; i < line.size(); i++) {

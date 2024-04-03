@@ -21,7 +21,7 @@ class NGramInvertedIndex : public NGramIndex {
 
     void print_index() override;
     
-    const std::vector<unsigned int> & get_line_pos_at(const std::string & key) const override;
+    const std::vector<unsigned int> & get_line_pos_at(const std::string & key) override;
 
  protected:
     /**Key is multigram, value is a sorted (ascending) list of line indices**/

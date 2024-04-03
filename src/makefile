@@ -27,7 +27,7 @@ GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 
 .PHONY: all
-all: $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
+all: $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out btree.o
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ -o $@
@@ -55,6 +55,9 @@ utils/hash_pair.o: utils/hash_pair.cpp
 
 inverted.o: ngram_inverted_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
+
+btree.o: ngram_btree_index.cpp
+	$(CXX) -Wno-format -Wno-unused-result -c $(CPPFLAGS) $^ -o $@
 
 .PHONY: clean
 clean:

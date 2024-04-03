@@ -21,7 +21,7 @@ class NGramIndex {
 
     virtual void print_index() = 0;
     
-    virtual const std::vector<unsigned int> & get_line_pos_at(const std::string & key) const = 0;
+    virtual const std::vector<unsigned int> & get_line_pos_at(const std::string & key) = 0;
 
     const std::vector<std::string> & get_dataset() const {
         return k_dataset_;
