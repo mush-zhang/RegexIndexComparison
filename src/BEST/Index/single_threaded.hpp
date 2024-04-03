@@ -95,15 +95,22 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     bool all_covered(const std::set<unsigned int> & index,
         const best_index::SingleThreadedIndex::job & job,  
         size_t query_size);
+    
+    void indexed_grams_in_string(const std::string & l, 
+        const std::vector<std::string> & candidates,
+        std::vector<std::set<unsigned int>> & g_list, 
+        size_t idx,
+        const std::vector<bool> & candidates_filter=std::vector<bool>());
 
-    void build_job(best_index::SingleThreadedIndex::job & job,
-        const std::vector<std::string> & candidates, 
-        const std::vector<std::vector<std::string>> & query_literals);
-
-    void build_job_local(best_index::SingleThreadedIndex::job & job,
-        const std::vector<std::string> & candidates, 
-        const std::vector<std::vector<std::string>> & query_literals,
-        const std::vector<size_t> r_list);
+    void indexed_grams_in_literals(const std::vector<std::string> & literals, 
+        const std::vector<std::string> & candidates,
+        std::vector<std::set<unsigned int>> & g_list,
+        size_t idx);
+    
+    void build_gr_list_rc(best_index::SingleThreadedIndex::job & job, 
+        size_t candidates_size,  
+        unsigned int dataset_size,
+        const std::vector<std::set<unsigned int>> & rg_list);
 
  private:
     const long double k_queries_size_;
@@ -119,10 +126,19 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     /** Helpers **/
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, unsigned int> & pre_suf_count);
-    
+
     bool index_covered(const std::set<unsigned int> & index, 
         const best_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k);
+
+    void build_qg_list(std::vector<std::set<unsigned int>> & qg_list,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals);
+    
+    void build_job(best_index::SingleThreadedIndex::job & job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals);
+
 };
 
 } // namespace best_index

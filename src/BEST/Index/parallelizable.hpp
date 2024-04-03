@@ -32,9 +32,18 @@ class ParallelizableIndex : public SingleThreadedIndex {
        k between |Q|/2 and |Q|/5 **/
     const unsigned int k_num_clusters_;
 
+    void build_qg_list_local(std::vector<std::set<unsigned int>> & qg_list,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals,
+        const std::vector<size_t> & q_list);
+
+    void build_job_local(best_index::SingleThreadedIndex::job & job,
+        const std::vector<std::string> & candidates, 
+        const std::vector<std::vector<std::string>> & query_literals,
+        const std::vector<size_t> q_list);
+
     bool multi_all_covered(const std::set<unsigned int> & index, 
-        const std::vector<best_index::SingleThreadedIndex::job> & jobs,
-        size_t num_queries);
+        const std::vector<best_index::SingleThreadedIndex::job> & jobs);
 };
 
 } // namespace best_index
