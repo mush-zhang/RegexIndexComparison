@@ -3,37 +3,26 @@
 
 static const std::vector<unsigned int> k_empty_pos_list_;
 
-entry_key_t NGramBtreeIndex::iter_to_key(std::set<std::string>::iterator & it) {
-    return reinterpret_cast<entry_key_t>(std::to_address(it));
-}
-
-const std::vector<unsigned int> & NGramBtreeIndex::get_line_pos_at(
-        const std::string & key) {
-    auto it = k_index_keys_.find(key); 
-    if (it == k_index_keys_.end()) return k_empty_pos_list_;
-    
-    auto addr = k_index_.btree_search(iter_to_key(it));
-    if (!addr) return k_empty_pos_list_;
-    auto result = reinterpret_cast<size_t>(addr);
-    return k_idx_lists_[result-1];
-}
-
 void NGramBtreeIndex::print_index() {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
-    std::cout << ", size of index: " << std::endl;
-    k_index_.printAll();
-    std::cout << "Printing actual value" << std::endl;
-
+    std::cout << ", size of index: " << k_index_.size() << std::endl;
     for (const auto & key : k_index_keys_) {
-        std::cout << key << ": [" << std::flush;;
-
-        auto idxs = get_line_pos_at(key);
-        for (auto idx : idxs) {
+        std::cout << key << ": ";
+        std::cout << "[";
+        for (auto idx : k_index_[key]) {
             std::cout << idx << ",";
         }
         std::cout << "]"  << std::endl;
     }
+}
+
+const std::vector<unsigned int> & NGramBtreeIndex::get_line_pos_at(
+        const std::string & key) { 
+    if (auto it = k_index_.find(key); it != k_index_.end()) {
+        return it->second;
+    }
+    return k_empty_pos_list_;
 }
 
 std::vector<std::string> NGramBtreeIndex::find_all_indexed(

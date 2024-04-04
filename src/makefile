@@ -19,7 +19,7 @@ BEST_MCH_DIR=$(BEST_BASE_DIR)/Matcher
 
 BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR) $(BEST_MCH_DIR)
 
-BEST_IDX=btree_index.o utils/btree.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
+BEST_IDX=btree_index.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
 DIRS=. utils $(FREE_DIRS) $(BEST_DIRS)
 
@@ -59,8 +59,8 @@ inverted_index.o: ngram_inverted_index.cpp
 btree_index.o: ngram_btree_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
-btree.o: utils/btree.cpp
-	$(CXX) -c $(CPPFLAGS) $^ -o $@
+# btree.o: utils/btree.cpp
+# 	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 .PHONY: clean
 clean:

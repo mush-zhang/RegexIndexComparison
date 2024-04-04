@@ -26,6 +26,7 @@ class NGramInvertedIndex : public NGramIndex {
  protected:
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
     std::unordered_map<std::string, std::vector<unsigned int>> k_index_;
+    std::set<std::string> k_index_keys_;
 };
 
 #endif // NGRAM_INVERTED_INDEX_HPP_

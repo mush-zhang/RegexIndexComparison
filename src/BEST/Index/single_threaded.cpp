@@ -574,19 +574,10 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    std::map<std::string, size_t> gram_to_candidate_idx_map;
+    // std::map<std::string, size_t> gram_to_candidate_idx_map;
     for (auto idx : index) {
         k_index_keys_.insert(candidates[idx]);
-        gram_to_candidate_idx_map.insert({candidates[idx], idx});
-    }
-    size_t pos_list_idx = 1;
-    for (auto it = k_index_keys_.begin(); it != k_index_keys_.end(); ++it) {
-        auto key = iter_to_key(it);
-
-        auto idx = gram_to_candidate_idx_map.at(*it);
-        k_idx_lists_.push_back(job.gr_list[idx]);
-
-        k_index_.btree_insert(key, reinterpret_cast<char*>(pos_list_idx++));
+        k_index_.insert({candidates[idx], job.gr_list[idx]});
     }
 
     elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(

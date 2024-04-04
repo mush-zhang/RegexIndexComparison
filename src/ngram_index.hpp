@@ -33,8 +33,6 @@ class NGramIndex {
     // the index structure should be stored here
     const std::vector<std::string> &k_dataset_;
     const unsigned int k_dataset_size_;
-
-    std::set<std::string> k_index_keys_;
 };
 
 #endif // NGRAM_INDEX_HPP_
