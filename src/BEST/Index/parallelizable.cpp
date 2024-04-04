@@ -160,18 +160,18 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    for (auto idx : index) {
-        auto curr_gram = candidates[idx];
-        k_index_keys_.insert(curr_gram);
-        for (const auto & job : jobs) {
-            if (!(k_index_[curr_gram].empty())) continue;
-            k_index_[curr_gram].insert(
-                k_index_[curr_gram].end(), 
-                job.gr_list[idx].begin(), 
-                job.gr_list[idx].end()
-            );
-        }
-    }
+    // for (auto idx : index) {
+    //     auto curr_gram = candidates[idx];
+    //     k_index_keys_.insert(curr_gram);
+    //     for (const auto & job : jobs) {
+    //         if (!(k_index_[curr_gram].empty())) continue;
+    //         k_index_[curr_gram].insert(
+    //             k_index_[curr_gram].end(), 
+    //             job.gr_list[idx].begin(), 
+    //             job.gr_list[idx].end()
+    //         );
+    //     }
+    // }
     elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Index Building End in " << elapsed << std::endl;

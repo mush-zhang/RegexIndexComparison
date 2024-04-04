@@ -2,8 +2,9 @@
 #define BEST_INDEX_SINGLE_THREADED_HPP_
 
 #include <map>
+#include <unordered_map>
 
-#include "../../ngram_inverted_index.hpp"
+#include "../../ngram_btree_index.hpp"
 
 namespace best_index {
 
@@ -13,7 +14,7 @@ namespace best_index {
  *       It uses the ARE (false positives related measurement) to measure the.
  *       effectiveness of index
  */
-class SingleThreadedIndex  : public NGramInvertedIndex {
+class SingleThreadedIndex  : public NGramBtreeIndex {
  public:
     enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
 
@@ -37,7 +38,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
                double sel_threshold)
-      : NGramInvertedIndex(dataset), 
+      : NGramBtreeIndex(dataset), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(queries.size()),
@@ -47,7 +48,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
                const std::vector<std::string> & queries, 
                double sel_threshold, long workload_reduced_size,
                dist_type dist_measure_type)
-      : NGramInvertedIndex(dataset), 
+      : NGramBtreeIndex(dataset), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),

@@ -20,6 +20,8 @@ class NGramBtreeIndex : public NGramIndex {
     const std::vector<unsigned int> & get_line_pos_at(const std::string & key) override;
 
  protected:
+    entry_key_t iter_to_key(std::set<std::string>::iterator & it);
+
     /**Key is address of the multigram in k_index_keys_, 
      * value address of is a sorted (ascending) list of line indices**/
     btree k_index_;
