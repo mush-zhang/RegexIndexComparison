@@ -1,3 +1,6 @@
 [submodule "src/utils/rax"]
 	path = src/utils/rax
 	url = https://github.com/mush-zhang/rax.git
+[submodule "src/utils/cpp-btree"]
+	path = src/utils/cpp-btree
+	url = https://github.com/Kronuz/cpp-btree.git
