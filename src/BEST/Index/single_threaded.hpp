@@ -41,8 +41,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
       : NGramBtreeIndex(dataset), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
-        k_reduced_queries_size_(queries.size()),
-        k_original_queries_(queries) {}
+        k_reduced_queries_size_(queries.size()) {}
     
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
@@ -52,8 +51,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),
-        dist_measure_type_(dist_measure_type),
-        k_original_queries_(queries) {}
+        dist_measure_type_(dist_measure_type) {}
     
     ~SingleThreadedIndex() {}
 
@@ -118,8 +116,6 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     const std::vector<std::string> & k_queries_;
 
     long double k_reduced_queries_size_;
-
-    const std::vector<std::string> & k_original_queries_;
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
