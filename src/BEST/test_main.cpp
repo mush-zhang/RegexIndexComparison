@@ -1,6 +1,8 @@
 #include "Index/single_threaded.hpp"
 #include "Index/parallelizable.hpp"
 
+#include "Matcher/query_matcher.hpp"
+
 #include <iostream> 
 #include <cassert>
 #include <unordered_set>

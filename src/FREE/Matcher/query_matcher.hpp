@@ -36,7 +36,9 @@ class QueryMatcher {
     }
 
     void match_all() {
-        for (const auto & [parser, regex] : reg_evals_) {
+        for (const auto & [reg_str, comps] : reg_evals_) {
+            const auto & parser = comps.first();
+            const auto & regex = comps.second();
             long count = 0;
             auto idx_list = parser.get_index_by_plan();
             for (auto idx : idx_list) {
@@ -60,8 +62,6 @@ class QueryMatcher {
     }
 
     ~QueryMatcher() {}
-
-    
 
  private:
     const std::vector<std::string> & k_dataset_;
