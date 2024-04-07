@@ -30,6 +30,7 @@ class MultigramIndex : public NGramInvertedIndex {
     void get_kgrams_not_indexed(
             std::unordered_map<std::string, long double> & kgrams,
             const std::unordered_set<std::string> & expand, size_t k);
+
     void get_uni_bigram(
         std::unordered_map<char, long double> & unigrams,
         std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);
@@ -37,6 +38,7 @@ class MultigramIndex : public NGramInvertedIndex {
     void insert_kgram_into_index(
         const std::unordered_map<std::string, long double> & kgrams,
         std::unordered_set<std::string> & expand);
+
     void insert_uni_bigram_into_index(
         const std::unordered_map<char, long double> & unigrams,
         const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
