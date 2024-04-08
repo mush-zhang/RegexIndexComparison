@@ -38,8 +38,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
                double sel_threshold)
-      : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
-        k_queries_(queries), k_queries_size_(queries.size()),
+      : NGramBtreeIndex(dataset, queries),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(queries.size()) {}
     
@@ -47,8 +46,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
                const std::vector<std::string> & queries, 
                double sel_threshold, long workload_reduced_size,
                dist_type dist_measure_type)
-      : k_dataset_(dataset), k_dataset_size_(dataset.size()),
-        k_queries_(queries), k_queries_size_(queries.size()),
+      : NGramBtreeIndex(dataset, queries),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),
         dist_measure_type_(dist_measure_type) {}

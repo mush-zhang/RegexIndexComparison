@@ -13,6 +13,14 @@ class NGramInvertedIndex : public NGramIndex {
         k_index_.reserve(1024); // RESERVING SPACE BEFOREHAND
         k_index_.max_load_factor(0.25); // DECREASING MAX_LOAD_FACTOR
     }
+    
+    NGramInvertedIndex(const std::vector<std::string> & dataset, 
+            const std::vector<std::string> & queries) : NGramIndex(dataset, queries) {
+        // https://www.geeksforgeeks.org/how-to-use-unordered_map-efficiently-in-c/
+        k_index_.reserve(1024); // RESERVING SPACE BEFOREHAND
+        k_index_.max_load_factor(0.25); // DECREASING MAX_LOAD_FACTOR
+    }
+
     ~NGramInvertedIndex() {}
 
     virtual void build_index(int upper_k) {}

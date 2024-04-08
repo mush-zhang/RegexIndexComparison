@@ -13,15 +13,13 @@ class LpmsIndex : public NGramInvertedIndex {
     LpmsIndex(const LpmsIndex &&) = delete;
     LpmsIndex(const std::vector<std::string> & dataset, 
               const std::vector<std::string> & queries)
-      : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
-        k_queries_(queries), k_queries_size_(queries.size),
+      : NGramInvertedIndex(dataset, queries),
         k_relaxation_type_(k_deterministic) {}
 
     LpmsIndex(const std::vector<std::string> & dataset, 
               const std::vector<std::string> & queries,
               relaxation_type re_type)
-      : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
-        k_queries_(queries), k_queries_size_(queries.size),
+      : NGramInvertedIndex(dataset, queries),
         k_relaxation_type_(re_type) {}
     
     ~LpmsIndex() {}

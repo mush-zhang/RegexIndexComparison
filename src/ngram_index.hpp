@@ -15,6 +15,11 @@ class NGramIndex {
       : k_dataset_(dataset), k_dataset_size_(dataset.size()),
 	  	k_queries_(std::vector<std::string>()), k_queries_size_(0) {}
     
+	NGramIndex(const std::vector<std::string> & dataset,
+			  const std::vector<std::string> & queries)
+      : k_dataset_(dataset), k_dataset_size_(dataset.size()),
+	  	k_queries_(queries), k_queries_size_(queries.size()) {}
+
     ~NGramIndex() {}
 
     virtual void build_index(int upper_k) {}
@@ -43,7 +48,7 @@ class NGramIndex {
     virtual void select_grams(int upper_k) {};
     
     // the index structure should be stored here
-    const std::vector<std::string> &k_dataset_;
+    const std::vector<std::string> & k_dataset_;
     const unsigned int k_dataset_size_;
 
 	const long double k_queries_size_;

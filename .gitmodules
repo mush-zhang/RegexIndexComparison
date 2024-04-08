@@ -4,3 +4,9 @@
 [submodule "src/utils/cpp-btree"]
 	path = src/utils/cpp-btree
 	url = https://github.com/Kronuz/cpp-btree.git
+[submodule "src/utils/re2"]
+	path = src/utils/re2
+	url = https://github.com/google/re2.git
+[submodule "src/utils/abseil-cpp"]
+	path = src/utils/abseil-cpp
+	url = https://github.com/abseil/abseil-cpp.git

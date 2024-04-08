@@ -10,6 +10,8 @@ class NGramBtreeIndex : public NGramIndex {
     NGramBtreeIndex() = delete;
     NGramBtreeIndex(const NGramBtreeIndex &&) = delete;
     NGramBtreeIndex(const std::vector<std::string> & dataset) : NGramIndex(dataset) {}
+    NGramBtreeIndex(const std::vector<std::string> & dataset,
+        const std::vector<std::string> & queries) : NGramIndex(dataset, queries) {}
     ~NGramBtreeIndex() {}
 
     virtual void build_index(int upper_k) {}
