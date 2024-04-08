@@ -39,6 +39,10 @@ class LpmsIndex : public NGramInvertedIndex {
         std::vector<std::vector<size_t>> & gr_map,
         const std::unordered_set<std::string> & expand, size_t k);
 
+    void get_unigram_r(std::unordered_map<size_t, long double> & uni_count,
+        std::unordered_map<char, size_t> & unigrams,
+        std::vector<std::vector<size_t>> & uni_gr_map);
+
     void uni_special(std::unordered_set<std::string> & expand, 
         const std::vector<std::vector<std::string>> & query_literals);
 
