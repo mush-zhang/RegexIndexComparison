@@ -38,7 +38,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
                double sel_threshold)
-      : NGramBtreeIndex(dataset), 
+      : k_dataset_(dataset), k_dataset_size_(dataset.size()), 
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(queries.size()) {}
@@ -47,7 +47,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
                const std::vector<std::string> & queries, 
                double sel_threshold, long workload_reduced_size,
                dist_type dist_measure_type)
-      : NGramBtreeIndex(dataset), 
+      : k_dataset_(dataset), k_dataset_size_(dataset.size()),
         k_queries_(queries), k_queries_size_(queries.size()),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),
@@ -69,8 +69,6 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     std::vector<std::string> candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, unsigned int> & pre_suf_count);
-
-    std::vector<std::vector<std::string>> get_query_literals();
 
     std::map<std::string, unsigned int> get_all_gram_counts(
         const std::vector<std::vector<std::string>> & query_literals);
@@ -112,9 +110,6 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
         const std::vector<std::set<unsigned int>> & rg_list);
 
  private:
-    const long double k_queries_size_;
-    const std::vector<std::string> & k_queries_;
-
     long double k_reduced_queries_size_;
 
     /** The selectivity of the gram in index will be <= k_threshold_**/

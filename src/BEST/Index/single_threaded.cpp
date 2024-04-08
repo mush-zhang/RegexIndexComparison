@@ -6,7 +6,6 @@
 #include <ranges>
 #include <stdexcept>
 
-#include "../../utils/reg_utils.hpp"
 #include "../../utils/utils.hpp"
 
 // #include "../../utils/trie.hpp"
@@ -454,16 +453,6 @@ void best_index::SingleThreadedIndex::compute_benefit(
             }
         }
     }
-}
-
-std::vector<std::vector<std::string>> 
-best_index::SingleThreadedIndex::get_query_literals() {
-    std::vector<std::vector<std::string>> query_literals;
-    for (const auto & q : k_queries_) {
-        std::vector<std::string> literals = extract_literals(q);
-        query_literals.push_back(literals);
-    }
-    return query_literals;
 }
 
 void best_index::SingleThreadedIndex::build_qg_list(

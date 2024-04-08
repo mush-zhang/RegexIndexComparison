@@ -5,12 +5,15 @@
 #include <string>
 #include <set>
 
+#include "utils/reg_utils.hpp"
+
 class NGramIndex {
  public:
     NGramIndex() = delete;
     NGramIndex(const NGramIndex &&) = delete;
     NGramIndex(const std::vector<std::string> & dataset)
-      : k_dataset_(dataset), k_dataset_size_(dataset.size()) {}
+      : k_dataset_(dataset), k_dataset_size_(dataset.size()),
+	  	k_queries_(std::vector<std::string>()), k_queries_size_(0) {}
     
     ~NGramIndex() {}
 
@@ -27,12 +30,24 @@ class NGramIndex {
         return k_dataset_;
     }
 
+    std::vector<std::vector<std::string>> get_query_literals() {
+		std::vector<std::vector<std::string>> query_literals;
+		for (const auto & q : k_queries_) {
+			std::vector<std::string> literals = extract_literals(q);
+			query_literals.push_back(literals);
+		}
+		return query_literals;
+	}
+
  protected:
     virtual void select_grams(int upper_k) {};
     
     // the index structure should be stored here
     const std::vector<std::string> &k_dataset_;
     const unsigned int k_dataset_size_;
+
+	const long double k_queries_size_;
+    const std::vector<std::string> & k_queries_;
 };
 
 #endif // NGRAM_INDEX_HPP_
