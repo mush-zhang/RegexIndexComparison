@@ -73,7 +73,7 @@ void get_uni_bigram_q(const std::vector<std::vector<std::string>> & q_lits,
     }
 }
 
-void free_index::MultigramIndex::get_kgrams_not_indexed_r(
+void fast_index::LpmsIndex::get_kgrams_r(
         std::unordered_map<size_t, long double> & r_count,
         std::unordered_map<std::string, size_t> & kgrams,
         std::vector<std::vector<size_t>> & gr_map,
@@ -98,7 +98,7 @@ void free_index::MultigramIndex::get_kgrams_not_indexed_r(
     }
 } 
 
-void get_kgrams_not_indexed_q(const std::vector<std::vector<std::string>> & q_lits,
+void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
         std::unordered_map<size_t, long double> & q_count,
         std::unordered_map<std::string, size_t> & kgrams,
         std::vector<std::vector<size_t>> & qg_map,
