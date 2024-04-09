@@ -1,5 +1,5 @@
 #include "query_parser.hpp"
-#include "../../utils/reg_utils.hpp"
+#include "../../utils/utils.hpp"
 
 #include <iostream>
 
@@ -254,56 +254,6 @@ void free_index::QueryParser::rewrite_by_index() {
     rewrote_by_index_ = query_plan_ == nullptr;
 }
 
-void sorted_lists_union(const std::vector<unsigned int> & l, 
-        const std::vector<unsigned int> & r, std::vector<unsigned int> & result) {
-    size_t i = 0, j = 0;
-    while (i < l.size() && j < r.size()) {
-        unsigned int candidate;
-        if (l[i] < r[j]) {
-            candidate = l[i++];
-        } else {
-            candidate = r[j++];
-            if (l[i] == r[j]) i++;
-        } 
-        if (candidate != result.back()) {
-            result.push_back(candidate);
-        }
-    } 
-    // there can be at most one of l and r that has remaining elements
-    if (i < l.size()) {
-        if(l[i] != result.back()) {
-            result.push_back(l[i++]);
-        } 
-        while (i < l.size()) {
-            result.push_back(l[i++]);
-        }
-    } 
-    if (j < r.size()) {
-        if (r[j] != result.back()) {
-            result.push_back(r[j++]);
-        } 
-        while (j < r.size()) {
-            result.push_back(r[j++]);
-        }
-    }
-}
-
-void sorted_lists_intersection(const std::vector<unsigned int> & l, 
-        const std::vector<unsigned int> & r, std::vector<unsigned int> & result) {
-    size_t i = 0, j = 0;
-    while (i < l.size() && j < r.size()) {
-        if (l[i] < r[j]) {
-            i++;
-        } else if (l[i] > r[j]) {
-            j++;
-        } else {
-            result.push_back(l[i]);
-            i++; 
-            j++;
-        }
-    } 
-}
-
 std::vector<unsigned int> free_index::QueryParser::get_index_by_node(
         std::unique_ptr<QueryPlanNode> & node) {
     std::vector<unsigned int> result;
@@ -319,9 +269,9 @@ std::vector<unsigned int> free_index::QueryParser::get_index_by_node(
     auto right_idxs = get_index_by_node(node->right_);
 
     if (node->get_type() == free_index::NodeType::kAndNode) {
-        sorted_lists_intersection(left_idxs, right_idxs, result);
+        return sorted_lists_intersection(left_idxs, right_idxs);
     } else if (node->get_type() == free_index::NodeType::kOrNode) {
-        sorted_lists_union(left_idxs, right_idxs, result);        
+        return sorted_lists_union(left_idxs, right_idxs);        
     } 
     return result;
 } 

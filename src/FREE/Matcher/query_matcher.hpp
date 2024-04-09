@@ -23,8 +23,8 @@ class QueryMatcher {
     
     QueryMatcher(MultigramIndex * index, 
                  const std::vector<std::string> & regs) 
-                 : k_dataset_(index->get_dataset()), k_reg_strings_(regs), index_(index) {
-        for (const auto & reg : k_regexes) {
+                 : index_(index) {
+        for (const auto & reg : regs) {
             auto curr_p = std::make_unique<QueryParser>(index_);
             curr_p->generate_query_plan(reg);
             curr_p->remove_null();
@@ -36,13 +36,14 @@ class QueryMatcher {
     }
 
     void match_all() {
+        auto dataset = index_->get_dataset();
         for (const auto & [reg_str, comps] : reg_evals_) {
             const auto & parser = comps.first();
             const auto & regex = comps.second();
             long count = 0;
             auto idx_list = parser.get_index_by_plan();
             for (auto idx : idx_list) {
-                count += RE2::PartialMatch(k_dataset_[idx], regex);
+                count += RE2::PartialMatch(dataset[idx], regex);
             }
             std::cout << count << std::endl;
         }
@@ -50,12 +51,13 @@ class QueryMatcher {
     }
 
     void match_one(const std::string & reg) {
+        auto dataset = index_->get_dataset();
         if (reg_evals_.find(reg) != reg_evals_.end()) {
             const auto & [parser, regex] = reg_evals_[reg];
             long count = 0;
             auto idx_list = parser.get_index_by_plan();
             for (auto idx : idx_list) {
-                count += RE2::PartialMatch(k_dataset_[idx], regex);
+                count += RE2::PartialMatch(dataset[idx], regex);
             }
             std::cout << count << std::endl;
         }
@@ -64,8 +66,6 @@ class QueryMatcher {
     ~QueryMatcher() {}
 
  private:
-    const std::vector<std::string> & k_dataset_;
-    const std::vector<std::string> & k_reg_strings_;
     std::shared_ptr<MultigramIndex> index_;
 
     std::unordered_map<std::string, 

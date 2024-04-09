@@ -7,11 +7,11 @@
 #include <algorithm>
 
 //The true special/meta chars: '{', '}', '['. ']', '(', ')', '^', '$', '.', '*', '+', '?', '|'
-const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+', '?', '|'};
-const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', 'D', 'l', 'p',
+static const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+', '?', '|'};
+static const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', 'D', 'l', 'p',
                                                  's', 'S', 'u', 'x'};
 
-bool char_escaped(const std::string &line, std::size_t pos) {
+static bool char_escaped(const std::string &line, std::size_t pos) {
     auto temp_pos = pos;
     int num_escaped = 0;
     // count number of escape characters before the char
@@ -23,14 +23,14 @@ bool char_escaped(const std::string &line, std::size_t pos) {
     return num_escaped % 2 == 1;
 }
 
-std::string remove_escape(const std::string & line) {
+static std::string remove_escape(const std::string & line) {
     // remove escape (trick method. should only remove single \ and turning \\ to \)
     std::string result(line);
     result.erase(std::remove(result.begin(), result.end(), '\\'), result.end());
     return result;
 }
 
-bool check_special(const std::string & reg_str) {
+static bool check_special(const std::string & reg_str) {
     // check if the string contains 
     //    1. special chars not escaped; or
     //    2. special class chars that are espcaed
@@ -47,7 +47,7 @@ bool check_special(const std::string & reg_str) {
     return false;
 }
 
-std::vector<std::string> extract_literals(const std::string & reg_str) {
+static std::vector<std::string> extract_literals(const std::string & reg_str) {
     std::vector<std::string> result;
 
     size_t pos = 0;

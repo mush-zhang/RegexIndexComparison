@@ -35,6 +35,10 @@ class NGramIndex {
         return k_dataset_;
     }
 
+	const std::vector<std::string> & get_queries() const {
+        return k_queries_;
+    }
+
     std::vector<std::vector<std::string>> get_query_literals() {
 		std::vector<std::vector<std::string>> query_literals;
 		for (const auto & q : k_queries_) {
