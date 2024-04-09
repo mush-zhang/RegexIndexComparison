@@ -3,7 +3,7 @@
 #include "lpms.hpp"
 
 
-static const k_deterministic_threshold_ = 0.99;
+static const k_eterministic_threshold_ = 0.99;
 
 using gram_set = std::unordered_set<std::string>;
 
@@ -204,14 +204,14 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         // 6. use lp solver with deterministic relaxation 
         //    or random rounding to find x
         switch (k_relaxation_type_) {
-            case k_deterministic:
+            case kDeterministic:
                 for (g_idx = 0; g_idx < num_grams; ++g_idx) {
-                    if (x[g_idx].get(GRB_DoubleAttr_X) > k_deterministic_threshold_) {
+                    if (x[g_idx].get(GRB_DoubleAttr_X) > k_eterministic_threshold_) {
                         x_result[g_idx] = true;
                     }
                 }
                 break;
-            case k_randomized:
+            case kRandomized:
                 for (g_idx = 0; g_idx < num_grams; ++g_idx) {
                     x_result[g_idx] = (std::rand() % 100) < x[g_idx].get(GRB_DoubleAttr_X);
                 }

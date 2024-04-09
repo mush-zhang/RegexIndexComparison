@@ -21,13 +21,30 @@ BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR) $(BEST_MCH_DIR)
 
 BEST_IDX=btree_index.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $(BEST_MCH_DIR)/query_matcher.o
 
-DIRS=. utils $(FREE_DIRS) $(BEST_DIRS)
+FAST_BASE_DIR=BEST
+FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
+FAST_MCH_DIR=$(FAST_BASE_DIR)/Matcher
+
+FAST_DIRS=$(FAST_BASE_DIR) $(FAST_IDX_DIR) $(FAST_MCH_DIR)
+
+FAST_IDX=inverted_index.o $(FAST_IDX_DIR)/lpsm.o $(FAST_MCH_DIR)/query_matcher.o
+
+DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
 
 GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 
 .PHONY: all
-all: $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
+all: $(FAST_BASE_DIR)/test_fast.out $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
+
+$(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
+	$(CXX) $(CPPFLAGS) $^ -o $@
+
+$(FAST_MCH_DIR)/query_matcher.o: $(FAST_MCH_DIR)/query_matcher.cpp
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
+
+$(FAST_IDX_DIR)/lpsm.o: $(FAST_IDX_DIR)/lpsm.cpp
+	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ -o $@

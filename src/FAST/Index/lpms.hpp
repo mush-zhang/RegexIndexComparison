@@ -7,14 +7,14 @@ namespace fast_index {
 
 class LpmsIndex : public NGramInvertedIndex {
  public:
-    enum relaxation_type { k_deterministic, k_randomized, kInvalid };
+    enum relaxation_type { kDeterministic, kRandomized, kInvalid };
 
     LpmsIndex() = delete;
     LpmsIndex(const LpmsIndex &&) = delete;
     LpmsIndex(const std::vector<std::string> & dataset, 
               const std::vector<std::string> & queries)
       : NGramInvertedIndex(dataset, queries),
-        k_relaxation_type_(k_deterministic) {}
+        k_relaxation_type_(kDeterministic) {}
 
     LpmsIndex(const std::vector<std::string> & dataset, 
               const std::vector<std::string> & queries,
