@@ -1,33 +1,27 @@
 CC=gcc
 CXX=g++
 RM=rm -rf
-CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
+CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
 LDFLAGS=-g $(shell root-config --ldflags)
+GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
+RE2_FLAGS=-L/usr/local/lib -lre2
 
 FREE_BASE_DIR=FREE
 FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
 FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
-
 FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR) $(FREE_MCH_DIR)
-
 FREE_MCH=$(FREE_MCH_DIR)/free_parser.o
 FREE_IDX=inverted_index.o utils/hash_pair.o $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o 
 
 BEST_BASE_DIR=BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
-BEST_MCH_DIR=$(BEST_BASE_DIR)/Matcher
+BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR)
+BEST_IDX=simple_query_matcher.o btree_index.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
-BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR) $(BEST_MCH_DIR)
-
-BEST_IDX=btree_index.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $(BEST_MCH_DIR)/query_matcher.o
-
-FAST_BASE_DIR=BEST
+FAST_BASE_DIR=FAST
 FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
-FAST_MCH_DIR=$(FAST_BASE_DIR)/Matcher
-
-FAST_DIRS=$(FAST_BASE_DIR) $(FAST_IDX_DIR) $(FAST_MCH_DIR)
-
-FAST_IDX=inverted_index.o $(FAST_IDX_DIR)/lpsm.o $(FAST_MCH_DIR)/query_matcher.o
+FAST_DIRS=$(FAST_BASE_DIR) $(FAST_IDX_DIR)
+FAST_IDX=simple_query_matcher.o inverted_index.o $(FAST_IDX_DIR)/lpms.o
 
 DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
 
@@ -38,19 +32,13 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: $(FAST_BASE_DIR)/test_fast.out $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
 
 $(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 
-$(FAST_MCH_DIR)/query_matcher.o: $(FAST_MCH_DIR)/query_matcher.cpp
-	$(CXX) -c $(CPPFLAGS) $^ -o $@
-
-$(FAST_IDX_DIR)/lpsm.o: $(FAST_IDX_DIR)/lpsm.cpp
-	$(CXX) -c $(CPPFLAGS) $^ -o $@
+$(FAST_IDX_DIR)/lpms.o: $(FAST_IDX_DIR)/lpms.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(GUROBI_FLAGS) -o $@
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ -o $@
-
-$(BEST_MCH_DIR)/query_matcher.o: $(BEST_MCH_DIR)/query_matcher.cpp
-	$(CXX) -c $(CPPFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) -o $@
 
 $(BEST_IDX_DIR)/best_parallel.o: $(BEST_IDX_DIR)/parallelizable.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
@@ -59,7 +47,7 @@ $(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
 
 $(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_MCH) $(FREE_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) -o $@
 
 $(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
@@ -72,6 +60,9 @@ $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp
 
 utils/hash_pair.o: utils/hash_pair.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
+
+simple_query_matcher.o: simple_query_matcher.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) -o $@
 
 inverted_index.o: ngram_inverted_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ -o $@
