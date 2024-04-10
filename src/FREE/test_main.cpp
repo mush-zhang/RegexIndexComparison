@@ -162,9 +162,24 @@ void simple_find_keys() {
 }
 
 void simple_query_parser() {
+    std::vector<std::string> test_keys({
+        "Will",
+        "liam",
+        "Clint",
+        "nton"
+    });
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_keys, test_dataset, threshold);
+
+    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    pi.build_index(5);
+    pi.print_index();
+
     std::string reg_query = "(Bill|William)(.*)Clinton";
     
-    auto qp = free_index::QueryParser();
+    auto qp = free_index::QueryParser(pi);
 
     // Should be same as Figure 6(b)
     qp.generate_query_plan(reg_query);
@@ -191,7 +206,7 @@ void simple_query_plan_by_index() {
     pi.build_index(5);
     
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_index::QueryParser(&pi);
+    auto qp = free_index::QueryParser(pi);
 
     qp.generate_query_plan(reg_query);
     // Should be same as Figure 7(a)
@@ -228,7 +243,7 @@ void simple_lines_by_plan() {
     pi.build_index(5);
     pi.print_index();
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_index::QueryParser(&pi);
+    auto qp = free_index::QueryParser(pi);
 
     qp.generate_query_plan(reg_query);
     qp.rewrite_by_index();
@@ -236,12 +251,45 @@ void simple_lines_by_plan() {
     qp.remove_null();
     qp.print_plan();
 
-    auto idx_list = qp.get_index_by_plan();
-    assert(compare_lists(idx_list, {455}) && 
+    std::vector<size_t> idx_list;
+    bool helped = qp.get_index_by_plan(idx_list);
+    assert(helped && compare_lists(idx_list, {455}) && 
            "Line 455 Clinton should be the only result");
 }
 
-void simple_lines_by_plan() {
+void simple_match_all() {
+    std::vector<std::string> test_keys({
+        "Will",
+        "liam",
+        "Clint",
+        "nton"
+    });
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_keys, test_dataset, threshold);
+    threshold = 4.0/(42.0+test_dataset.size());
+    for (size_t i = 0; i < k_number_repeat; i++) {
+        test_dataset.push_back("linto");
+        test_dataset.push_back("illi");
+        test_dataset.push_back("ton");
+        test_dataset.push_back("llia");
+    }
+    test_dataset.push_back("William");
+    test_dataset.push_back("Clinton");
+    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    pi.build_index(5);
+    pi.print_index();
+    std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton", "TDT"};
+    auto matcher = free_index::QueryMatcher(pi, reg_query);
+
+    matcher.match_all();
+    
+    // assert(compare_lists(idx_list, {455}) && 
+    //        "Line 455 Clinton should be the only result");
+}
+
+void simple_match_one() {
     std::vector<std::string> test_keys({
         "Will",
         "liam",
@@ -265,9 +313,9 @@ void simple_lines_by_plan() {
     pi.build_index(5);
     pi.print_index();
     std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton"};
-    auto matcher = free_index::QueryMatcher(&pi, reg_query);
+    auto matcher = free_index::QueryMatcher(pi, reg_query);
 
-    matcher.match_all();
+    matcher.match_one(reg_query[0]);
     
     // assert(compare_lists(idx_list, {455}) && 
     //        "Line 455 Clinton should be the only result");
@@ -289,6 +337,10 @@ int main() {
     std::cout << "\t SIMPLE QUERY PLAN BY INDEX-------------------------------------------" << std::endl;
     simple_query_plan_by_index();
     std::cout << "\t SIMPLE LINES BY PLAN-------------------------------------------" << std::endl;
-    simple_lines_by_plan();
+    std::cout << "BEGIN MATCHER TESTS-------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE MATCH ALL -------------------------------------------" << std::endl;
+    simple_match_all();
+    std::cout << "\t SIMPLE MATCH ONE -------------------------------------------" << std::endl;
+    simple_match_one();
     return 0;
 }

@@ -3,7 +3,7 @@
 
 #include "gurobi_c++.h"
 
-#include "../../FREE/Index/multigram_index.hpp"
+#include "../../ngram_inverted_index.hpp"
 
 namespace fast_index {
 

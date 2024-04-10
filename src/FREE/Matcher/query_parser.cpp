@@ -230,7 +230,7 @@ void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNod
         rewrite_node_by_index(node->left_);
         rewrite_node_by_index(node->right_);
     } else if (node->get_type() == free_index::NodeType::kLiteralNode) {
-        auto all_keys = k_index_->find_all_indexed(node->to_string());
+        auto all_keys = k_index_.find_all_indexed(node->to_string());
         if (all_keys.empty()) {
             node = make_const_node("");
         } else {
@@ -247,7 +247,7 @@ void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNod
 } 
 
 void free_index::QueryParser::rewrite_by_index() {
-    if (!k_index_) {
+    if (k_index_.empty()) {
         std::cerr << "No index provided; plan stays untouched." << std::endl;
     }
     rewrite_node_by_index(query_plan_);
@@ -263,7 +263,7 @@ std::vector<size_t> free_index::QueryParser::get_index_by_node(
         return result;
     }
     if (node->get_type() == free_index::NodeType::kLiteralNode) {
-        return k_index_->get_line_pos_at(node->to_string());
+        return k_index_.get_line_pos_at(node->to_string());
     }
     auto left_idxs = get_index_by_node(node->left_);
     auto right_idxs = get_index_by_node(node->right_);
@@ -276,9 +276,15 @@ std::vector<size_t> free_index::QueryParser::get_index_by_node(
     return result;
 } 
 
-std::vector<size_t> free_index::QueryParser::get_index_by_plan() {
+bool free_index::QueryParser::get_index_by_plan(std::vector<size_t> & container) {
     if (!rewrote_by_index_) {
         rewrite_by_index();
     }
-    return get_index_by_node(query_plan_);
+    if (!query_plan_ || query_plan_->is_null() ||
+        query_plan_->get_type() == free_index::NodeType::kInvalidNode) {
+        return false; // if helped_by_idx
+    }
+    auto result = get_index_by_node(query_plan_);
+    container.swap(result);
+    return true;
 }

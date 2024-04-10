@@ -14,19 +14,20 @@ namespace free_index {
  */
 class QueryParser {
  public:
-    QueryParser() {}
-    QueryParser(MultigramIndex* index) : k_index_(index) {}
+    QueryParser() = delete;
+    QueryParser(const MultigramIndex & index) : k_index_(index) {}
     ~QueryParser() {}
 
     void generate_query_plan(const std::string & reg_str);
     void remove_null();
     void rewrite_by_index();
-    std::vector<size_t> get_index_by_plan();
+    bool get_index_by_plan(std::vector<size_t> & container);
     void print_plan();
 
  private:
     std::unique_ptr<QueryPlanNode> query_plan_;
-    MultigramIndex* k_index_ = nullptr;
+    const MultigramIndex & k_index_;
+
     bool rewrote_by_index_ = false;
     void rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node);
     std::vector<size_t> get_index_by_node(std::unique_ptr<QueryPlanNode> & node);

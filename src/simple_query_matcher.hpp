@@ -13,14 +13,14 @@ class SimpleQueryMatcher {
 
     SimpleQueryMatcher(const NGramIndex & index, 
                  const std::vector<std::string> & regs) 
-                 : index_(index) {
+                 : k_index_(index) {
         for (const auto & reg_str : regs) {
             reg_evals_[reg_str] = std::make_shared<RE2>(reg_str);
         }
     }
 
-    SimpleQueryMatcher(const NGramIndex & index) : index_(index) {
-        auto regs = index_.get_queries();
+    SimpleQueryMatcher(const NGramIndex & index) : k_index_(index) {
+        auto regs = k_index_.get_queries();
         assert(!regs.empty() &&
             "If the index has no regexes, pass in the regex set as second parameter");
         for (const auto & reg_str : regs) {
@@ -35,7 +35,7 @@ class SimpleQueryMatcher {
     ~SimpleQueryMatcher() {}
 
  private:
-    const NGramIndex & index_;
+    const NGramIndex & k_index_;
 
     std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;
 

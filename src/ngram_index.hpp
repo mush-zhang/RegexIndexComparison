@@ -47,6 +47,8 @@ class NGramIndex {
 		}
 		return query_literals;
 	}
+    
+    virtual bool empty() const = 0;
 
  protected:
     virtual void select_grams(int upper_k) {};

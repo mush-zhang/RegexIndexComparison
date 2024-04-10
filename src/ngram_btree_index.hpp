@@ -22,6 +22,8 @@ class NGramBtreeIndex : public NGramIndex {
     
     const std::vector<size_t> & get_line_pos_at(const std::string & key) const override;
 
+    bool empty() const override { return k_index_keys_.empty(); }
+
  protected:
     /**Key is address of the multigram in k_index_keys_, 
      * value address of is a sorted (ascending) list of line indices**/
