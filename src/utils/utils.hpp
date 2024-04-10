@@ -4,10 +4,13 @@
 
 #include <vector>
 #include <algorithm>
+#include <cassert>
 
 template<class T, class U>
 static bool sorted_list_contains(const std::vector<T>& container, const U& v)
 {
+    // TODO remove assert after debugging
+    assert(std::is_sorted(container.cbegin(), container.cend()) && "list not sorted");
     auto it = std::lower_bound(
         container.begin(),
         container.end(),
