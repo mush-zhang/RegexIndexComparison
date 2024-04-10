@@ -50,7 +50,7 @@ class LpmsIndex : public NGramInvertedIndex {
     std::vector<bool> build_model(size_t k,
         const std::unordered_map<size_t, long double> & r_count, 
         const std::unordered_map<size_t, long double> & q_count, 
-        const std::vector<std::vector<size_t>> & qg_map, GRBEnv * env);    
+        const std::vector<std::set<size_t>> & qg_map, GRBEnv * env);    
 
 };
 

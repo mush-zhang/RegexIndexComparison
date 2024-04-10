@@ -57,7 +57,7 @@ void fast_index::LpmsIndex::get_unigram_r(
 void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits, 
                    std::unordered_map<size_t, long double> & uni_count,
                    std::unordered_map<char, size_t> & unigrams, 
-                   std::vector<std::vector<size_t>> & uni_qg_map) {
+                   std::vector<std::set<size_t>> & uni_qg_map) {
 
     for (size_t q = 0; q < q_lits.size(); ++q) {
         std::unordered_set<char> visited_unigrams;
@@ -66,7 +66,7 @@ void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits,
                 char c = lit.at(i);
                 if (visited_unigrams.find(c) == visited_unigrams.end()) {
                     insert_or_increment(uni_count, c, visited_unigrams, unigrams);
-                    uni_qg_map[q].push_back(unigrams.at(c));
+                    uni_qg_map[q].insert(unigrams.at(c));
                 }             
             }
         }
@@ -101,7 +101,7 @@ void fast_index::LpmsIndex::get_kgrams_r(
 void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
         std::unordered_map<size_t, long double> & q_count,
         std::unordered_map<std::string, size_t> & kgrams,
-        std::vector<std::vector<size_t>> & qg_map,
+        std::vector<std::set<size_t>> & qg_map,
         const std::unordered_set<std::string> & expand, size_t k) {
 
     for (size_t q = 0; q < q_lits.size(); ++q) {
@@ -113,7 +113,7 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
                 if (visited_kgrams.find(curr_kgram) == visited_kgrams.end() &&
                         expand.find(lit.substr(i, k-1)) != expand.end()) {
                     insert_or_increment(q_count, curr_kgram, visited_kgrams, kgrams);
-                    qg_map[q].push_back(kgrams.at(curr_kgram));
+                    qg_map[q].insert(kgrams.at(curr_kgram));
                 }            
             }
         }
@@ -125,13 +125,13 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
  * 
  * @param r_count Key is gram_idx, value is the #records with this gram
  * @param q_count Key is gram_idx, value is the #queries with this gram
- * @param qg_map Key is query_idx, value is the vector of all gram_idxs in the query
+ * @param qg_map Key is query_idx, value is the set of all gram_idxs in the query
  * @return std::vector<bool> vector of bool for if the gram is kept
  */
 std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         const std::unordered_map<size_t, long double> & r_count, 
         const std::unordered_map<size_t, long double> & q_count, 
-        const std::vector<std::vector<size_t>> & qg_map,
+        const std::vector<std::set<size_t>> & qg_map,
         GRBEnv* env) {
     GRBVar* x = 0;
 
@@ -143,6 +143,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         // Model
         GRBModel model = GRBModel(*env);
         model.set(GRB_StringAttr_ModelName, "model");
+        model.set(GRB_IntParam_OutputFlag, 0);
 
         // minimize \sum_{g \in G} c_g x_g ; x \in {0, 1}
         // Gurobi by default minimize the objective
@@ -187,7 +188,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             // This should follow the order of the temp vector grams_ordered!
             for (size_t g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
                 size_t A_qg = 0;
-                if (sorted_list_contains(qg_map[q_idx], g_inner_idx) && r_count.contains(g_inner_idx)) {
+                if (qg_map[q_idx].contains(g_inner_idx) && r_count.contains(g_inner_idx)) {
                     A_qg = r_count.at(g_inner_idx);
                 }
                 A_q[g_inner_idx] = A_qg;
@@ -234,7 +235,7 @@ void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
 
     get_unigram_r(unigrams_r_count, unigrams, uni_gr_map);
 
-    std::vector<std::vector<size_t>> uni_qg_map(k_queries_size_, std::vector<size_t>());
+    std::vector<std::set<size_t>> uni_qg_map(k_queries_size_, std::set<size_t>());
     std::unordered_map<size_t, long double> unigrams_q_count;
     get_unigram_q(query_literals, unigrams_q_count, unigrams, uni_qg_map);
 
@@ -259,6 +260,7 @@ void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
 // Algorithm 1: LPMS multigram selection algorithm
 void fast_index::LpmsIndex::select_grams(int upper_k) {
     GRBEnv* env = new GRBEnv();
+    // env->set("OutputFlag", 0);
 
     // Initialize a empty expand set
     gram_set expand; // stores useless prefix
@@ -286,7 +288,7 @@ void fast_index::LpmsIndex::select_grams(int upper_k) {
         std::vector<std::vector<size_t>> gr_map;
 
         get_kgrams_r(r_count, kgrams, gr_map, expand, k);
-        std::vector<std::vector<size_t>> qg_map(k_queries_size_, std::vector<size_t>());
+        std::vector<std::set<size_t>> qg_map(k_queries_size_, std::set<size_t>());
         std::unordered_map<size_t, long double> q_count;
         get_kgrams_q(query_literals, q_count, kgrams, qg_map, expand, k);
 
