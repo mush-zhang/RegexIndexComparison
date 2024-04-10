@@ -212,7 +212,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
                 break;
             case kRandomized:
                 for (size_t g_idx = 0; g_idx < num_grams; ++g_idx) {
-                    x_result[g_idx] = (std::rand() % 100) < x[g_idx].get(GRB_DoubleAttr_X);
+                    x_result[g_idx] = (std::rand() / double(RAND_MAX)) < (x[g_idx].get(GRB_DoubleAttr_X));
                 }
                 break;
         }
