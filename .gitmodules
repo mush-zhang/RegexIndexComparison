@@ -10,3 +10,4 @@
 [submodule "src/utils/abseil-cpp"]
 	path = src/utils/abseil-cpp
 	url = https://github.com/abseil/abseil-cpp.git
+	branch = lts_2024_01_16
