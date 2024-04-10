@@ -1,24 +1,24 @@
 #include <iostream>
 #include "ngram_inverted_index.hpp"
 
-static const std::vector<unsigned int> k_empty_pos_list_;
+static const std::vector<size_t> k_empty_pos_list_;
 
-void NGramInvertedIndex::print_index() {
+void NGramInvertedIndex::print_index() const {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
     std::cout << ", size of index: " << k_index_.size() << std::endl;
     for (const auto & key : k_index_keys_) {
         std::cout << key << ": ";
         std::cout << "[";
-        for (auto idx : k_index_[key]) {
+        for (auto idx : k_index_.at(key)) {
             std::cout << idx << ",";
         }
         std::cout << "]"  << std::endl;
     }
 }
 
-const std::vector<unsigned int> & NGramInvertedIndex::get_line_pos_at(
-        const std::string & key) { 
+const std::vector<size_t> & NGramInvertedIndex::get_line_pos_at(
+        const std::string & key) const { 
     if (auto it = k_index_.find(key); it != k_index_.end()) {
         return it->second;
     }
@@ -26,7 +26,7 @@ const std::vector<unsigned int> & NGramInvertedIndex::get_line_pos_at(
 }
 
 std::vector<std::string> NGramInvertedIndex::find_all_indexed(
-        const std::string & line) {
+        const std::string & line) const {
     std::vector<std::string> found_keys;
     for (size_t i = 0; i < line.size(); i++) {
         auto curr_c = line.at(i);

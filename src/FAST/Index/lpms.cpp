@@ -1,9 +1,9 @@
-#include "gurobi_c++.h"
+#include <exception>
 
 #include "lpms.hpp"
+#include "../../utils/utils.hpp"
 
-
-static const k_eterministic_threshold_ = 0.99;
+static const double k_deterministic_threshold_ = 0.99;
 
 using gram_set = std::unordered_set<std::string>;
 
@@ -28,7 +28,7 @@ static void insert_or_increment(std::unordered_map<size_t, long double> & kgrams
         kgrams_count[curr_idx]++;
     } else {
         kgrams.insert({ key, curr_idx });
-        kgrams_count.insert({ curr_idx, 1 })
+        kgrams_count.insert({ curr_idx, 1 });
     }
     visited_kgrams.insert(key);
 }
@@ -45,7 +45,7 @@ void fast_index::LpmsIndex::get_unigram_r(
             if (visited_unigrams.find(c) == visited_unigrams.end()) {
                 insert_or_increment(uni_count, c, visited_unigrams, unigrams);
                 if (uni_count.size() > uni_gr_map.size()) {
-                    uni_gr_map.push_back(std::vector<size_t>{r})
+                    uni_gr_map.push_back(std::vector<size_t>{r});
                 } else {
                     uni_gr_map[unigrams.at(c)].push_back(r);
                 }
@@ -54,10 +54,10 @@ void fast_index::LpmsIndex::get_unigram_r(
     }
 }
 
-void get_uni_bigram_q(const std::vector<std::vector<std::string>> & q_lits, 
-                      std::unordered_map<char, long double> & uni_count,
-                      std::unordered_map<char, size_t> & unigrams, 
-                      std::vector<std::vector<size_t>> & uni_qg_map) {
+void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits, 
+                   std::unordered_map<size_t, long double> & uni_count,
+                   std::unordered_map<char, size_t> & unigrams, 
+                   std::vector<std::vector<size_t>> & uni_qg_map) {
 
     for (size_t q = 0; q < q_lits.size(); ++q) {
         std::unordered_set<char> visited_unigrams;
@@ -87,11 +87,11 @@ void fast_index::LpmsIndex::get_kgrams_r(
             // not seen in current line and in expand
             if (visited_kgrams.find(curr_kgram) == visited_kgrams.end() &&
                     expand.find(line.substr(i, k-1)) != expand.end()) {
-                insert_or_increment(r_count, c, visited_kgrams, kgrams);
+                insert_or_increment(r_count, curr_kgram, visited_kgrams, kgrams);
                 if (r_count.size() > gr_map.size()) {
-                    gr_map.push_back(std::vector<size_t>{r})
+                    gr_map.push_back(std::vector<size_t>{r});
                 } else {
-                    gr_map[kgrams.at(c)].push_back(r);
+                    gr_map[kgrams.at(curr_kgram)].push_back(r);
                 }
             }
         }
@@ -108,12 +108,12 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
         gram_set visited_kgrams;
         for (const auto & lit : q_lits[q]) {
             for (size_t i = 0; i+k < lit.size(); i++) {
-                auto curr_kgram = line.substr(i, k);
-                // not seen in current line and in expand
+                auto curr_kgram = lit.substr(i, k);
+                // not seen in current lit and in expand
                 if (visited_kgrams.find(curr_kgram) == visited_kgrams.end() &&
-                        expand.find(line.substr(i, k-1)) != expand.end()) {
-                    insert_or_increment(r_count, c, visited_kgrams, kgrams);
-                    qg_map[q].push_back(curr_kgram);
+                        expand.find(lit.substr(i, k-1)) != expand.end()) {
+                    insert_or_increment(q_count, curr_kgram, visited_kgrams, kgrams);
+                    qg_map[q].push_back(kgrams.at(curr_kgram));
                 }            
             }
         }
@@ -128,22 +128,19 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
  * @param qg_map Key is query_idx, value is the vector of all gram_idxs in the query
  * @return std::vector<bool> vector of bool for if the gram is kept
  */
-template <typename T, class hash_T>
 std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         const std::unordered_map<size_t, long double> & r_count, 
         const std::unordered_map<size_t, long double> & q_count, 
-        const std::vector<std::vector<size_t>> & qg_map) {
-    GRBEnv* env = 0;
+        const std::vector<std::vector<size_t>> & qg_map,
+        GRBEnv* env) {
     GRBVar* x = 0;
-    GRBVar** mtx_A = 0;
 
-    size_t num_grams = grams.size();
+    size_t num_grams = r_count.size();
     size_t num_queries = qg_map.size();
     std::vector<bool> x_result(num_grams, false);
 
     try {
         // Model
-        env = new GRBEnv();
         GRBModel model = GRBModel(*env);
         model.set(GRB_StringAttr_ModelName, "model");
 
@@ -161,17 +158,15 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             double c_g = curr_r_count / (k * curr_q_count);
             x[g_idx].set(GRB_DoubleAttr_Obj, c_g);
             x[g_idx].set(GRB_StringAttr_VarName, "x_" + std::to_string(g_idx));
-            g_idx++;
         }
 
         // qg_map : key: q; value: set of g in q
-        size_t g_inner_idx;
         for (size_t q_idx = 0; q_idx < num_queries; ++q_idx) {
             auto curr_grams_in_q = qg_map[q_idx];
             // 4. populate vector b, where b_q denote the smallest
             //    r_count among all grams in query q; b length num_query
             // Note: Definition of b in Section 3.1, formulae (3)
-            unsigned int b_q = 0;
+            size_t b_q = 0;
             for (const auto & curr_gram_idx : curr_grams_in_q) {
                 long double curr_r_count = 1;
                 if (r_count.contains(curr_gram_idx)) 
@@ -188,14 +183,17 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             //    number of records in the whole dataset that 
             //    contains this gram
             GRBLinExpr Ax_q = 0;
+            double A_q[num_grams];
             // This should follow the order of the temp vector grams_ordered!
-            for (g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
-                unsigned_int A_qg = 0;
-                if (qg_map[q_idx].contains(g_inner_idx) && r_count.contains(g_inner_idx)) {
+            for (size_t g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
+                size_t A_qg = 0;
+                if (sorted_list_contains(qg_map[q_idx], g_inner_idx) && r_count.contains(g_inner_idx)) {
                     A_qg = r_count.at(g_inner_idx);
                 }
-                Ax_q.addTerm(A_qg, x[g_inner_idx]);
+                A_q[g_inner_idx] = A_qg;
+                // Ax_q.addTerms(A_qg, x[g_inner_idx]);
             }
+            Ax_q.addTerms(A_q, x, num_grams);
             model.addConstr(Ax_q >= b_q, "Ax_" + std::to_string(q_idx));
         }
 
@@ -205,36 +203,31 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         //    or random rounding to find x
         switch (k_relaxation_type_) {
             case kDeterministic:
-                for (g_idx = 0; g_idx < num_grams; ++g_idx) {
-                    if (x[g_idx].get(GRB_DoubleAttr_X) > k_eterministic_threshold_) {
+                for (size_t g_idx = 0; g_idx < num_grams; ++g_idx) {
+                    if (x[g_idx].get(GRB_DoubleAttr_X) > k_deterministic_threshold_) {
                         x_result[g_idx] = true;
                     }
                 }
                 break;
             case kRandomized:
-                for (g_idx = 0; g_idx < num_grams; ++g_idx) {
+                for (size_t g_idx = 0; g_idx < num_grams; ++g_idx) {
                     x_result[g_idx] = (std::rand() % 100) < x[g_idx].get(GRB_DoubleAttr_X);
                 }
                 break;
         }
-
-        model.dispose();
-        env.dispose();
-
     } catch (GRBException e) {
         std::cout << "Error code = " << e.getErrorCode() << std::endl;
         std::cout << e.getMessage() << std::endl;
-    } catch (Exception e2) {
+    } catch (std::exception e2) {
         std::cout << "Exception during optimization" << std::endl;
-        std::cout << e2.getMessage() << std::endl;
+        std::cout << e2.what() << std::endl;
     }
-
-    delete env;
+    delete x;
     return x_result;
 }
 
 void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand, 
-        const std::vector<std::vector<std::string>> & query_literals) {
+        const std::vector<std::vector<std::string>> & query_literals, GRBEnv * env) {
     std::unordered_map<size_t, long double> unigrams_r_count;
     std::unordered_map<char, size_t> unigrams; 
     std::vector<std::vector<size_t>> uni_gr_map;
@@ -246,7 +239,7 @@ void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
     get_unigram_q(query_literals, unigrams_q_count, unigrams, uni_qg_map);
 
     // 3. build matrix A for unigram
-    std::vector<bool> mask_uni = build_model(1, unigrams_r_count, unigrams_q_count, uni_qg_map);
+    std::vector<bool> mask_uni = build_model(1, unigrams_r_count, unigrams_q_count, uni_qg_map, env);
 
     for (const auto & [c, idx] : unigrams) {
         std::string curr_kgram = std::string(1, c);
@@ -265,11 +258,13 @@ void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
 
 // Algorithm 1: LPMS multigram selection algorithm
 void fast_index::LpmsIndex::select_grams(int upper_k) {
+    GRBEnv* env = new GRBEnv();
+
     // Initialize a empty expand set
     gram_set expand; // stores useless prefix
     auto query_literals = get_query_literals();
 
-    uni_special(expand, query_literals);
+    uni_special(expand, query_literals, env);
     size_t k = 2;
 
     // 9. stop until expand set empty.
@@ -295,16 +290,16 @@ void fast_index::LpmsIndex::select_grams(int upper_k) {
         std::unordered_map<size_t, long double> q_count;
         get_kgrams_q(query_literals, q_count, kgrams, qg_map, expand, k);
 
-        std::vector<bool> mask = build_model(k, r_count, q_count, qg_map);
+        std::vector<bool> mask = build_model(k, r_count, q_count, qg_map, env);
         
         decltype(expand)().swap(expand);
 
-        for (const auto & [curr_kgram, idx] : unigrams) {
+        for (const auto & [curr_kgram, idx] : kgrams) {
             if (mask[idx]) {
                 // 7. Move all multigtams in the children set
                 //    whose associated value in x is 1 to G (the index)
                 k_index_keys_.insert(curr_kgram); 
-                k_index_.insert({ curr_kgram, gr_map.at(idx) });
+                k_index_[curr_kgram] = gr_map.at(idx);
             } else {
                 // 8. Those multigrams remainig become the new expand set
                 expand.insert(curr_kgram);
@@ -312,9 +307,9 @@ void fast_index::LpmsIndex::select_grams(int upper_k) {
         }
         k++;
     }
-
+    delete env;
 }
 
 void fast_index::LpmsIndex::build_index(int upper_k) {
-    select_grams();
+    select_grams(upper_k);
 }

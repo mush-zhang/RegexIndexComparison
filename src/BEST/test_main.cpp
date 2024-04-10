@@ -1,7 +1,7 @@
 #include "Index/single_threaded.hpp"
 #include "Index/parallelizable.hpp"
 
-#include "Matcher/query_matcher.hpp"
+#include "../simple_query_matcher.hpp"
 
 #include <iostream> 
 #include <cassert>
@@ -143,6 +143,25 @@ void simple_parallelizable() {
     pi.print_index();
 }
 
+void simple_matcher() {
+    std::vector<std::string> test_query({
+        "ane",
+        "ork",
+        "ka"
+    });;
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_query, test_dataset, threshold);
+
+    auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, 
+        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+    pi.build_index();
+    pi.print_index();
+    auto matcher = SimpleQueryMatcher(pi);
+    matcher.match_all();
+}
+
 int main() {
     std::cout << "BEGIN INDEX TESTS -------------------------------------------" << std::endl;
     std::cout << "\t GRAM CANDIDATE SET -------------------------------------------" << std::endl;
@@ -154,5 +173,8 @@ int main() {
     std::cout << "\t PARALLEL INDEX -------------------------------------------" << std::endl;
     simple_parallelizable();    
     std::cout << "\t END PARALLEL INDEX -------------------------------------------" << std::endl;
+    std::cout << "\t MATCHER -------------------------------------------" << std::endl;
+    simple_matcher();    
+    std::cout << "\t END MATCHER -------------------------------------------" << std::endl;
     return 0;
 }

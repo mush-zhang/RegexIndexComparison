@@ -1,6 +1,7 @@
 #include "Index/multigram_index.hpp"
 #include "Index/presuf_shell.hpp"
 #include "Matcher/query_parser.hpp"
+#include "Matcher/query_matcher.hpp"
 
 #include <iostream> 
 #include <cassert>
@@ -238,6 +239,38 @@ void simple_lines_by_plan() {
     auto idx_list = qp.get_index_by_plan();
     assert(compare_lists(idx_list, {455}) && 
            "Line 455 Clinton should be the only result");
+}
+
+void simple_lines_by_plan() {
+    std::vector<std::string> test_keys({
+        "Will",
+        "liam",
+        "Clint",
+        "nton"
+    });
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_keys, test_dataset, threshold);
+    threshold = 4.0/(42.0+test_dataset.size());
+    for (size_t i = 0; i < k_number_repeat; i++) {
+        test_dataset.push_back("linto");
+        test_dataset.push_back("illi");
+        test_dataset.push_back("ton");
+        test_dataset.push_back("llia");
+    }
+    test_dataset.push_back("William");
+    test_dataset.push_back("Clinton");
+    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    pi.build_index(5);
+    pi.print_index();
+    std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton"};
+    auto matcher = free_index::QueryMatcher(&pi, reg_query);
+
+    matcher.match_all();
+    
+    // assert(compare_lists(idx_list, {455}) && 
+    //        "Line 455 Clinton should be the only result");
 }
 
 int main() {

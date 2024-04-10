@@ -30,9 +30,9 @@ class ParallelizableIndex : public SingleThreadedIndex {
     
     /**Accoriding to Section 3 part 3), we choose a hard-coded value
        k between |Q|/2 and |Q|/5 **/
-    const unsigned int k_num_clusters_;
+    const size_t k_num_clusters_;
 
-    void build_qg_list_local(std::vector<std::set<unsigned int>> & qg_list,
+    void build_qg_list_local(std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> & q_list);
@@ -42,7 +42,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> q_list);
 
-    bool multi_all_covered(const std::set<unsigned int> & index, 
+    bool multi_all_covered(const std::set<size_t> & index, 
         const std::vector<best_index::SingleThreadedIndex::job> & jobs);
 };
 

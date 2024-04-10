@@ -61,9 +61,9 @@ std::set<std::string> intersect(const std::set<std::string> & q1_grams,
     return result;   
 } 
 
-unsigned int cardinality_not_in(const std::set<std::string> & g_set, 
-                                const std::map<std::string, unsigned int> & pre_suf_count) {
-    unsigned int g_cadinality_sum = 0;
+size_t cardinality_not_in(const std::set<std::string> & g_set, 
+                                const std::map<std::string, size_t> & pre_suf_count) {
+    size_t g_cadinality_sum = 0;
     for (const auto & g : g_set) {
         g_cadinality_sum += pre_suf_count.at(g);
     }
@@ -72,29 +72,29 @@ unsigned int cardinality_not_in(const std::set<std::string> & g_set,
 
 double max_dev_dist1(const std::set<std::string> & q1_grams, 
                      const std::set<std::string> & q2_grams,
-                     const std::map<std::string, unsigned int> & pre_suf_count) {
+                     const std::map<std::string, size_t> & pre_suf_count) {
     std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
-    unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
+    size_t gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
 
     std::set<std::string> gd_set = intersect(q1_grams, q2_grams);
-    unsigned int gd_cadinality_sum = 1 + cardinality_not_in(gd_set, pre_suf_count);
+    size_t gd_cadinality_sum = 1 + cardinality_not_in(gd_set, pre_suf_count);
 
     return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
 }
 
 double max_dev_dist2(const std::set<std::string> & q1_grams, 
                      const std::set<std::string> & q2_grams,
-                     const std::map<std::string, unsigned int> & pre_suf_count) {
+                     const std::map<std::string, size_t> & pre_suf_count) {
     std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
-    unsigned int gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
-    unsigned int gd_cadinality_sum = 1 + cardinality_not_in(q2_grams, pre_suf_count);
+    size_t gn_cadinality_sum = cardinality_not_in(gn_set, pre_suf_count);
+    size_t gd_cadinality_sum = 1 + cardinality_not_in(q2_grams, pre_suf_count);
 
     return double( ((long double)gn_cadinality_sum)/((long double)gd_cadinality_sum) );
 }
 
 double max_dev_dist3(const std::set<std::string> & q1_grams, 
                      const std::set<std::string> & q2_grams,
-                     const std::map<std::string, unsigned int> & pre_suf_count) {
+                     const std::map<std::string, size_t> & pre_suf_count) {
     std::set<std::string> gn_set = diff_union(q1_grams, q2_grams);
     return (double)cardinality_not_in(gn_set, pre_suf_count);
 }
@@ -104,12 +104,12 @@ size_t argmin(const std::vector<double> & v) {
                          std::min_element(std::begin(v), std::end(v)));
 }
 
-std::unordered_map<unsigned int, std::vector<size_t>> 
+std::unordered_map<size_t, std::vector<size_t>> 
 best_index::SingleThreadedIndex::k_medians(
         const std::vector<std::vector<double>> & dist_mtx, 
         int num_queries, int num_clusters) {
     // 1. randomly pick k queries as centroids
-    std::vector<unsigned int> centroids;
+    std::vector<size_t> centroids;
     // Note: random sample function from here: https://stackoverflow.com/a/73133364
     //       does it perform better than pre-buidling the 0-k_query_size_ array?
     centroids.resize(num_clusters);
@@ -126,7 +126,7 @@ best_index::SingleThreadedIndex::k_medians(
     
     // cmap: key [query idx centroid in centroids] 
     //       value [list of query idx]
-    std::unordered_map<unsigned int, std::vector<size_t>> cmap;
+    std::unordered_map<size_t, std::vector<size_t>> cmap;
 
     bool centroid_final = false;
     size_t max_iteration = 100000;
@@ -135,7 +135,7 @@ best_index::SingleThreadedIndex::k_medians(
     while(!centroid_final && curr_it++ < max_iteration) {
         centroid_final = true;
         // 2. assign data points to nearest centroids
-        std::unordered_map<unsigned int, std::vector<size_t>>().swap(cmap);
+        std::unordered_map<size_t, std::vector<size_t>>().swap(cmap);
         cmap.reserve(num_clusters);
         // q_dists: index [idx of a query] 
         //          value [distance to the current query]
@@ -171,7 +171,7 @@ best_index::SingleThreadedIndex::k_medians(
             }
         }
         //3.5 empty cluster, choose a random centroid
-        std::set<unsigned int> centroids_set(centroids.begin(), centroids.end());
+        std::set<size_t> centroids_set(centroids.begin(), centroids.end());
         for (const auto & c_idx : fillables) {
             std::uniform_int_distribution<int> uni_rand_int(0, num_queries-1);
             auto rng = std::mt19937{std::random_device{}()};
@@ -206,11 +206,11 @@ best_index::SingleThreadedIndex::get_all_multigrams_per_query(
 std::vector<std::vector<double>> 
 best_index::SingleThreadedIndex::calculate_pairwise_dist(
         const std::vector<std::set<std::string>> & qg_gram_set,
-        const std::map<std::string, unsigned int> & pre_suf_count) {
+        const std::map<std::string, size_t> & pre_suf_count) {
 
     double (*max_dev_dist)(const std::set<std::string> &, 
         const std::set<std::string> &,
-        const std::map<std::string, unsigned int> &){ nullptr };
+        const std::map<std::string, size_t> &){ nullptr };
     switch (dist_measure_type_) {
         case dist_type::kMaxDevDist1:
             max_dev_dist = &max_dev_dist1;
@@ -249,7 +249,7 @@ best_index::SingleThreadedIndex::calculate_pairwise_dist(
  */
 void best_index::SingleThreadedIndex::workload_reduction(
         std::vector<std::vector<std::string>> & query_literals,
-        std::map<std::string, unsigned int> & pre_suf_count) {
+        std::map<std::string, size_t> & pre_suf_count) {
     auto qg_gram_set = get_all_multigrams_per_query(query_literals);
     
     auto dist_mtx = calculate_pairwise_dist(qg_gram_set, pre_suf_count);
@@ -258,7 +258,7 @@ void best_index::SingleThreadedIndex::workload_reduction(
     auto centroids = k_medians(dist_mtx, k_queries_size_, k_reduced_queries_size_);
 
     std::vector<std::vector<std::string>> new_query_literals(centroids.size());
-    std::map<std::string, unsigned int> new_pre_suf_count;
+    std::map<std::string, size_t> new_pre_suf_count;
 
     size_t i = 0;
     for (const auto & [centroid_q_idx, cluster_list] : centroids) {
@@ -272,7 +272,7 @@ void best_index::SingleThreadedIndex::workload_reduction(
     pre_suf_count.swap(new_pre_suf_count);
 }
 
-std::map<std::string, unsigned int> 
+std::map<std::string, size_t> 
 best_index::SingleThreadedIndex::get_all_gram_counts(
         const std::vector<std::vector<std::string>> & query_literals) {
     rax *gram_tree = raxNew();
@@ -291,7 +291,7 @@ best_index::SingleThreadedIndex::get_all_gram_counts(
 
     // 3. get all prefixes of path labels; 
     //    store them in an ordered map
-    std::map<std::string, unsigned int> pre_suf_count;
+    std::map<std::string, size_t> pre_suf_count;
     std::string prev = "";
     for (const auto & pl : path_labels) {
         for (size_t i = 0; i < pl.size(); i++) {
@@ -335,7 +335,7 @@ best_index::SingleThreadedIndex::get_all_gram_counts(
  **/
 std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals,
-        std::map<std::string, unsigned int> & pre_suf_count) {
+        std::map<std::string, size_t> & pre_suf_count) {
     
     // 4.5 Optional: if we are doing workload reduction
     //     reduce the k_queries_size_ and k_queries, 
@@ -367,7 +367,7 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
 void best_index::SingleThreadedIndex::indexed_grams_in_string(
         const std::string & l, 
         const std::vector<std::string> & candidates,
-        std::vector<std::set<unsigned int>> & qg_list, 
+        std::vector<std::set<size_t>> & qg_list, 
         size_t q_idx, const std::vector<bool> & candidates_filter) {
 
     for (size_t i = 0; i < l.size(); i++) {
@@ -389,7 +389,7 @@ void best_index::SingleThreadedIndex::indexed_grams_in_string(
 void best_index::SingleThreadedIndex::indexed_grams_in_literals(
         const std::vector<std::string> & literals, 
         const std::vector<std::string> & candidates,
-        std::vector<std::set<unsigned int>> & qg_list,
+        std::vector<std::set<size_t>> & qg_list,
         size_t idx) {
 
     for (const auto & l : literals) {
@@ -398,7 +398,7 @@ void best_index::SingleThreadedIndex::indexed_grams_in_literals(
 }
 
 bool best_index::SingleThreadedIndex::index_covered(
-        const std::set<unsigned int> & index, 
+        const std::set<size_t> & index, 
         const best_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k) {
     for (auto g_idx : index) {
@@ -415,7 +415,7 @@ bool best_index::SingleThreadedIndex::index_covered(
 
 // TODO: to speed up, it is possible to store all covered pairs
 bool best_index::SingleThreadedIndex::all_covered(
-        const std::set<unsigned int> & index, 
+        const std::set<size_t> & index, 
         const best_index::SingleThreadedIndex::job & job, 
         size_t query_size) {
     for (size_t k = 0; k < query_size; k++) {
@@ -430,7 +430,7 @@ bool best_index::SingleThreadedIndex::all_covered(
 
 void best_index::SingleThreadedIndex::compute_benefit(
         std::vector<long double> & benefit, 
-        const std::set<unsigned int> & index, 
+        const std::set<size_t> & index, 
         const best_index::SingleThreadedIndex::job & job, 
         size_t num_queries) {
     
@@ -456,11 +456,11 @@ void best_index::SingleThreadedIndex::compute_benefit(
 }
 
 void best_index::SingleThreadedIndex::build_qg_list(
-        std::vector<std::set<unsigned int>> & qg_list,
+        std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals) {
     auto num_queries = query_literals.size();
-    qg_list.assign(num_queries, std::set<unsigned int>());
+    qg_list.assign(num_queries, std::set<size_t>());
     for (size_t q_idx = 0; q_idx < num_queries; q_idx++) {
         const auto & literals = query_literals[q_idx];
         indexed_grams_in_literals(literals, candidates, qg_list, q_idx);
@@ -469,12 +469,12 @@ void best_index::SingleThreadedIndex::build_qg_list(
 
 void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job & job, 
         size_t set_idx, size_t r_idx, 
-        const std::vector<std::set<unsigned int>> & rg_list) {
-    const std::set<unsigned int> & set_of_exists_grams = rg_list[set_idx];
+        const std::vector<std::set<size_t>> & rg_list) {
+    const std::set<size_t> & set_of_exists_grams = rg_list[set_idx];
     if (!set_of_exists_grams.empty()) {
         job.rc.push_back(r_idx);
     }
-    for (unsigned int g_idx : set_of_exists_grams) {
+    for (size_t g_idx : set_of_exists_grams) {
         job.gr_list[g_idx].push_back(r_idx);
     }
 }
@@ -482,9 +482,9 @@ void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job & job,
 void best_index::SingleThreadedIndex::build_gr_list_rc(
         best_index::SingleThreadedIndex::job & job, 
         size_t candidates_size,  
-        unsigned int dataset_size,
-        const std::vector<std::set<unsigned int>> & rg_list) {
-    job.gr_list.assign(candidates_size, std::vector<unsigned int>());
+        size_t dataset_size,
+        const std::vector<std::set<size_t>> & rg_list) {
+    job.gr_list.assign(candidates_size, std::vector<size_t>());
     for (size_t r_idx = 0; r_idx < dataset_size; r_idx++) {
         build_gr_list_rc_helper(job, r_idx, r_idx, rg_list);
     }
@@ -496,7 +496,7 @@ void best_index::SingleThreadedIndex::build_job(
         const std::vector<std::vector<std::string>> & query_literals) {
 
     build_qg_list(job.qg_list, candidates, query_literals);
-    std::vector<std::set<unsigned int>> rg_list(k_dataset_size_);
+    std::vector<std::set<size_t>> rg_list(k_dataset_size_);
     for (size_t i = 0; i < k_dataset_size_; i++) {
         indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i);
     }
@@ -527,7 +527,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
      *     use intermediate i to reduce hash/storage overhead
      *     of string over int
      */
-    std::set<unsigned int> index;
+    std::set<size_t> index;
     std::vector<long double> benefit(candidates_size);
     // While some (q,r) uncovered AND space available
     while (!all_covered(index, job, num_queries) && 

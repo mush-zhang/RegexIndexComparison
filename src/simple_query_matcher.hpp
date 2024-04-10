@@ -1,19 +1,17 @@
-#ifndef BEST_MATCHER_QUERY_MATCHER_HPP_
-#define BEST_MATCHER_QUERY_MATCHER_HPP_
+#ifndef SIMPLE_QUERY_MATCHER_HPP_
+#define SIMPLE_QUERY_MATCHER_HPP_
 
 #include <memory>
 #include <re2/re2.h>
 #include <cassert>
 
-#include "../../ngram_btree_index.hpp"
+#include "ngram_index.hpp"
 
-namespace best_index {
-
-class QueryMatcher {
+class SimpleQueryMatcher {
  public:
-    QueryMatcher() = delete;
+    SimpleQueryMatcher() = delete;
 
-    QueryMatcher(NGramBtreeIndex * index, 
+    SimpleQueryMatcher(const NGramIndex & index, 
                  const std::vector<std::string> & regs) 
                  : index_(index) {
         for (const auto & reg_str : regs) {
@@ -21,8 +19,8 @@ class QueryMatcher {
         }
     }
 
-    QueryMatcher(NGramBtreeIndex * index) : index_(index) {
-        auto regs = index_->get_queries();
+    SimpleQueryMatcher(const NGramIndex & index) : index_(index) {
+        auto regs = index_.get_queries();
         assert(!regs.empty() &&
             "If the index has no regexes, pass in the regex set as second parameter");
         for (const auto & reg_str : regs) {
@@ -34,10 +32,10 @@ class QueryMatcher {
 
     void match_one(const std::string & reg);
 
-    ~QueryMatcher() {}
+    ~SimpleQueryMatcher() {}
 
  private:
-    std::shared_ptr<NGramBtreeIndex> index_;
+    const NGramIndex & index_;
 
     std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;
 
@@ -45,6 +43,4 @@ class QueryMatcher {
         const std::shared_ptr<RE2> compiled_reg);
 };
 
-} // namespace best_index
-
-#endif // BEST_MATCHER_QUERY_MATCHER_HPP_
+#endif // SIMPLE_QUERY_MATCHER_HPP_

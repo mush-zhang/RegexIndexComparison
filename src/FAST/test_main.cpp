@@ -1,6 +1,6 @@
 #include "Index/lpms.hpp"
 
-#include "Matcher/query_matcher.hpp"
+#include "../simple_query_matcher.hpp"
 
 #include <iostream> 
 #include <cassert>
@@ -71,10 +71,28 @@ void simple_index_radonmized() {
     });;
 
     auto pi2 = fast_index::LpmsIndex(test_dataset, test_query, 
-        ast_index::LpmsIndex::k_relaxation_type_::kRandomized);
+        fast_index::LpmsIndex::relaxation_type::kRandomized);
     pi2.build_index();
     pi2.print_index();
     std::cout << "***********" << std::endl;
+}
+
+void simple_matcher() {
+    std::vector<std::string> test_query({
+        "ane",
+        "ork",
+        "ka"
+    });;
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_query, test_dataset, threshold);
+
+    auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+    pi.build_index();
+    pi.print_index();
+    auto matcher = SimpleQueryMatcher(pi);
+    matcher.match_all();
 }
 
 int main() {
@@ -85,5 +103,8 @@ int main() {
     std::cout << "\t SIMPLE RANDOMIZED -------------------------------------------" << std::endl;
     simple_index_radonmized();    
     std::cout << "\t END SIMPLE RANDOMIZED -------------------------------------------" << std::endl;
+    std::cout << "\t MATCHER -------------------------------------------" << std::endl;
+    simple_matcher();    
+    std::cout << "\t END MATCHER -------------------------------------------" << std::endl;
     return 0;
 }

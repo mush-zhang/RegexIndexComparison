@@ -1,6 +1,8 @@
 #ifndef FAST_INDEX_LPMS_INDEX_HPP_
 #define FAST_INDEX_LPMS_INDEX_HPP_
 
+#include "gurobi_c++.h"
+
 #include "../../FREE/Index/multigram_index.hpp"
 
 namespace fast_index {
@@ -24,10 +26,10 @@ class LpmsIndex : public NGramInvertedIndex {
     
     ~LpmsIndex() {}
 
-    void build_index(int upper_k) override;
+    void build_index(int upper_k=-1) override;
 
  protected:
-    void select_grams(int upper_k) override;
+    void select_grams(int upper_k=-1) override;
     
  private:
     const relaxation_type k_relaxation_type_;
@@ -42,14 +44,13 @@ class LpmsIndex : public NGramInvertedIndex {
         std::vector<std::vector<size_t>> & uni_gr_map);
 
     void uni_special(std::unordered_set<std::string> & expand, 
-        const std::vector<std::vector<std::string>> & query_literals);
+        const std::vector<std::vector<std::string>> & query_literals, 
+        GRBEnv * env);
 
-    template <typename T, class hash_T>
     std::vector<bool> build_model(size_t k,
         const std::unordered_map<size_t, long double> & r_count, 
         const std::unordered_map<size_t, long double> & q_count, 
-        const std::vector<std::vector<size_t>> & qg_map);
-    
+        const std::vector<std::vector<size_t>> & qg_map, GRBEnv * env);    
 
 };
 

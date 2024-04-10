@@ -254,9 +254,9 @@ void free_index::QueryParser::rewrite_by_index() {
     rewrote_by_index_ = query_plan_ == nullptr;
 }
 
-std::vector<unsigned int> free_index::QueryParser::get_index_by_node(
+std::vector<size_t> free_index::QueryParser::get_index_by_node(
         std::unique_ptr<QueryPlanNode> & node) {
-    std::vector<unsigned int> result;
+    std::vector<size_t> result;
 
     if (!node || node->is_null() ||
         node->get_type() == free_index::NodeType::kInvalidNode) {
@@ -276,7 +276,7 @@ std::vector<unsigned int> free_index::QueryParser::get_index_by_node(
     return result;
 } 
 
-std::vector<unsigned int> free_index::QueryParser::get_index_by_plan() {
+std::vector<size_t> free_index::QueryParser::get_index_by_plan() {
     if (!rewrote_by_index_) {
         rewrite_by_index();
     }

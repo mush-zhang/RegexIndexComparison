@@ -25,11 +25,11 @@ class NGramIndex {
     virtual void build_index(int upper_k) {}
 
     // return all substrings of the given string that are keys in the index
-    virtual std::vector<std::string> find_all_indexed(const std::string & line) = 0;
+    virtual std::vector<std::string> find_all_indexed(const std::string & line) const = 0;
 
-    virtual void print_index() = 0;
+    virtual void print_index() const = 0;
     
-    virtual const std::vector<unsigned int> & get_line_pos_at(const std::string & key) = 0;
+    virtual const std::vector<size_t> & get_line_pos_at(const std::string & key)  const = 0;
 
     const std::vector<std::string> & get_dataset() const {
         return k_dataset_;
@@ -39,7 +39,7 @@ class NGramIndex {
         return k_queries_;
     }
 
-    std::vector<std::vector<std::string>> get_query_literals() {
+    std::vector<std::vector<std::string>> get_query_literals() const {
 		std::vector<std::vector<std::string>> query_literals;
 		for (const auto & q : k_queries_) {
 			std::vector<std::string> literals = extract_literals(q);
@@ -53,7 +53,7 @@ class NGramIndex {
     
     // the index structure should be stored here
     const std::vector<std::string> & k_dataset_;
-    const unsigned int k_dataset_size_;
+    const size_t k_dataset_size_;
 
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;

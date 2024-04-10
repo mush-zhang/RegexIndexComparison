@@ -6,11 +6,11 @@
 #include "../../utils/utils.hpp"
 
 void best_index::ParallelizableIndex::build_qg_list_local(
-        std::vector<std::set<unsigned int>> & qg_list,
+        std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> & q_list) {
-    qg_list.assign(q_list.size(), std::set<unsigned int>());
+    qg_list.assign(q_list.size(), std::set<size_t>());
     for (size_t i = 0; i < q_list.size(); i++) {
         auto q_idx = q_list[i];
         const auto & literals = query_literals[q_idx];
@@ -31,7 +31,7 @@ void best_index::ParallelizableIndex::build_job_local(
             candidates_filter[g_idx] = true;
         }
     }
-    std::vector<std::set<unsigned int>> rg_list(k_dataset_size_);
+    std::vector<std::set<size_t>> rg_list(k_dataset_size_);
     for (size_t i = 0; i < k_dataset_size_; i++) {
         indexed_grams_in_string(k_dataset_[i], candidates, rg_list, i, candidates_filter);
     }
@@ -41,7 +41,7 @@ void best_index::ParallelizableIndex::build_job_local(
 // TODO: add stop token to notify all asyncs once got a false
 //       https://www.geeksforgeeks.org/cpp-20-stop_token-header/
 bool best_index::ParallelizableIndex::multi_all_covered(
-        const std::set<unsigned int> & index, 
+        const std::set<size_t> & index, 
         const std::vector<best_index::SingleThreadedIndex::job> & jobs) {
     std::vector<std::future<bool>> futures;
     for (int i = 0; i < jobs.size(); i++) {
@@ -101,7 +101,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
      *     use intermediate i to reduce hash/storage overhead
      *     of string over int
      */
-    std::set<unsigned int> index;
+    std::set<size_t> index;
     std::vector<long double> benefit_global(candidates_size);
 
     std::vector<std::vector<long double>> benefits_local(
