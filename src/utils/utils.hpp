@@ -29,10 +29,11 @@ static std::vector<T> sorted_lists_union(const std::vector<T> & l,
         if (l[i] < r[j]) {
             candidate = l[i++];
         } else {
-            candidate = r[j++];
+            candidate = r[j];
             if (l[i] == r[j]) i++;
+            j++;
         } 
-        if (candidate != temp.back()) {
+        if (temp.empty() || candidate != temp.back()) {
             temp.push_back(candidate);
         }
     } 
@@ -41,17 +42,13 @@ static std::vector<T> sorted_lists_union(const std::vector<T> & l,
         if(l[i] != temp.back()) {
             temp.push_back(l[i++]);
         } 
-        while (i < l.size()) {
-            temp.push_back(l[i++]);
-        }
+        temp.insert(temp.end(), l.cbegin() + i, l.cend());
     } 
     if (j < r.size()) {
         if (r[j] != temp.back()) {
             temp.push_back(r[j++]);
         } 
-        while (j < r.size()) {
-            temp.push_back(r[j++]);
-        }
+        temp.insert(temp.end(), r.cbegin() + j, r.cend());
     }
     return temp;
 }

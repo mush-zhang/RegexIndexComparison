@@ -251,7 +251,7 @@ void free_index::QueryParser::rewrite_by_index() {
         std::cerr << "No index provided; plan stays untouched." << std::endl;
     }
     rewrite_node_by_index(query_plan_);
-    rewrote_by_index_ = query_plan_ == nullptr;
+    rewrote_by_index_ = true;
 }
 
 std::vector<size_t> free_index::QueryParser::get_index_by_node(
@@ -269,9 +269,9 @@ std::vector<size_t> free_index::QueryParser::get_index_by_node(
     auto right_idxs = get_index_by_node(node->right_);
 
     if (node->get_type() == free_index::NodeType::kAndNode) {
-        return sorted_lists_intersection(left_idxs, right_idxs);
+        result = sorted_lists_intersection(left_idxs, right_idxs);
     } else if (node->get_type() == free_index::NodeType::kOrNode) {
-        return sorted_lists_union(left_idxs, right_idxs);        
+        result = sorted_lists_union(left_idxs, right_idxs);        
     } 
     return result;
 } 
