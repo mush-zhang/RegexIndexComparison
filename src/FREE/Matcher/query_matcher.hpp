@@ -30,7 +30,7 @@ class QueryMatcher {
     void match_all() {
         for (const auto & [reg_str, comps] : reg_evals_) {
             long count = match_one_helper(comps.first, comps.second);
-            std::cout << count << std::endl;
+            std::cout << "[" << reg_str << "] : " << count << std::endl;
         }
         // TOOD: add timing print maybe.
     }
@@ -39,7 +39,7 @@ class QueryMatcher {
         if (reg_evals_.find(reg) != reg_evals_.end()) {
             const auto & [parser, regex] = reg_evals_[reg];
             long count = match_one_helper(parser, regex);
-            std::cout << count << std::endl;
+            std::cout << "[" << reg << "] : " << count << std::endl;
         }
     }
 

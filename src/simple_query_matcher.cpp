@@ -28,7 +28,7 @@ long SimpleQueryMatcher::match_one_helper(
 void SimpleQueryMatcher::match_all() {
     for (const auto & [reg, compiled_reg] : reg_evals_) {
         long count = match_one_helper(reg, compiled_reg);
-        std::cout << count << std::endl;
+        std::cout << "[" << reg << "] : " << count << std::endl;
     }
     // TOOD: add timing print maybe.
 }
@@ -37,6 +37,6 @@ void SimpleQueryMatcher::match_one(const std::string & reg) {
     if (reg_evals_.find(reg) != reg_evals_.end()) {
         auto compiled_reg = reg_evals_[reg];
         long count = match_one_helper(reg, compiled_reg);
-        std::cout << count << std::endl;
+        std::cout << "[" << reg << "] : " << count << std::endl;
     }
 }
