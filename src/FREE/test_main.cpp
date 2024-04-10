@@ -238,23 +238,42 @@ void simple_lines_by_plan() {
         test_dataset.push_back("llia");
     }
     test_dataset.push_back("William");
-    test_dataset.push_back("Clinton");
-    auto pi = free_index::PresufShell(test_dataset, threshold);
-    pi.build_index(5);
-    pi.print_index();
+    // test_dataset.push_back("Clinton");
+    test_dataset.push_back("Bill.Clinton");
+
+    auto pi1 = free_index::MultigramIndex(test_dataset, threshold);
+    pi1.build_index(5);
+    pi1.print_index();
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_index::QueryParser(pi);
+    auto qp1 = free_index::QueryParser(pi1);
 
-    qp.generate_query_plan(reg_query);
-    qp.rewrite_by_index();
+    qp1.generate_query_plan(reg_query);
+    qp1.rewrite_by_index();
     // Should be same as Figure 7(b)
-    qp.remove_null();
-    qp.print_plan();
+    qp1.remove_null();
+    qp1.print_plan();
 
-    std::vector<size_t> idx_list;
-    bool helped = qp.get_index_by_plan(idx_list);
-    assert(helped && compare_lists(idx_list, {455}) && 
-           "Line 455 Clinton should be the only result");
+    std::vector<size_t> idx_list1;
+    bool helped1 = qp1.get_index_by_plan(idx_list1);
+    assert(helped1 && compare_lists(idx_list1, {455}) && 
+           "Multigram: Line 455 Clinton should be the only result");
+
+    auto pi2 = free_index::PresufShell(test_dataset, threshold);
+    pi2.build_index(5);
+    pi2.print_index();
+
+    auto qp2 = free_index::QueryParser(pi2);
+
+    qp2.generate_query_plan(reg_query);
+    qp2.rewrite_by_index();
+    // Should be same as Figure 7(b)
+    qp2.remove_null();
+    qp2.print_plan();
+
+    std::vector<size_t> idx_list2;
+    bool helped2 = qp2.get_index_by_plan(idx_list2);
+    assert(helped2 && compare_lists(idx_list2, {455}) && 
+           "Presuf Shell: Line 455 Clinton should be the only result");
 }
 
 void simple_match_all() {
@@ -276,11 +295,12 @@ void simple_match_all() {
         test_dataset.push_back("llia");
     }
     test_dataset.push_back("William");
-    test_dataset.push_back("Clinton");
+    test_dataset.push_back("Bill.Clinton");
     auto pi = free_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
     std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton", "TDT"};
+    std::cout << "start matching" << std::endl;
     auto matcher = free_index::QueryMatcher(pi, reg_query);
 
     matcher.match_all();
@@ -308,12 +328,13 @@ void simple_match_one() {
         test_dataset.push_back("llia");
     }
     test_dataset.push_back("William");
-    test_dataset.push_back("Clinton");
+    test_dataset.push_back("Bill.Clinton");
     auto pi = free_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
     std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton"};
     auto matcher = free_index::QueryMatcher(pi, reg_query);
+    std::cout << "start matching" << std::endl;
 
     matcher.match_one(reg_query[0]);
     
@@ -337,6 +358,7 @@ int main() {
     std::cout << "\t SIMPLE QUERY PLAN BY INDEX-------------------------------------------" << std::endl;
     simple_query_plan_by_index();
     std::cout << "\t SIMPLE LINES BY PLAN-------------------------------------------" << std::endl;
+    simple_lines_by_plan();
     std::cout << "BEGIN MATCHER TESTS-------------------------------------------" << std::endl;
     std::cout << "\t SIMPLE MATCH ALL -------------------------------------------" << std::endl;
     simple_match_all();
