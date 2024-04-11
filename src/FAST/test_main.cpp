@@ -79,6 +79,37 @@ void simple_index_radonmized() {
 
 void simple_matcher() {
     std::vector<std::string> test_query({
+        "ane", // [4, 9]
+        "ork", // [2]
+        "ka" // [4, 8, 12]
+    });;
+    std::vector<std::string> test_dataset({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });;
+
+    auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+    pi.build_index();
+    pi.print_index();
+    auto matcher = SimpleQueryMatcher(pi);
+    std::cout << "\t match all" << std::endl;
+    matcher.match_all();
+    std::cout << "\t match one" << std::endl;
+    matcher.match_one(test_query[2]);
+}
+
+void longer_matcher() {
+    std::vector<std::string> test_query({
         "ane",
         "ork",
         "ka"
@@ -89,10 +120,15 @@ void simple_matcher() {
     make_dataset_with_keys(test_query, test_dataset, threshold);
 
     auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
+    std::cout << "\t match all" << std::endl;
     matcher.match_all();
+    std::cout << "\t match one" << std::endl;
+    matcher.match_one(test_query[0]);
+
 }
 
 int main() {
@@ -103,8 +139,14 @@ int main() {
     std::cout << "\t SIMPLE RANDOMIZED -------------------------------------------" << std::endl;
     simple_index_radonmized();    
     std::cout << "\t END SIMPLE RANDOMIZED -------------------------------------------" << std::endl;
-    std::cout << "\t MATCHER -------------------------------------------" << std::endl;
+    std::cout << "END INDEX TESTS -------------------------------------------" << std::endl;
+    std::cout << "BEGIN MATCHER TESTS -------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE MATCHER -------------------------------------------" << std::endl;
     simple_matcher();    
-    std::cout << "\t END MATCHER -------------------------------------------" << std::endl;
+    std::cout << "\t END SIMPLE MATCHER -------------------------------------------" << std::endl;
+    std::cout << "\t LONGER MATCHER -------------------------------------------" << std::endl;
+    longer_matcher();    
+    std::cout << "\t END LONGER MATCHER -------------------------------------------" << std::endl;
+    std::cout << "END MATCHER TESTS -------------------------------------------" << std::endl;
     return 0;
 }

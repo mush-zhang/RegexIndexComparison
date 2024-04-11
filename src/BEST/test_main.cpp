@@ -169,7 +169,10 @@ void simple_matcher() {
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
+    std::cout << "\t match all" << std::endl;
     matcher.match_all();
+    std::cout << "\t match one" << std::endl;
+    matcher.match_one(test_query[1]);
 }
 
 void longer_matcher() {
@@ -188,7 +191,10 @@ void longer_matcher() {
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
+    std::cout << "\t match all" << std::endl;
     matcher.match_all();
+    std::cout << "\t match one" << std::endl;
+    matcher.match_one(test_query[0]);
 }
 
 int main() {
