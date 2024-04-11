@@ -142,8 +142,8 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
     try {
         // Model
         GRBModel model = GRBModel(*env);
-        model.set(GRB_StringAttr_ModelName, "model");
         model.set(GRB_IntParam_OutputFlag, 0);
+        model.set(GRB_StringAttr_ModelName, "model");
 
         // minimize \sum_{g \in G} c_g x_g ; x \in {0, 1}
         // Gurobi by default minimize the objective
@@ -200,6 +200,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
 
         // Solve
         model.optimize();
+
         // 6. use lp solver with deterministic relaxation 
         //    or random rounding to find x
         switch (k_relaxation_type_) {

@@ -36,3 +36,6 @@
 
 # My personal notes
 *.*.txt
+
+# Gurobi log
+*gurobi.log
