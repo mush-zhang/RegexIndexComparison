@@ -15,9 +15,15 @@ long SimpleQueryMatcher::match_one_helper(
         return count;
     }
     std::vector<size_t> idx_list;
+    bool is_first = true;
     for (const auto & key : all_keys) {
-        auto curr_idxs = k_index_.get_line_pos_at(key);
-        idx_list = sorted_lists_intersection(idx_list, curr_idxs);
+        if (is_first) {
+            idx_list = k_index_.get_line_pos_at(key);
+            is_first = false;
+        } else {
+            auto curr_idxs = k_index_.get_line_pos_at(key);
+            idx_list = sorted_lists_intersection(idx_list, curr_idxs);
+        }
     }
     for (auto idx : idx_list) {
         count += RE2::PartialMatch(dataset[idx], *compiled_reg);
