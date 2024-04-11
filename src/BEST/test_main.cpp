@@ -145,6 +145,35 @@ void simple_parallelizable() {
 
 void simple_matcher() {
     std::vector<std::string> test_query({
+        "ane", // [4, 9]
+        "ork", // [2]
+        "ka" // [4, 8, 12]
+    });;
+    std::vector<std::string> test_dataset({
+        "an", //1
+        "York", //2
+        "Franc", //3
+        "kane", //4
+        "anc", //5
+        "Yor", //6
+        "Fran", //7
+        "kan", //8
+        "ane", //9
+        "Yo", //10
+        "Fra", //11
+        "ka" //12
+    });;
+
+    auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, 
+        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+    pi.build_index();
+    pi.print_index();
+    auto matcher = SimpleQueryMatcher(pi);
+    matcher.match_all();
+}
+
+void longer_matcher() {
+    std::vector<std::string> test_query({
         "ane",
         "ork",
         "ka"
@@ -173,8 +202,14 @@ int main() {
     std::cout << "\t PARALLEL INDEX -------------------------------------------" << std::endl;
     simple_parallelizable();    
     std::cout << "\t END PARALLEL INDEX -------------------------------------------" << std::endl;
-    std::cout << "\t MATCHER -------------------------------------------" << std::endl;
+    std::cout << "END INDEX TESTS -------------------------------------------" << std::endl;
+    std::cout << "BEGIN MATCHER TESTS -------------------------------------------" << std::endl;
+    std::cout << "\t SIMPLE MATCHER -------------------------------------------" << std::endl;
     simple_matcher();    
-    std::cout << "\t END MATCHER -------------------------------------------" << std::endl;
+    std::cout << "\t END SIMPLE MATCHER -------------------------------------------" << std::endl;
+    std::cout << "\t LONGER MATCHER -------------------------------------------" << std::endl;
+    longer_matcher();    
+    std::cout << "\t END LONGER MATCHER -------------------------------------------" << std::endl;
+    std::cout << "END MATCHER TESTS -------------------------------------------" << std::endl;
     return 0;
 }
