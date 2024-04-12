@@ -17,14 +17,8 @@ class QueryMatcher {
                  const std::vector<std::string> & regs) 
                  : k_index_(index) {
         for (const auto & reg : regs) {
-            auto curr_p = std::make_unique<QueryParser>(k_index_);
-            curr_p->generate_query_plan(reg);
-            curr_p->remove_null();
-            curr_p->rewrite_by_index();
-            curr_p->remove_null();
-            reg_evals_[reg] = std::make_pair(std::move(curr_p), std::make_shared<RE2>(reg));
+            add_query(reg);
         }
-
     }
 
     void match_all() {
@@ -36,11 +30,12 @@ class QueryMatcher {
     }
 
     void match_one(const std::string & reg) {
-        if (reg_evals_.find(reg) != reg_evals_.end()) {
-            const auto & [parser, regex] = reg_evals_[reg];
-            long count = match_one_helper(parser, regex);
-            std::cout << "[" << reg << "] : " << count << std::endl;
-        }
+        if (reg_evals_.find(reg) == reg_evals_.end()) {
+            add_query(reg);
+        } 
+        const auto & [parser, regex] = reg_evals_[reg];
+        long count = match_one_helper(parser, regex);
+        std::cout << "[" << reg << "] : " << count << std::endl;
     }
 
     ~QueryMatcher() {}
@@ -66,6 +61,15 @@ class QueryMatcher {
             }
         }
         return count;
+    }
+
+    void add_query(const std::string & reg) {
+        auto curr_p = std::make_unique<QueryParser>(k_index_);
+        curr_p->generate_query_plan(reg);
+        curr_p->remove_null();
+        curr_p->rewrite_by_index();
+        curr_p->remove_null();
+        reg_evals_[reg] = std::make_pair(std::move(curr_p), std::make_shared<RE2>(reg));
     }
 };
 
