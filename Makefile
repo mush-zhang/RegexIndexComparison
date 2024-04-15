@@ -2,7 +2,7 @@ CC=gcc
 CXX=g++
 
 CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
-
+LDFLAGS=-pthread
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2
 
@@ -33,7 +33,7 @@ $(info $(OBJECT_LIST))
 all: benchmark.out
 
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $(FREE_IDX_DIR)/free_multigram.o $(FREE_MCH_DIR)/free_parser.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $(FAST_IDX_DIR)/lpms.o benchmarks/benchmark.cpp
-	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
+	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 
 .PHONY: clean
 clean:
