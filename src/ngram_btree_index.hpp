@@ -18,7 +18,7 @@ class NGramBtreeIndex : public NGramIndex {
 
     std::vector<std::string> find_all_indexed(const std::string & line) const override;
 
-    void print_index() const override;
+    void print_index(bool size_only=false) const override;
     
     const std::vector<size_t> & get_line_pos_at(const std::string & key) const override;
 

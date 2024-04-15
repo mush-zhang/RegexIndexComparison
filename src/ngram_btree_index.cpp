@@ -3,17 +3,22 @@
 
 static const std::vector<size_t> k_empty_pos_list_;
 
-void NGramBtreeIndex::print_index() const {
+void NGramBtreeIndex::print_index(bool size_only) const {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
     std::cout << ", size of index: " << k_index_.size() << std::endl;
+    std::cout << ", size of index in bytes: " << k_index_.bytes_used() << std::endl;
     for (const auto & key : k_index_keys_) {
         std::cout << key << ": ";
-        std::cout << "[";
-        for (auto idx : k_index_.at(key)) {
-            std::cout << idx << ",";
+        if (size_only) {
+            std::cout << k_index_.at(key).size() << " lines" << std::endl;
+        } else {
+            std::cout << "[";
+            for (auto idx : k_index_.at(key)) {
+                std::cout << idx << ",";
+            }
+            std::cout << "]"  << std::endl;
         }
-        std::cout << "]"  << std::endl;
     }
 }
 

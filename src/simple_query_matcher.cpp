@@ -1,5 +1,6 @@
 #include "simple_query_matcher.hpp"
 #include <iostream>
+#include <chrono>
 #include "utils/utils.hpp"
 
 long SimpleQueryMatcher::match_one_helper(
@@ -32,17 +33,33 @@ long SimpleQueryMatcher::match_one_helper(
 }
 
 void SimpleQueryMatcher::match_all() {
+    auto start = std::chrono::high_resolution_clock::now();
+    std::vector<long> counts;
+    counts.reserve(reg_evals_.size());
+
     for (const auto & [reg, compiled_reg] : reg_evals_) {
-        long count = match_one_helper(reg, compiled_reg);
-        std::cout << "[" << reg << "] : " << count << std::endl;
+        counts.push_back(match_one_helper(reg, compiled_reg));
     }
-    // TOOD: add timing print maybe.
+    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Match All End in " << elapsed << " s" << std::endl;
+
+    for (long c : counts) {
+        // std::cout << "[" << reg << "] : " << c << std::endl;
+        std::cout << c << std::endl;
+    }
 }
 
 void SimpleQueryMatcher::match_one(const std::string & reg) {
+    auto start = std::chrono::high_resolution_clock::now();
+    long count = 0;
     if (reg_evals_.find(reg) != reg_evals_.end()) {
         auto compiled_reg = reg_evals_[reg];
         long count = match_one_helper(reg, compiled_reg);
-        std::cout << "[" << reg << "] : " << count << std::endl;
     }
+    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Match One End in " << elapsed << " s" << std::endl;
+
+    std::cout << "[" << reg << "] : " << count << std::endl;
 }

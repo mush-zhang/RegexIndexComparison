@@ -130,12 +130,17 @@ std::vector<std::string> readDataIn(const std::string & file_type,
 
 void run_end_to_end(const std::vector<std::string> & regexes, 
                     const std::vector<std::string> & lines) {
-    auto pi = best_index::SingleThreadedIndex(lines, regexes, 0.1);
-    pi.build_index();
-
-    auto matcher = SimpleQueryMatcher(pi);
-
-    matcher.match_all();
+    std::vector<double> threshs({0.1, 0.3, 0.6, 0.8, 1});
+    for (double t : threshs) {
+        std::cout << "Start with threshold = " << t << std::endl;
+        std::cout << "--------------------------------------" << std::endl;
+        auto pi = best_index::SingleThreadedIndex(lines, regexes, t);
+        pi.build_index();
+        pi.print_index(true);
+        auto matcher = SimpleQueryMatcher(pi);
+        matcher.match_all();
+        std::cout << "--------------------------------------" << std::endl;
+    }
 }
 
 // void experiment(std::ofstream & r_file, const std::vector<std::string> & regexes, 

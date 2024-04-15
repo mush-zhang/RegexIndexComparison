@@ -27,7 +27,7 @@ class NGramIndex {
     // return all substrings of the given string that are keys in the index
     virtual std::vector<std::string> find_all_indexed(const std::string & line) const = 0;
 
-    virtual void print_index() const = 0;
+    virtual void print_index(bool size_only=false) const = 0;
     
     virtual const std::vector<size_t> & get_line_pos_at(const std::string & key)  const = 0;
 
