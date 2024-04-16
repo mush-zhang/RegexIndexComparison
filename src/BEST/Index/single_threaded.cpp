@@ -108,6 +108,8 @@ std::unordered_map<size_t, std::vector<size_t>>
 best_index::SingleThreadedIndex::k_medians(
         const std::vector<std::vector<double>> & dist_mtx, 
         int num_queries, int num_clusters) {
+    std::cout << "k medians start" << std::endl;
+
     // 1. randomly pick k queries as centroids
     std::vector<size_t> centroids;
     // Note: random sample function from here: https://stackoverflow.com/a/73133364
@@ -115,6 +117,8 @@ best_index::SingleThreadedIndex::k_medians(
     centroids.resize(num_clusters);
     std::ranges::sample(std::views::iota(0, num_queries), centroids.begin(), 
                         num_clusters, std::mt19937{std::random_device{}()}); 
+    // std::cout << " num_clusters " << num_clusters << std::endl;
+    // std::cout << " random sample centroids " << centroids.size() << std::endl;
 
     // c_dists: index [idx of centroid in centroids] 
     //          value [distance from current node to the centroid]
@@ -122,7 +126,6 @@ best_index::SingleThreadedIndex::k_medians(
     // closest_c_idxs: index [idx of a query] 
     //                 value [current query idx of closet centroid in centroids]
     std::vector<int> closest_c_idxs(num_queries, -1);
-
     
     // cmap: key [query idx centroid in centroids] 
     //       value [list of query idx]
@@ -130,9 +133,11 @@ best_index::SingleThreadedIndex::k_medians(
 
     bool centroid_final = false;
     size_t max_iteration = 100000;
+    // std::cout << "variables set, start iterating" << std::endl;
 
     size_t curr_it = 0;
     while(!centroid_final && curr_it++ < max_iteration) {
+        std::cout << "iteration " << curr_it << std::endl;
         centroid_final = true;
         // 2. assign data points to nearest centroids
         std::unordered_map<size_t, std::vector<size_t>>().swap(cmap);
@@ -141,23 +146,30 @@ best_index::SingleThreadedIndex::k_medians(
         //          value [distance to the current query]
         for (size_t q_idx = 0; q_idx < num_queries; q_idx++) {
             auto q_dists = dist_mtx[q_idx];
+            // std::cout << "\t\t q_dist[" << q_idx << "] size " << q_dists.size() << std::endl;
             for (size_t i = 0; i < num_clusters; i++) {
                 c_dists[i] = q_dists[centroids[i]];
             }
+            // std::cout << "\t\t c_dists; argmin = " << argmin(c_dists) << ", centroids size " << centroids.size() << std::endl;
             // curr_closest: [idx of closet centroid in centroids] 
             auto curr_closest = centroids[argmin(c_dists)];
+            // std::cout << "\t\t curr_closest " << curr_closest << std::endl;
             if (closest_c_idxs[q_idx] != curr_closest) {
                 centroid_final = false;
                 closest_c_idxs[q_idx] = curr_closest;
             }
             cmap[curr_closest].push_back(q_idx);
+            // std::cout << "\t\t cmap updated" << std::endl;
         }
+        // std::cout << "\t calcualte c_dists, cmap, closest_c_idxs" << std::endl;
 
         std::vector<size_t> fillables;
         // 3. compute the new median as centroids for each cluster
         for (size_t c_idx = 0; c_idx < num_clusters; c_idx++) {
             auto q_idxs = cmap[centroids[c_idx]];
             if (q_idxs.empty() || q_idxs.size() == 1) {
+
+                // TODO: maybe keep when q_idxs.size() == 1?
                 fillables.push_back(c_idx);
             } else {
                 std::vector<double> dist_sums(q_idxs.size(), 0);
@@ -170,6 +182,10 @@ best_index::SingleThreadedIndex::k_medians(
                 centroids[c_idx] = q_idxs[curr_c];
             }
         }
+        // std::cout << "\t choose centroids" << std::endl;
+        // if (!fillables.empty())
+            // std::cout << "\t get random for fillables " << fillables.size() << std::endl;
+        
         //3.5 empty cluster, choose a random centroid
         std::set<size_t> centroids_set(centroids.begin(), centroids.end());
         for (const auto & c_idx : fillables) {
@@ -181,6 +197,8 @@ best_index::SingleThreadedIndex::k_medians(
             }
             centroids[c_idx] = curr_rand;
         }
+        // if (!fillables.empty())
+        //     std::cout << "\t end fillables" << std::endl;
     }
     return cmap;
 }

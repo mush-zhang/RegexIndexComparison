@@ -1,6 +1,8 @@
 #ifndef BEST_INDEX_PARALLELIZABLE_HPP_
 #define BEST_INDEX_PARALLELIZABLE_HPP_
 
+#include <algorithm>
+
 #include "single_threaded.hpp"
 
 namespace best_index {
@@ -12,7 +14,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
                const std::vector<std::string> & queries, 
                double sel_threshold)
       : SingleThreadedIndex(dataset, queries, sel_threshold),
-        k_num_clusters_(queries.size()/5) {
+        k_num_clusters_(std::max(4, int(queries.size()/5))) {
             dist_measure_type_ = dist_type::kMaxDevDist2;
         }
     
@@ -22,7 +24,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
                dist_type dist_measure_type)
       : SingleThreadedIndex(dataset, queries, sel_threshold,
                             workload_reduced_size, dist_measure_type),
-        k_num_clusters_(queries.size()/5) {}
+        k_num_clusters_(std::max(4, int(queries.size()/5))) {}
 
     ~ParallelizableIndex() {}
  private:

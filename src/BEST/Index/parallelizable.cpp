@@ -73,12 +73,22 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
               keeping only the reduced set of queries.**/
     auto candidates = candidate_gram_set_gen(query_literals, pre_suf_count);
     size_t candidates_size = candidates.size();
+    // std::cout << "candidate set generated " << std::endl;
 
     // Partition Q into k disjoint sets
     // Note: now query literals and presufcount is the one after workload reduction
     auto qg_gram_set = get_all_multigrams_per_query(query_literals);
     auto dist_mtx = calculate_pairwise_dist(qg_gram_set, pre_suf_count);
-    auto cmap = k_medians(dist_mtx, dist_mtx.size(), k_num_clusters_);
+
+    std::unordered_map<size_t, std::vector<size_t>> cmap;
+    if (k_num_clusters_ >= k_queries_size_) {
+        for (size_t q_idx = 0; q_idx < k_queries_size_; q_idx++) {
+            cmap[q_idx] = std::vector<size_t>({q_idx});
+        }
+    } else {
+        cmap = k_medians(dist_mtx, dist_mtx.size(), k_num_clusters_);
+    }
+    // std::cout << "cluster done " << std::endl;
 
     // build gr_list, qg_list, rc for each partition
     std::vector<best_index::SingleThreadedIndex::job> jobs(cmap.size());
@@ -94,6 +104,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     for (auto & th : job_building_threads) {
         th.join();
     }
+    // std::cout << "built gr qg rc" << std::endl;
 
     /**
      * I : index key idx; 
@@ -109,6 +120,8 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     // While some (q,r) uncovered AND space available
     while (!multi_all_covered(index, jobs) && 
             (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
+        // std::cout << "Iteration: index size " << index.size() << std::endl;
+
         // for every g \in G\I, set benefit_global[g] = 0
         std::fill(benefit_global.begin(), benefit_global.end(), 0);
 
