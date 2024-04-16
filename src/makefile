@@ -11,12 +11,15 @@ FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
 FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
 FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR) $(FREE_MCH_DIR)
 FREE_MCH=$(FREE_MCH_DIR)/free_parser.o
-FREE_IDX=inverted_index.o utils/hash_pair.o $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o 
+FREE_IDX=inverted_index.o utils/hash_pair.o $\
+		 $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o 
 
 BEST_BASE_DIR=BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR)
-BEST_IDX=simple_query_matcher.o btree_index.o utils/rax/rax.o utils/rax/rc4rand.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
+BEST_IDX=simple_query_matcher.o btree_index.o $\
+		 utils/rax/rax.o utils/rax/rc4rand.o $\
+		 $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
 FAST_BASE_DIR=FAST
 FAST_IDX_DIR=$(FAST_BASE_DIR)/Index

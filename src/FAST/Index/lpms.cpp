@@ -1,4 +1,5 @@
 #include <exception>
+#include <chrono>
 
 #include "lpms.hpp"
 #include "../../utils/utils.hpp"
@@ -314,5 +315,9 @@ void fast_index::LpmsIndex::select_grams(int upper_k) {
 }
 
 void fast_index::LpmsIndex::build_index(int upper_k) {
+    auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_k);
+    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Select Grams and Index Building End in " << elapsed << " s" << std::endl;
 }

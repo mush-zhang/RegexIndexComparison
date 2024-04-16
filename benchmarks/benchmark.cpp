@@ -35,13 +35,13 @@ int main(int argc, char** argv) {
     }
     std::cout << "read lines end" << std::endl;
 
-    std::ofstream r_file(argv[1], std::ofstream::out);
-    if (!r_file.is_open()) {
-        std::cerr << "Could not open output file '" << argv[1] << "'" << std::endl;
-        return EXIT_FAILURE;
-    }
+    // std::ofstream r_file(argv[1], std::ofstream::out);
+    // if (!r_file.is_open()) {
+    //     std::cerr << "Could not open output file '" << argv[1] << "'" << std::endl;
+    //     return EXIT_FAILURE;
+    // }
     std::cout << "start best end-to-end" << std::endl;
     run_end_to_end(regexes, lines);
 
-    r_file.close(); 
+    // r_file.close(); 
 }

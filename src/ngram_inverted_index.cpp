@@ -8,7 +8,7 @@ void NGramInvertedIndex::print_index(bool size_only) const {
     std::cout << ", size of keys: " << k_index_keys_.size();
     std::cout << ", size of index: " << k_index_.size() << std::endl;
     for (const auto & key : k_index_keys_) {
-        std::cout << key << ": ";
+        std::cout << "\"" << key << "\"" << ": ";
         if (size_only) {
             std::cout << k_index_.at(key).size() << " lines" << std::endl;
         } else {

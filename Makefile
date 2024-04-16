@@ -32,9 +32,18 @@ $(info $(OBJECT_LIST))
 
 all: benchmark.out
 
-benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $(FREE_IDX_DIR)/free_multigram.o $(FREE_MCH_DIR)/free_parser.o $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $(FAST_IDX_DIR)/lpms.o benchmarks/benchmark.cpp
+benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
+			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $\
+			   $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $\
+			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_MCH_DIR)/free_parser.o $\
+			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
+			   $(FAST_IDX_DIR)/lpms.o $\
+			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
+
+benchmarks/utils.o: benchmarks/utils.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o  $@
 
 .PHONY: clean
 clean:
-	rm benchmark.out
+	rm benchmark.out benchmarks/utils.o
