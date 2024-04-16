@@ -49,8 +49,8 @@ std::vector<std::string> readTraffic() {
         return lines;
     }
     size_t i = 0;
-    while (i++ < 100000 && getline(data_in, line)){
-    // while (getline(data_in, line)){
+    // while (i++ < 100000 && getline(data_in, line)){
+    while (getline(data_in, line)){
         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         std::stringstream streamData(line);
         std::string s; 
