@@ -7,9 +7,10 @@
 
 namespace fast_index {
 
+enum relaxation_type { kDeterministic, kRandomized, kInvalid };
+
 class LpmsIndex : public NGramInvertedIndex {
  public:
-    enum relaxation_type { kDeterministic, kRandomized, kInvalid };
 
     LpmsIndex() = delete;
     LpmsIndex(const LpmsIndex &&) = delete;

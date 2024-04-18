@@ -2,7 +2,7 @@ CC=gcc
 CXX=g++
 
 CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
-LDFLAGS=-pthread
+LDFLAGS=-pthread -lstdc++fs
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2
 
@@ -46,4 +46,4 @@ benchmarks/utils.o: benchmarks/utils.cpp
 
 .PHONY: clean
 clean:
-	rm benchmark.out benchmarks/utils.o
+	rm -f benchmark.out benchmarks/utils.o

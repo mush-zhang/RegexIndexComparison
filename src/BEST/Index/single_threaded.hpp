@@ -8,6 +8,8 @@
 
 namespace best_index {
 
+enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
+
 /**
  * Note: the orginal paper assumes b+tree for size constraint calculation.
  *       Yet it does not actually build the index and measure query performance.
@@ -16,7 +18,6 @@ namespace best_index {
  */
 class SingleThreadedIndex  : public NGramBtreeIndex {
  public:
-    enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
 
     /**
      * Q-G-list: vector in order of q, where each element is

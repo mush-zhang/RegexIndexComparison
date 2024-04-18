@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <numeric>
 #include <sstream>
+#include <string.h>
+#include <filesystem>
 
-#include "../src/BEST/Index/single_threaded.hpp"
 #include "../src/BEST/Index/parallelizable.hpp"
-#include "../src/FAST/Index/lpms.hpp"
 #include "../src/simple_query_matcher.hpp"
 
 #include "../src/FREE/Index/multigram_index.hpp"
@@ -15,15 +15,41 @@
 
 #include "utils.hpp"
 
-char * getCmdOption(char ** begin, char ** end, const std::string & option) {
-    char ** itr = std::find(begin, end, option);
-    if (itr != end && ++itr != end) {
-        return *itr;
+inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
+inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
+inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
+
+selection_type get_method(const std::string gs) {
+    if (gs == "REI") {
+        return selection_type::kRei;
     }
-    return 0;
+    if (gs == "FREE") {
+        return selection_type::kFree;
+    }
+    if (gs == "BEST") {
+        return selection_type::kBest;
+    }
+    if (gs == "FAST") {
+        return selection_type::kFast;
+    }
+    return selection_type::kInvalid;
 }
 
-bool cmdOptionExists(char** begin, char** end, const std::string& option) {
+int error_return(const std::string msg) {
+    std::cerr << "Error: " << msg << std::endl;
+    std::cerr << kUsage << std::endl;
+    return EXIT_FAILURE;
+}
+
+std::string getCmdOption(char ** begin, char ** end, const std::string & option) {
+    char ** itr = std::find(begin, end, option);
+    if (itr != end && ++itr != end) {
+        return std::string(*itr);
+    }
+    return "";
+}
+
+bool cmdOptionExists(char ** begin, char ** end, const std::string & option) {
     return std::find(begin, end, option) != end;
 }
 
@@ -39,17 +65,161 @@ std::pair<T, T> getStats(std::vector<T> & arr) {
     return std::make_pair(ave, trimmed_ave);
 }
 
-std::vector<std::string> readTraffic() {
+int parseArgs(int argc, char ** argv, 
+             expr_info & expr_info, rei_info & rei_info, 
+             free_info & free_info, best_info & best_info, 
+             fast_info & fast_info) {
+
+    if (argc < 8) {
+        return error_return("Missing required arguments.");
+    }
+
+    // check gram selection type
+    expr_info.stype = get_method(argv[1]);
+    if (expr_info.stype == selection_type::kInvalid) {
+        return error_return("Invalid gram selection method.");
+    }
+
+    // check workload
+    auto wl_string = getCmdOption(argv, argv + argc, "-w");
+    if (wl_string.empty()) {
+        return error_return("Missing type of workload used.");
+    } else {
+        expr_info.wl = std::stoi(wl_string);
+        if (expr_info.wl < 0 || expr_info.wl > 3) {
+            return error_return("Invalid workload type.");
+        } else if (expr_info.wl == 0) {
+            expr_info.reg_file = getCmdOption(argv, argv + argc, "-r");
+            if (expr_info.reg_file.empty()) {
+                return error_return("Missing path to regex file for customized workload.");        
+            }
+            expr_info.data_file = getCmdOption(argv, argv + argc, "-d");
+            if (expr_info.data_file.empty()) {
+                return error_return("Missing path to data file for customized workload.");        
+            }
+        }
+    }
+
+    expr_info.out_file = getCmdOption(argv, argv + argc, "-o");
+    if (expr_info.out_file.empty()) {
+        return error_return("Missing output file.");
+    }
+
+    auto repeat_string = getCmdOption(argv, argv + argc, "-e");
+    if (repeat_string.empty()) {
+        expr_info.num_repeat = 10;
+    } else {
+        expr_info.num_repeat = std::stoi(repeat_string);
+    }
+
+    auto thread_string = getCmdOption(argv, argv + argc, "-t");
+    int thread_count = 0;
+    if (thread_string.empty()) {
+        return error_return("Missing number of threads.");
+    } else {
+        thread_count = std::stoi(thread_string);
+    }
+    auto gram_size_string = getCmdOption(argv, argv + argc, "-n");
+    int n = 0;
+    if (!gram_size_string.empty()) {
+        n = std::stoi(gram_size_string);
+    }
+    auto selec_string = getCmdOption(argv, argv + argc, "-c");
+    double selec = -1;
+    if (!selec_string.empty()) {
+        selec = std::stod(selec_string);
+    }
+    switch (expr_info.stype) {
+        case selection_type::kRei: {
+            rei_info.num_threads = thread_count;
+            if (n > 1) {
+                return error_return("Missing/Invalid size n of n-gram.");
+            }
+            rei_info.gram_size = n;
+            auto gram_num_string = getCmdOption(argv, argv + argc, "-k");
+            if (gram_num_string.empty()) {
+                return error_return("Missing number of grams.");
+            } else {
+                rei_info.num_grams = std::stoi(gram_num_string);
+            }
+            break;
+        }
+        case selection_type::kFree: {
+            free_info.num_threads = thread_count;
+            if (n == 0) {
+                return error_return("Missing/Invalid upper bound on n of n-gram.");
+            }
+            free_info.upper_k = n;
+            if (selec > 0 && selec <= 1) {
+                free_info.sel_threshold = selec;
+            } 
+            free_info.use_presuf = cmdOptionExists(argv, argv + argc, "--presuf");
+            break;
+        }
+        case selection_type::kBest: {
+            best_info.num_threads = thread_count;
+            if (selec > 0 && selec <= 1) {
+                best_info.sel_threshold = selec;
+            } 
+            auto wl_reduce_string = getCmdOption(argv, argv + argc, "--wl_reduce");
+            if (!wl_reduce_string.empty()) {
+                if (wl_reduce_string.find('.') != std::string::npos) {
+                    best_info.wl_reduced_frac = std::stod(wl_reduce_string);
+                } else {
+                    best_info.wl_reduced_size = std::stoi(wl_reduce_string);
+                }
+            }
+            auto dtype_string = getCmdOption(argv, argv + argc, "--dist");
+            if (!dtype_string.empty()) {
+                switch (std::stoi(dtype_string)) {
+                    case 1:
+                        best_info.dtype = best_index::dist_type::kMaxDevDist1;
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        best_info.dtype = best_index::dist_type::kMaxDevDist3;
+                        break;
+                    default:
+                        return error_return("Invalid distance type.");
+                }
+            }
+            break;
+        }
+        case selection_type::kFast: {
+            fast_info.num_threads = thread_count;
+            auto relax_string = getCmdOption(argv, argv + argc, "--relax");
+            if (relax_string.empty()) {
+                return error_return("Missing type of relaxation.");
+            } else if (relax_string == "DETERM") {
+                fast_info.rtype = fast_index::relaxation_type::kDeterministic;
+            } else if (relax_string == "RANDOM") {
+                fast_info.rtype = fast_index::relaxation_type::kRandomized;
+            } else {
+                return error_return("Invalid relaxation type.");
+            }
+            break;
+        }
+        default:
+            // should not have reached here.
+            return error_return("Invalid gram selection method. (Wrong place to return)");
+    }
+
+    return EXIT_SUCCESS;
+}
+
+std::vector<std::string> read_traffic(int max_lines=-1) {
     std::string line;
     std::vector<std::string> lines;
-    std::ifstream data_in(kDataDefault);
+    std::string traffic_file = "data/US_Accidents_Dec21_updated.csv";
+
+    std::ifstream data_in(traffic_file);
     if (!data_in.is_open()) {
-        std::cerr << "Could not open data file '" << kDataDefault << "'" << std::endl;
-        std::cerr << "Try downloading it first per instruction in ../data/dataset.txt" << std::endl;
+        std::cerr << "Could not open data file '" << traffic_file << "'" << std::endl;
         return lines;
     }
+
     size_t i = 0;
-    // while (i++ < 100000 && getline(data_in, line)){
     while (getline(data_in, line)){
         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         std::stringstream streamData(line);
@@ -61,59 +231,122 @@ std::vector<std::string> readTraffic() {
                 break;
             }
         }
+        if (max_lines > 0 && lines.size() > max_lines) {
+            break;
+        }
     }
     data_in.close();
     return lines;
 }
 
-int parseArgs(int argc, char** argv, int * num_repeat, 
-        std::string * input_regex_file, std::string * input_data_file) {
-    // argument should have -r -d -o for optional input regex file, input data file, and output file specification
+std::vector<std::string> read_dbx(int max_lines=-1) {
+    std::string line;
 
-    if (argc < 2) {
-        std::cerr << "Arguments missing: output file." << std::endl;
-        std::cerr << kUsage << std::endl;
-        return EXIT_FAILURE;
+    std::vector<std::string> lines;
+    std::string path = "data/extracted";
+    for (const auto & entry : std::filesystem::directory_iterator(path)) {
+        std::string data_file = entry.path();
+        std::ifstream data_in(data_file);
+        if (!data_in.is_open()) {
+            std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
+            return lines;
+        }
+        //  101876733 
+        while (getline(data_in, line)){
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            if (line.size() > 2) {
+                lines.push_back(line);
+                if (max_lines > 0 && lines.size() > max_lines) {
+                    data_in.close();
+                    return lines;
+                }
+            }
+        }
+        data_in.close();
     }
-
-    auto repeat_string = getCmdOption(argv, argv + argc, "-n");
-    if (repeat_string) {
-        *num_repeat = std::stoi(repeat_string);
-    } else {
-        *num_repeat = 10;
-    }
-
-    auto input_regex_file_raw = getCmdOption(argv, argv + argc, "-r");
-    if (input_regex_file_raw) {
-        *input_regex_file = input_regex_file_raw;
-    } else {
-        *input_regex_file = kRegexDefault;
-    }
-    auto input_data_file_raw = getCmdOption(argv, argv + argc, "-d");
-    if (input_data_file_raw) {
-        *input_data_file = input_data_file_raw;
-    } else {
-        *input_data_file = "";
-    }
-
-    return EXIT_SUCCESS;
+    return lines;
 }
 
-std::vector<std::string> readDataIn(const std::string & file_type, 
-                                    const std::string & infile_name) {
+std::vector<std::string> read_sysy(int max_lines=-1) {
+    std::string line;
+    std::vector<std::string> lines;
+    std::string data_file = "data/tagged_data.csv";
+
+    std::ifstream data_in(data_file);
+    if (!data_in.is_open()) {
+        std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
+        return lines;
+    }
+    while (getline(data_in, line)){
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+        std::stringstream streamData(line);
+        std::vector<std::string> curr_line;
+        std::string s; 
+        while (getline(streamData, s, '\t')) {
+            curr_line.push_back(s);
+        }
+        curr_line.resize(curr_line.size()-4);
+
+        std::string curr;
+        for (const auto &piece : curr_line) curr += piece;
+
+        lines.push_back(curr);
+        if (max_lines > 0 && lines.size() > max_lines) {
+            break;
+        }
+    }
+    data_in.close();
+    return lines;
+}
+
+std::vector<std::string> read_file(const std::string & file_type, 
+                                    const std::string & infile_name,
+                                    int max_lines=-1) {
     std::vector<std::string> in_strings;
     std::ifstream data_in(infile_name);
     if (!data_in.is_open()) {
-        std::cerr << "Could not open " << file_type << " file '" << infile_name << "'" << std::endl;
+        std::cerr << "Could not open " << file_type << " file '";
+        std::cerr << infile_name << "'" << std::endl;
     } else {
         std::string line;
         while (getline(data_in, line)){
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
             in_strings.push_back(line);
+            if (max_lines > 0 && in_strings.size() > max_lines) {
+                break;
+            }
         }
         data_in.close();
     }
     return in_strings;
+}
+
+int readWorkload(const expr_info & expr_info, 
+                 std::vector<std::string> & regexes, 
+                 std::vector<std::string> & lines,
+                 int max_lines) {
+    switch (expr_info.wl) {
+        case 1: 
+            regexes = read_file("regex", kTrafficRegex);
+            lines = read_traffic(max_lines);
+            break;
+        case 2:
+            regexes = read_file("regex", kDbxRegex);
+            lines = read_dbx(max_lines);
+            break;
+        case 3:
+            regexes = read_file("regex", kSysyRegex);
+            lines = read_sysy(max_lines);    
+            break;
+        default:
+            regexes = read_file("regex", expr_info.reg_file);
+            lines = read_file("data", expr_info.data_file, max_lines);
+    }
+    if (regexes.empty() || lines.empty()) {
+        return EXIT_FAILURE;
+    }
+    std::cout << "read workload end" << std::endl;
+    return EXIT_SUCCESS;
 }
 
 void run_end_to_end(const std::vector<std::string> & regexes, 

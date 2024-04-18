@@ -71,7 +71,7 @@ void simple_index_radonmized() {
     });;
 
     auto pi2 = fast_index::LpmsIndex(test_dataset, test_query, 
-        fast_index::LpmsIndex::relaxation_type::kRandomized);
+        fast_index::relaxation_type::kRandomized);
     pi2.build_index();
     pi2.print_index();
     std::cout << "***********" << std::endl;

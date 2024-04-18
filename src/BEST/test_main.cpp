@@ -88,19 +88,19 @@ void simple_wl_red_index() {
     });;
 
     auto pi1 = best_index::SingleThreadedIndex(test_dataset, test_query, 
-        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+        1, 4, best_index::dist_type::kMaxDevDist1);
     pi1.build_index();
     pi1.print_index();
     std::cout << "***********" << std::endl;
 
     auto pi2 = best_index::SingleThreadedIndex(test_dataset, test_query, 
-        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist2);
+        1, 4, best_index::dist_type::kMaxDevDist2);
     pi2.build_index();
     pi2.print_index();
     std::cout << "***********" << std::endl;
 
     auto pi3 = best_index::SingleThreadedIndex(test_dataset, test_query, 
-        1, 4, best_index::SingleThreadedIndex::dist_type::kMaxDevDist3);
+        1, 4, best_index::dist_type::kMaxDevDist3);
     pi3.build_index();
     pi3.print_index();
     std::cout << "***********" << std::endl;
@@ -138,7 +138,7 @@ void simple_parallelizable() {
     });;
 
     auto pi = best_index::ParallelizableIndex(test_dataset, test_query, 1, 4, 
-        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+        best_index::dist_type::kMaxDevDist1);
     pi.build_index();
     pi.print_index();
 }
@@ -165,7 +165,7 @@ void simple_matcher() {
     });;
 
     auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, 
-        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+        best_index::dist_type::kMaxDevDist1);
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
@@ -187,7 +187,7 @@ void longer_matcher() {
     make_dataset_with_keys(test_query, test_dataset, threshold);
 
     auto pi = best_index::SingleThreadedIndex(test_dataset, test_query, 1, 4, 
-        best_index::SingleThreadedIndex::dist_type::kMaxDevDist1);
+        best_index::dist_type::kMaxDevDist1);
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
