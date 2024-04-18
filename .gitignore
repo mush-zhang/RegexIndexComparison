@@ -39,3 +39,6 @@
 
 # Gurobi log
 *gurobi.log
+
+# Sensitive data files
+data/*
