@@ -21,11 +21,10 @@ class MultigramIndex : public NGramInvertedIndex {
  protected:
     void select_grams(int upper_k) override;
     void fill_posting(int upper_k);
-    
- private:
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
-
+        
+ private:
     /**Select Grams Helpers**/
     void get_kgrams_not_indexed(
             std::unordered_map<std::string, long double> & kgrams,

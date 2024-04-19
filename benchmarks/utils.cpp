@@ -19,6 +19,9 @@ inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 
+inline constexpr const std::string_view kIndexHeader = "\
+    name,num_threads,gram_size,selectivity,selection_time,build_time,overall_time,num_keys,index_size"
+
 selection_type get_method(const std::string gs) {
     if (gs == "REI") {
         return selection_type::kRei;
@@ -106,10 +109,9 @@ int parseArgs(int argc, char ** argv,
     }
 
     auto repeat_string = getCmdOption(argv, argv + argc, "-e");
-    if (repeat_string.empty()) {
-        expr_info.num_repeat = 10;
-    } else {
-        expr_info.num_repeat = std::stoi(repeat_string);
+    int rep = 10;
+    if (!repeat_string.empty()) {
+        rep = std::stoi(repeat_string);
     }
 
     auto thread_string = getCmdOption(argv, argv + argc, "-t");
@@ -131,6 +133,7 @@ int parseArgs(int argc, char ** argv,
     }
     switch (expr_info.stype) {
         case selection_type::kRei: {
+            rei_info.num_repeat = rep;
             rei_info.num_threads = thread_count;
             if (n > 1) {
                 return error_return("Missing/Invalid size n of n-gram.");
@@ -145,6 +148,7 @@ int parseArgs(int argc, char ** argv,
             break;
         }
         case selection_type::kFree: {
+            free_info.num_repeat = rep;
             free_info.num_threads = thread_count;
             if (n == 0) {
                 return error_return("Missing/Invalid upper bound on n of n-gram.");
@@ -157,6 +161,7 @@ int parseArgs(int argc, char ** argv,
             break;
         }
         case selection_type::kBest: {
+            best_info.num_repeat = rep;
             best_info.num_threads = thread_count;
             if (selec > 0 && selec <= 1) {
                 best_info.sel_threshold = selec;
@@ -187,6 +192,7 @@ int parseArgs(int argc, char ** argv,
             break;
         }
         case selection_type::kFast: {
+            fast_info.num_repeat = rep;
             fast_info.num_threads = thread_count;
             auto relax_string = getCmdOption(argv, argv + argc, "--relax");
             if (relax_string.empty()) {
@@ -336,7 +342,7 @@ int readWorkload(const expr_info & expr_info,
             break;
         case 3:
             regexes = read_file("regex", kSysyRegex);
-            lines = read_sysy(max_lines);    
+            lines = read_sysy(max_lines);
             break;
         default:
             regexes = read_file("regex", expr_info.reg_file);
@@ -345,7 +351,9 @@ int readWorkload(const expr_info & expr_info,
     if (regexes.empty() || lines.empty()) {
         return EXIT_FAILURE;
     }
-    std::cout << "read workload end" << std::endl;
+    std::cout << "read workload end." << std::endl;
+    std::cout << "Number of regexes: " << regexes.size() << "."<< std::endl;
+    std::cout << "Number of data lines: " << lines.size() << "." << std::endl;
     return EXIT_SUCCESS;
 }
 
@@ -390,58 +398,70 @@ void run_end_to_end(const std::vector<std::string> & regexes,
 
 }
 
-// void experiment(std::ofstream & r_file, const std::vector<std::string> & regexes, 
-//         const std::vector<std::string> & lines, int num_repeat) {
-//     for (const std::string & r : regexes) {
-//         std::vector<double> elapsed_time_blare;
-//         std::vector<double> elapsed_time_direct;
-//         std::vector<double> elapsed_time_split;
-//         std::vector<double> elapsed_time_multi;
-//         std::vector<int> strategies;
-//         int match_count_blare;
-//         int match_count_direct;
-//         int match_count_split;
-//         int match_count_multi;
-//         for (int i = 0; i < num_repeat; i++) {
-//             auto [dtime, dnum] = DirectMatch(lines, r);
-//             auto [smtime, smnum] = SplitMatch3Way(lines, r);
-//             auto [btime, bnum, bstrat] = Blare(lines, r);
-//             auto [multime, mulnum] = SplitMatchMultiWay(lines, r);
+int benchmark(const ofstream & outfile, const expr_info & expr_info, 
+               const rei_info & rei_info, const free_info & free_info, 
+               const best_info & best_info, const fast_info & fast_info) {
+    // index building file
+    const std::filesystem::path out_path = expr_info.out_file / "index_building.csv";
+    std::ofstream outfile;
+    if (!std::filesystem::exists(out_path)) {
+        // write header
+        outfile.open(out_path, std::ios::out);
+        outfile << kIndexHeader << std::endl;
+    } else {
+        outfile.open(out_path, std::ios::app);
+    }
 
-//             elapsed_time_blare.push_back(btime);
-//             strategies.push_back(bstrat);
-//             elapsed_time_direct.push_back(dtime);
-//             elapsed_time_split.push_back(smtime);
-//             elapsed_time_multi.push_back(multime);
 
-//             match_count_blare = bnum;
-//             match_count_direct = dnum;
-//             match_count_split = smnum;
-//             match_count_multi = mulnum;
-//         }
-        
-//         auto [ave_direct, mid_ave_direct] = getStats<double>(elapsed_time_direct);
-//         auto [ave_multi, mid_ave_multi] = getStats<double>(elapsed_time_multi);
-//         auto [ave_split, mid_ave_split] = getStats<double>(elapsed_time_split);
-//         auto [ave_blare, mid_ave_blare] = getStats<double>(elapsed_time_blare);
-//         auto [ave_stratgy, mid_ave_strategy] = getStats<int>(strategies);
 
-//         std::vector<double> mid_times(3, 0);
-//         mid_times[ARM::kSplitMatch] = mid_ave_split;
-//         mid_times[ARM::kMultiMatch] = mid_ave_multi;
-//         mid_times[ARM::kDirectMatch] = mid_ave_direct;
-//         auto true_strategy = std::distance(mid_times.begin(), std::min_element(mid_times.begin(), mid_times.end()));
-//         auto strategy_diff = std::count(strategies.begin(), strategies.end(), true_strategy);
+    outfile.close();
+}
+void benchmarkRei(const ofstream & outfile, 
+                  const std::vector<std::string> regexes, 
+                  const std::vector<std::string> lines,
+                  const rei_info & rei_info) {
+    // get index building time
+    return
+}
 
-//         r_file << r << "\t";
-//         r_file << true_strategy << "\t"  << ave_stratgy << "\t" << mid_ave_strategy << "\t" << strategy_diff << "\t";
-//         r_file << ave_blare << "\t" << mid_ave_blare << "\t";
-//         r_file << ave_multi << "\t" << mid_ave_multi << "\t";
-//         r_file << ave_split << "\t" << mid_ave_split << "\t";
-//         r_file << ave_direct << "\t" << mid_ave_direct << "\t";
-//         r_file << match_count_blare << "\t" << match_count_multi << "\t" << match_count_split << "\t" << match_count_direct << std::endl;
-//     }
-// }
+void benchmarkFree(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const free_info & free_info) {
+    // index building
+    if (free_info.use_presuf) {
+        auto pi = free_index::PresufShell(lines, free_info.sel_threshold);
+        pi.set_outfile(outfile);
+        pi.build_index(free_info.upper_k);
+    } else {
+        auto pi = free_index::MultigramIndex(lines, free_info.sel_threshold);
+        pi.build_index(free_info.upper_k);
+        pi.set_outfile(outfile);
+    }
+
+
+    double threshold = 0.3;
+    std::vector<size_t> upper_k({3, 5, 7, 10});
+    for (size_t t : upper_k) {
+        std::cout << "Start with max_k = " << t << std::endl;
+        std::cout << "--------------------------------------" << std::endl;
+        pi.build_index(t);
+        // pi.print_index(true);
+        auto matcher = free_index::QueryMatcher(pi, regexes);
+        matcher.match_all();
+        std::cout << "--------------------------------------" << std::endl;
+    }
+}
+
+void benchmarkBest(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const best_info & best_info);
+
+void benchmarkFast(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const fast_info & fast_info);
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
 template std::pair<double, double> getStats(std::vector<double> & arr);

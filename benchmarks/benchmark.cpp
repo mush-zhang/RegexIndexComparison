@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
         std::cout << kUsage << std::endl;
         return EXIT_SUCCESS;
     }
-    
+
     expr_info expr_info;
     rei_info rei_info;
     free_info free_info;
@@ -28,11 +28,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    // std::ofstream r_file(expr_info.out_file, std::ofstream::out);
-    // if (!r_file.is_open()) {
-    //     std::cerr << "Could not open output file '" << expr_info.out_file << "'" << std::endl;
-    //     return EXIT_FAILURE;
-    // }
+    const std::filesystem::path dir_path = expr_info.out_file;
+    if (!std::filesystem::exists(dir_path)) {
+        std::filesystem::create_directory(dir_path);
+    }
+
+    // start running! 
 
     std::cout << "start best end-to-end" << std::endl;
     run_end_to_end(regexes, lines);

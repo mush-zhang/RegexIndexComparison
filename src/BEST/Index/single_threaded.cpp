@@ -1,5 +1,4 @@
 #include "single_threaded.hpp"
-#include <iostream>
 #include <chrono>
 #include <cstring>
 #include <random>

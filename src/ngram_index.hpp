@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <fstream>
+#include <iostream>
 
 #include "utils/reg_utils.hpp"
 
@@ -50,6 +52,12 @@ class NGramIndex {
     
     virtual bool empty() const = 0;
 
+    virtual size_t get_num_keys() const = 0;
+
+    virtual size_t get_bytes_used() const = 0;
+
+    void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
+
  protected:
     virtual void select_grams(int upper_k) {};
     
@@ -59,6 +67,8 @@ class NGramIndex {
 
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
+
+    std::ostream* outfile_ = &std::cout;
 };
 
 #endif // NGRAM_INDEX_HPP_

@@ -1,6 +1,5 @@
 #include <thread>
 #include <future>
-#include <iostream>
 
 #include "parallelizable.hpp"
 #include "../../utils/utils.hpp"
@@ -65,7 +64,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
 
     auto query_literals = get_query_literals();
     auto pre_suf_count = get_all_gram_counts(query_literals);
-    
+
     // TODO: add workload reduction options in constructor
     // if (k_reduced_queries_size_ < k_queries_size_) {
     //     workload_reduction(query_literals, pre_suf_count);

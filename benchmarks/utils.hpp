@@ -24,7 +24,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t           \t Each line of the file is considered a regex query. \n\
     \t -d [path] \t Path to the list of data to be queried upon. \n\
     \t           \t Each line of the file is considered an individual (log) line. \n\
-    \t -o [path], required \t Path to output file.\n\
+    \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
     \t             \t The default is 0.1 for FREE and for BEST; not applicable to FAST and REI.\n\
@@ -51,23 +51,25 @@ struct expr_info {
     std::string reg_file = "";
     std::string data_file = "";
     std::string out_file;
-    int num_repeat = 10;
 };
 
 struct rei_info {
+    int num_repeat = 10;
     int num_threads;
-    int gram_size;
-    int num_grams;
+    int gram_size; // n
+    int num_grams; // k
 };
 
 struct free_info {
+    int num_repeat = 10;
     int num_threads;
     double sel_threshold = 0.1;
-    int upper_k;
+    int upper_k; // k
     bool use_presuf = false;
 };
 
 struct best_info {
+    int num_repeat = 10;
     int num_threads;
     double sel_threshold = 0.1;
     int wl_reduced_size = -1;
@@ -76,6 +78,7 @@ struct best_info {
 };
 
 struct fast_info {
+    int num_repeat = 10;
     int num_threads;
     fast_index::relaxation_type rtype;
 };
@@ -86,8 +89,6 @@ bool cmdOptionExists(char ** begin, char ** end, const std::string & option);
 
 template<class T>
 std::pair<T, T> getStats(std::vector<T> & arr);
-
-// std::vector<std::string> readTraffic();
 
 int parseArgs(int argc, char ** argv, 
              expr_info & expr_info, rei_info & rei_info, 
@@ -101,5 +102,31 @@ int readWorkload(const expr_info & expr_info,
 
 void run_end_to_end(const std::vector<std::string> & regexes, 
                     const std::vector<std::string> & lines);
+
+int benchmark(const std::vector<std::string> regexes, 
+              const std::vector<std::string> lines,
+              const expr_info & expr_info, 
+              const rei_info & rei_info, const free_info & free_info, 
+              const best_info & best_info, const fast_info & fast_info);
+
+void benchmarkRei(const ofstream & outfile, 
+                  const std::vector<std::string> regexes, 
+                  const std::vector<std::string> lines,
+                  const rei_info & rei_info);
+
+void benchmarkFree(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const free_info & free_info);
+
+void benchmarkBest(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const best_info & best_info);
+
+void benchmarkFast(const ofstream & outfile, 
+                   const std::vector<std::string> regexes, 
+                   const std::vector<std::string> lines,
+                   const fast_info & fast_info);
 
 #endif // BENCHMARKS_UTILS

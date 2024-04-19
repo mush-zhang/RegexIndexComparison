@@ -3,7 +3,7 @@
 #include "Matcher/query_parser.hpp"
 #include "Matcher/query_matcher.hpp"
 
-#include <iostream> 
+// #include <iostream> 
 #include <cassert>
 
 const double k_number_repeat = 10;

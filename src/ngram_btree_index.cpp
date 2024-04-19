@@ -1,4 +1,3 @@
-#include <iostream>
 #include "ngram_btree_index.hpp"
 
 static const std::vector<size_t> k_empty_pos_list_;

@@ -1,7 +1,6 @@
 #ifndef FREE_MATCHER_QUERY_MATCHER_HPP_
 #define FREE_MATCHER_QUERY_MATCHER_HPP_
 
-#include <iostream>
 #include <re2/re2.h>
 #include "query_parser.hpp"
 #include "../Index/multigram_index.hpp"

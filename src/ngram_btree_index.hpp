@@ -24,7 +24,14 @@ class NGramBtreeIndex : public NGramIndex {
 
     bool empty() const override { return k_index_keys_.empty(); }
 
+    size_t get_num_keys() const override { return k_index_keys_.size(); }
+
+    size_t get_bytes_used() const override { 
+        return k_index_.bytes_used() + k_index_keys_.bytes_used(); 
+    };
+
  protected:
+    // TODO: we can use abseil-btree also at https://abseil.io/about/design/btree
     /**Key is address of the multigram in k_index_keys_, 
      * value address of is a sorted (ascending) list of line indices**/
     btree::set<std::string> k_index_keys_;

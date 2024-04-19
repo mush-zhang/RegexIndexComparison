@@ -33,6 +33,10 @@ class NGramInvertedIndex : public NGramIndex {
 
     bool empty() const override { return k_index_keys_.empty(); }
 
+    size_t get_num_keys() const override { return k_index_keys_.size(); }
+
+    size_t get_bytes_used() const override;
+
  protected:
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
     std::unordered_map<std::string, std::vector<size_t>> k_index_;
