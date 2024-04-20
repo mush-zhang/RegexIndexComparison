@@ -1,6 +1,5 @@
 #include "presuf_shell.hpp"
 #include <algorithm>
-#include <chrono>
 
 // Section 3.2 Observation 3.13 proof
 void free_index::PresufShell::build_index(int upper_k) {
@@ -10,9 +9,10 @@ void free_index::PresufShell::build_index(int upper_k) {
     auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
-    
-    *outfile_ << "FREE-presuf," << thread_count_ << "," << upper_k << "," << k_threshold_ << ",";
-    *outfile_ << selection_time << ",";
+
+    std::ostringstream log;    
+    log << "FREE-presuf," << thread_count_ << "," << upper_k << ",";
+    log  << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
     fill_posting(upper_k);
@@ -20,8 +20,9 @@ void free_index::PresufShell::build_index(int upper_k) {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Index Building End in " << build_time << std::endl;
     
-    *outfile_ << build_time << "," << build_time+selection_time << ",";
-    *outfile_ << get_num_keys() << "," << get_bytes_used() << std::endl;
+    log << build_time << "," << build_time+selection_time << ",";
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+    write_to_file(log.str());
 }
 
 // Reverse the strings in the prefix free set X identified by 

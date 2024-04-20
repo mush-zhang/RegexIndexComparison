@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 
 #include "utils.hpp"
 
@@ -27,11 +26,6 @@ int main(int argc, char** argv) {
     status = readWorkload(expr_info, regexes, lines, 100000);
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
-    }
-
-    const std::filesystem::path dir_path = expr_info.out_file;
-    if (!std::filesystem::exists(dir_path)) {
-        std::filesystem::create_directory(dir_path);
     }
 
     // start running! 

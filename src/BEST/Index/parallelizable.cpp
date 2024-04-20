@@ -1,5 +1,6 @@
 #include <thread>
 #include <future>
+#include <sstream>
 
 #include "parallelizable.hpp"
 #include "../../utils/utils.hpp"
@@ -173,9 +174,9 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
-
-    *outfile_ << "BEST," << thread_count_ << "," << upper_k << ",-1,";
-    *outfile_ << selection_time << ",";
+    std::ostringstream log;
+    log << "BEST," << thread_count_ << "," << upper_k << ",";
+    log << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
     for (auto idx : index) {
@@ -195,6 +196,8 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     
     std::cout << "Index Building End in " << build_time << std::endl;
 
-    *outfile_ << build_time << "," << build_time+selection_time << ",";
-    *outfile_ << get_num_keys() << "," << get_bytes_used() << std::endl;
+    log << build_time << "," << build_time+selection_time << ",";
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+
+    write_to_file(log.str());
 }

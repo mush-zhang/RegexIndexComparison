@@ -1,6 +1,4 @@
 #include "simple_query_matcher.hpp"
-#include <iostream>
-#include <chrono>
 #include "utils/utils.hpp"
 
 long SimpleQueryMatcher::match_one_helper(
@@ -43,6 +41,7 @@ void SimpleQueryMatcher::match_all() {
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Match All End in " << elapsed << " s" << std::endl;
+    k_index_.write_to_file(std::to_string(elapsed) + "\n");
 
     for (long c : counts) {
         // std::cout << "[" << reg << "] : " << c << std::endl;

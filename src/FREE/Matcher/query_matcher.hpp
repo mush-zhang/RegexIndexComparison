@@ -15,23 +15,36 @@ class QueryMatcher {
     QueryMatcher(const MultigramIndex & index, 
                  const std::vector<std::string> & regs) 
                  : k_index_(index) {
+        auto start = std::chrono::high_resolution_clock::now();
         for (const auto & reg : regs) {
             add_query(reg);
         }
+        auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+        std::cout << "Compile all End in " << elapsed << " s" << std::endl;
+        k_index_.write_to_file(std::to_string(elapsed) + ",");
     }
 
     void match_all() {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::vector<long> counts;
+        counts.reserve(reg_evals_.size());
         for (const auto & [reg_str, comps] : reg_evals_) {
             long count = match_one_helper(comps.first, comps.second);
-            std::cout << "[" << reg_str << "] : " << count << std::endl;
         }
-        // TOOD: add timing print maybe.
+        auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+        std::cout << "Match All End in " << elapsed << " s" << std::endl;
+        k_index_.write_to_file(std::to_string(elapsed) + "\n");
+
+        for (long c : counts) {
+            // std::cout << "[" << reg << "] : " << c << std::endl;
+            std::cout << c << std::endl;
+        }
     }
 
     void match_one(const std::string & reg) {
-        if (reg_evals_.find(reg) == reg_evals_.end()) {
-            add_query(reg);
-        } 
+        add_query(reg);
         const auto & [parser, regex] = reg_evals_[reg];
         long count = match_one_helper(parser, regex);
         std::cout << "[" << reg << "] : " << count << std::endl;
@@ -63,12 +76,14 @@ class QueryMatcher {
     }
 
     void add_query(const std::string & reg) {
-        auto curr_p = std::make_unique<QueryParser>(k_index_);
-        curr_p->generate_query_plan(reg);
-        curr_p->remove_null();
-        curr_p->rewrite_by_index();
-        curr_p->remove_null();
-        reg_evals_[reg] = std::make_pair(std::move(curr_p), std::make_shared<RE2>(reg));
+        if (reg_evals_.find(reg) == reg_evals_.end()) {
+            auto curr_p = std::make_unique<QueryParser>(k_index_);
+            curr_p->generate_query_plan(reg);
+            curr_p->remove_null();
+            curr_p->rewrite_by_index();
+            curr_p->remove_null();
+            reg_evals_[reg] = std::make_pair(std::move(curr_p), std::make_shared<RE2>(reg));
+        } 
     }
 };
 

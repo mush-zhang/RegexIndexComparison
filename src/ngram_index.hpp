@@ -6,6 +6,8 @@
 #include <set>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <chrono>
 
 #include "utils/reg_utils.hpp"
 
@@ -58,6 +60,8 @@ class NGramIndex {
 
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 
+    void write_to_file(const std::string & str) const { *outfile_ << str; }   
+
  protected:
     virtual void select_grams(int upper_k) {};
     
@@ -68,8 +72,10 @@ class NGramIndex {
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
-    std::ostream* outfile_ = &std::cout;
     int thread_count_ = 1;
+
+ private:
+    std::ostream* outfile_ = &std::cout;
 };
 
 #endif // NGRAM_INDEX_HPP_

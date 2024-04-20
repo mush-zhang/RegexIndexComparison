@@ -1,5 +1,4 @@
 #include <exception>
-#include <chrono>
 
 #include "lpms.hpp"
 #include "../../utils/utils.hpp"
@@ -320,8 +319,10 @@ void fast_index::LpmsIndex::build_index(int upper_k) {
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams and Index Building End in " << elapsed << " s" << std::endl;
-    *outfile_ << "FAST," << thread_count_ << "," << upper_k << ",-1,";
-    *outfile_ << elapsed << ",";
-    *outfile_ << "-1," << elapsed << ",";
-    *outfile_ << get_num_keys() << "," << get_bytes_used() << std::endl;
+    std::ostringstream log;    
+    log << "FAST," << thread_count_ << "," << upper_k << ",";
+    log << "-1," << elapsed << ",";  // selectivity threshold, select time
+    log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+    write_to_file(log.str());
 }

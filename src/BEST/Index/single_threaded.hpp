@@ -65,6 +65,9 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     dist_type dist_measure_type_ = dist_type::kInvalid;
     int k_max_num_keys_ = -1;
 
+    /** The selectivity of the gram in index will be <= k_threshold_**/
+    const double k_threshold_;
+    
     void select_grams(int upper_k=-1) override;
 
     std::vector<std::string> candidate_gram_set_gen(
@@ -113,9 +116,6 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
  private:
     long double k_reduced_queries_size_;
     long max_iteration_ = 100000;
-
-    /** The selectivity of the gram in index will be <= k_threshold_**/
-    const double k_threshold_;
 
     /** Helpers **/
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,

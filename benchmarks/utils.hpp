@@ -50,7 +50,7 @@ struct expr_info {
     int wl;
     std::string reg_file = "";
     std::string data_file = "";
-    std::string out_file;
+    std::string out_dir;
 };
 
 struct rei_info {
