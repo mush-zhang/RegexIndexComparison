@@ -109,22 +109,22 @@ int benchmark(const std::vector<std::string> regexes,
               const rei_info & rei_info, const free_info & free_info, 
               const best_info & best_info, const fast_info & fast_info);
 
-void benchmarkRei(const ofstream & outfile, 
+void benchmarkRei(std::ofstream & outfile, 
                   const std::vector<std::string> regexes, 
                   const std::vector<std::string> lines,
                   const rei_info & rei_info);
 
-void benchmarkFree(const ofstream & outfile, 
+void benchmarkFree(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const free_info & free_info);
 
-void benchmarkBest(const ofstream & outfile, 
+void benchmarkBest(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const best_info & best_info);
 
-void benchmarkFast(const ofstream & outfile, 
+void benchmarkFast(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const fast_info & fast_info);

@@ -69,6 +69,7 @@ class NGramIndex {
     const std::vector<std::string> & k_queries_;
 
     std::ostream* outfile_ = &std::cout;
+    int thread_count_ = 1;
 };
 
 #endif // NGRAM_INDEX_HPP_

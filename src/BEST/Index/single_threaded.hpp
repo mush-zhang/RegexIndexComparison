@@ -59,6 +59,8 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
 
     void set_max_num_keys(int max_num_keys) { k_max_num_keys_ = max_num_keys; }
 
+    void set_max_iteration(long max_iter) { max_iteration_ = max_iter; }
+
  protected:
     dist_type dist_measure_type_ = dist_type::kInvalid;
     int k_max_num_keys_ = -1;
@@ -110,6 +112,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
 
  private:
     long double k_reduced_queries_size_;
+    long max_iteration_ = 100000;
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;

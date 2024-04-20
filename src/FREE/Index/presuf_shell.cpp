@@ -11,7 +11,7 @@ void free_index::PresufShell::build_index(int upper_k) {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     
-    *outfile_ << "FREE-presuf," << "1," << upper_k << "," << k_threshold_ << ",";
+    *outfile_ << "FREE-presuf," << thread_count_ << "," << upper_k << "," << k_threshold_ << ",";
     *outfile_ << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();

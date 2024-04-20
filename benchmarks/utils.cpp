@@ -20,7 +20,7 @@ inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 
 inline constexpr const std::string_view kIndexHeader = "\
-    name,num_threads,gram_size,selectivity,selection_time,build_time,overall_time,num_keys,index_size"
+    name,num_threads,gram_size,selectivity,selection_time,build_time,overall_time,num_keys,index_size";
 
 selection_type get_method(const std::string gs) {
     if (gs == "REI") {
@@ -398,11 +398,12 @@ void run_end_to_end(const std::vector<std::string> & regexes,
 
 }
 
-int benchmark(const ofstream & outfile, const expr_info & expr_info, 
+int benchmark(const expr_info & expr_info, 
                const rei_info & rei_info, const free_info & free_info, 
                const best_info & best_info, const fast_info & fast_info) {
     // index building file
-    const std::filesystem::path out_path = expr_info.out_file / "index_building.csv";
+    std::filesystem::path out_path = expr_info.out_file; 
+    out_path /= "index_building.csv";
     std::ofstream outfile;
     if (!std::filesystem::exists(out_path)) {
         // write header
@@ -415,16 +416,16 @@ int benchmark(const ofstream & outfile, const expr_info & expr_info,
 
 
     outfile.close();
+    return EXIT_SUCCESS;
 }
-void benchmarkRei(const ofstream & outfile, 
+void benchmarkRei(std::ofstream & outfile, 
                   const std::vector<std::string> regexes, 
                   const std::vector<std::string> lines,
                   const rei_info & rei_info) {
     // get index building time
-    return
 }
 
-void benchmarkFree(const ofstream & outfile, 
+void benchmarkFree(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const free_info & free_info) {
@@ -440,28 +441,28 @@ void benchmarkFree(const ofstream & outfile,
     }
 
 
-    double threshold = 0.3;
-    std::vector<size_t> upper_k({3, 5, 7, 10});
-    for (size_t t : upper_k) {
-        std::cout << "Start with max_k = " << t << std::endl;
-        std::cout << "--------------------------------------" << std::endl;
-        pi.build_index(t);
-        // pi.print_index(true);
-        auto matcher = free_index::QueryMatcher(pi, regexes);
-        matcher.match_all();
-        std::cout << "--------------------------------------" << std::endl;
-    }
+    // double threshold = 0.3;
+    // std::vector<size_t> upper_k({3, 5, 7, 10});
+    // for (size_t t : upper_k) {
+    //     std::cout << "Start with max_k = " << t << std::endl;
+    //     std::cout << "--------------------------------------" << std::endl;
+    //     pi.build_index(t);
+    //     // pi.print_index(true);
+    //     auto matcher = free_index::QueryMatcher(pi, regexes);
+    //     matcher.match_all();
+    //     std::cout << "--------------------------------------" << std::endl;
+    // }
 }
 
-void benchmarkBest(const ofstream & outfile, 
+void benchmarkBest(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const best_info & best_info);
+                   const best_info & best_info) {}
 
-void benchmarkFast(const ofstream & outfile, 
+void benchmarkFast(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const fast_info & fast_info);
+                   const fast_info & fast_info) {}
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
 template std::pair<double, double> getStats(std::vector<double> & arr);

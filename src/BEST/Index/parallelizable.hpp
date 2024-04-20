@@ -16,6 +16,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
       : SingleThreadedIndex(dataset, queries, sel_threshold),
         k_num_clusters_(std::max(4, int(queries.size()/5))) {
             dist_measure_type_ = dist_type::kMaxDevDist2;
+            thread_count_ = k_num_clusters_;
         }
     
     ParallelizableIndex(const std::vector<std::string> & dataset, 
@@ -24,7 +25,9 @@ class ParallelizableIndex : public SingleThreadedIndex {
                dist_type dist_measure_type)
       : SingleThreadedIndex(dataset, queries, sel_threshold,
                             workload_reduced_size, dist_measure_type),
-        k_num_clusters_(std::max(4, int(queries.size()/5))) {}
+        k_num_clusters_(std::max(4, int(queries.size()/5))) {
+            thread_count_ = k_num_clusters_;
+        }
 
     ~ParallelizableIndex() {}
  private:

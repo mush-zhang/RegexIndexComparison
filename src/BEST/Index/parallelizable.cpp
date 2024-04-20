@@ -92,7 +92,6 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     } else {
         cmap = k_medians(dist_mtx, dist_mtx.size(), k_num_clusters_);
     }
-    // std::cout << "cluster done " << std::endl;
 
     // build gr_list, qg_list, rc for each partition
     std::vector<best_index::SingleThreadedIndex::job> jobs(cmap.size());
@@ -108,7 +107,6 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     for (auto & th : job_building_threads) {
         th.join();
     }
-    // std::cout << "built gr qg rc" << std::endl;
 
     /**
      * I : index key idx; 
@@ -172,9 +170,12 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
             break;
         }
     }
-    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+    auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-    std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
+    std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
+
+    *outfile_ << "BEST," << thread_count_ << "," << upper_k << ",-1,";
+    *outfile_ << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
     for (auto idx : index) {
@@ -189,7 +190,11 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
             );
         }
     }
-    elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+    auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-    std::cout << "Index Building End in " << elapsed << std::endl;
+    
+    std::cout << "Index Building End in " << build_time << std::endl;
+
+    *outfile_ << build_time << "," << build_time+selection_time << ",";
+    *outfile_ << get_num_keys() << "," << get_bytes_used() << std::endl;
 }

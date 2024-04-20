@@ -131,11 +131,9 @@ best_index::SingleThreadedIndex::k_medians(
     std::unordered_map<size_t, std::vector<size_t>> cmap;
 
     bool centroid_final = false;
-    size_t max_iteration = 100000;
-    // std::cout << "variables set, start iterating" << std::endl;
 
     size_t curr_it = 0;
-    while(!centroid_final && curr_it++ < max_iteration) {
+    while(!centroid_final && curr_it++ < max_iteration_) {
         std::cout << "iteration " << curr_it << std::endl;
         centroid_final = true;
         // 2. assign data points to nearest centroids
@@ -145,11 +143,9 @@ best_index::SingleThreadedIndex::k_medians(
         //          value [distance to the current query]
         for (size_t q_idx = 0; q_idx < num_queries; q_idx++) {
             auto q_dists = dist_mtx[q_idx];
-            // std::cout << "\t\t q_dist[" << q_idx << "] size " << q_dists.size() << std::endl;
             for (size_t i = 0; i < num_clusters; i++) {
                 c_dists[i] = q_dists[centroids[i]];
             }
-            // std::cout << "\t\t c_dists; argmin = " << argmin(c_dists) << ", centroids size " << centroids.size() << std::endl;
             // curr_closest: [idx of closet centroid in centroids] 
             auto curr_closest = centroids[argmin(c_dists)];
             // std::cout << "\t\t curr_closest " << curr_closest << std::endl;
@@ -158,9 +154,7 @@ best_index::SingleThreadedIndex::k_medians(
                 closest_c_idxs[q_idx] = curr_closest;
             }
             cmap[curr_closest].push_back(q_idx);
-            // std::cout << "\t\t cmap updated" << std::endl;
         }
-        // std::cout << "\t calcualte c_dists, cmap, closest_c_idxs" << std::endl;
 
         std::vector<size_t> fillables;
         // 3. compute the new median as centroids for each cluster
@@ -180,11 +174,7 @@ best_index::SingleThreadedIndex::k_medians(
                 auto curr_c = argmin(dist_sums);
                 centroids[c_idx] = q_idxs[curr_c];
             }
-        }
-        // std::cout << "\t choose centroids" << std::endl;
-        // if (!fillables.empty())
-            // std::cout << "\t get random for fillables " << fillables.size() << std::endl;
-        
+        }        
         //3.5 empty cluster, choose a random centroid
         std::set<size_t> centroids_set(centroids.begin(), centroids.end());
         for (const auto & c_idx : fillables) {
@@ -196,8 +186,6 @@ best_index::SingleThreadedIndex::k_medians(
             }
             centroids[c_idx] = curr_rand;
         }
-        // if (!fillables.empty())
-        //     std::cout << "\t end fillables" << std::endl;
     }
     return cmap;
 }
@@ -575,10 +563,12 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
             break;
         }
     }
-    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+    auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-    std::cout << "Select Grams End in " << elapsed << " s" << std::endl;
-
+    std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
+    *outfile_ << "BEST," << thread_count_ << "," << upper_k << "," << k_threshold_ << ",";
+    *outfile_ << selection_time << ",";
+    
     start = std::chrono::high_resolution_clock::now();
     // std::map<std::string, size_t> gram_to_candidate_idx_map;
     for (auto idx : index) {
@@ -586,9 +576,11 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
         k_index_.insert({candidates[idx], job.gr_list[idx]});
     }
 
-    elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
+    auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-    std::cout << "Index Building End in " << elapsed << std::endl;
+    std::cout << "Index Building End in " << build_time << std::endl;
+    *outfile_ << build_time << "," << build_time+selection_time << ",";
+    *outfile_ << get_num_keys() << "," << get_bytes_used() << std::endl;
 }
 
 // Algorithm 2 in Figure 3
