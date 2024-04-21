@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include "utils.hpp"
 
@@ -21,6 +22,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    // Create overall result folder
+    const std::filesystem::path dir_path = expr_info.out_dir;
+    if (!std::filesystem::exists(dir_path)) {
+        std::filesystem::create_directory(dir_path);
+    }
+
     std::vector<std::string> regexes;
     std::vector<std::string> lines;
     status = readWorkload(expr_info, regexes, lines, 100000);
@@ -28,10 +35,30 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    std::cout << "start best end-to-end" << std::endl;
+
+    switch (expr_info.stype) {
+        case selection_type::kRei: {
+
+            break;
+        }
+        case selection_type::kFree: 
+            benchmarkFree(dir_path, regexes, lines, free_info);
+            break;
+        case selection_type::kBest: {
+
+            break;
+        }
+        case selection_type::kFast: {
+            
+            break;
+        }
+        default:
+            // should not have reached here.
+            return EXIT_FAILURE;
+    } 
+
     // start running! 
 
-    std::cout << "start best end-to-end" << std::endl;
-    run_end_to_end(regexes, lines);
-
-    // r_file.close(); 
+    // run_end_to_end(regexes, lines);
 }

@@ -103,18 +103,18 @@ int readWorkload(const expr_info & expr_info,
 void run_end_to_end(const std::vector<std::string> & regexes, 
                     const std::vector<std::string> & lines);
 
-int benchmark(const std::vector<std::string> regexes, 
-              const std::vector<std::string> lines,
-              const expr_info & expr_info, 
-              const rei_info & rei_info, const free_info & free_info, 
-              const best_info & best_info, const fast_info & fast_info);
+// int benchmark(const std::vector<std::string> regexes, 
+//               const std::vector<std::string> lines,
+//               const expr_info & expr_info, 
+//               const rei_info & rei_info, const free_info & free_info, 
+//               const best_info & best_info, const fast_info & fast_info);
 
 void benchmarkRei(std::ofstream & outfile, 
                   const std::vector<std::string> regexes, 
                   const std::vector<std::string> lines,
                   const rei_info & rei_info);
 
-void benchmarkFree(std::ofstream & outfile, 
+void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const free_info & free_info);

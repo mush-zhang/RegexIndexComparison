@@ -15,12 +15,16 @@
 
 #include "utils.hpp"
 
+inline constexpr const int kNumIndexBuilding = 1;
+
 inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 
-inline constexpr const std::string_view kIndexHeader = "\
+inline constexpr const std::string_view kSummaryHeader = "\
     name,num_threads,gram_size,selectivity,selection_time,build_time,overall_time,num_keys,index_size,compile_time,match_time";
+
+inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter"
 
 selection_type get_method(const std::string gs) {
     if (gs == "REI") {
@@ -398,30 +402,27 @@ void run_end_to_end(const std::vector<std::string> & regexes,
 
 }
 
-int benchmark(const expr_info & expr_info, 
-               const rei_info & rei_info, const free_info & free_info, 
-               const best_info & best_info, const fast_info & fast_info) {
-    // Create overall result folder
-    const std::filesystem::path dir_path = expr_info.out_dir;
-    if (!std::filesystem::exists(dir_path)) {
-        std::filesystem::create_directory(dir_path);
-    }
-
-    // index building file
+std::ofstream open_summary(const std::filesystem::path & dir_path) {
+    // open summary csv file
     std::filesystem::path out_path = dir_path / "summary.csv";
     std::ofstream outfile;
     if (!std::filesystem::exists(out_path)) {
         // write header
         outfile.open(out_path, std::ios::out);
-        outfile << kIndexHeader << std::endl;
+        outfile << kSummaryHeader << std::endl;
     } else {
         outfile.open(out_path, std::ios::app);
     }
-    
-
-    outfile.close();
-    return EXIT_SUCCESS;
+    return std::move(outfile);
 }
+
+// int benchmark(const expr_info & expr_info, 
+//                const rei_info & rei_info, const free_info & free_info, 
+//                const best_info & best_info, const fast_info & fast_info) {
+  
+
+//     return EXIT_SUCCESS;
+// }
 void benchmarkRei(std::ofstream & outfile, 
                   const std::vector<std::string> regexes, 
                   const std::vector<std::string> lines,
@@ -429,36 +430,57 @@ void benchmarkRei(std::ofstream & outfile,
     // get index building time
 }
 
-void benchmarkFree(std::ofstream & outfile, 
+void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const free_info & free_info) {
+    std::ofstream outfile = open_summary(dir_path);
+
+    std::ostringstream stats_name;
     // index building
     free_index::MultigramIndex * pi = nullptr;
     if (free_info.use_presuf) {
+        stats_name << "FREE-presuf_";
         pi = new free_index::PresufShell(lines, free_info.sel_threshold);
     } else {
+        stats_name << "FREE_";
         pi = new free_index::MultigramIndex(lines, free_info.sel_threshold);
     }
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_k);
 
-    // matching; add match time to the overall file
-    auto matcher = free_index::QueryMatcher(*pi, regexes);
-    matcher.match_all();
+    for (size_t i = 0; i < free_info.num_repeat; i++) {
+        if (i >= kNumIndexBuilding) {
+            // not re-running the time consuming index afterwards,
+            // filling the empty slots
+            pi->write_to_file(",,,,,,,,,");
+        }
+        // matching; add match time to the overall file
+        auto matcher = free_index::QueryMatcher(*pi, regexes);
+        matcher.match_all();
+    }
 
+    outfile.close();
 
-    // double threshold = 0.3;
-    // std::vector<size_t> upper_k({3, 5, 7, 10});
-    // for (size_t t : upper_k) {
-    //     std::cout << "Start with max_k = " << t << std::endl;
-    //     std::cout << "--------------------------------------" << std::endl;
-    //     pi.build_index(t);
-    //     // pi.print_index(true);
-    //     auto matcher = free_index::QueryMatcher(pi, regexes);
-    //     matcher.match_all();
-    //     std::cout << "--------------------------------------" << std::endl;
-    // }
+    // open stats file
+    stats_name << free_info.num_threads << "_" << free_info.upper_k;
+    stats_name << "_" << free_info.sel_threshold << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    outfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
+
+    auto matcher = free_index::QueryMatcher(*pi, regexes, false);
+
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
+
+    statsfile.close();
 }
 
 void benchmarkBest(std::ofstream & outfile, 

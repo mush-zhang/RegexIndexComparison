@@ -39,6 +39,8 @@ class NGramIndex {
         return k_dataset_;
     }
 
+    size_t get_dataset_size() const { return k_dataset_size_; }
+
 	const std::vector<std::string> & get_queries() const {
         return k_queries_;
     }

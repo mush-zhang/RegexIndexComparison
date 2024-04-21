@@ -42,3 +42,6 @@
 
 # Sensitive data files
 data/*
+
+# my test result files
+*Test/*
