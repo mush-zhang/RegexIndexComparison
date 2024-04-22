@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
             break;
         }
         case selection_type::kFast: {
-            
+            benchmarkFast(dir_path, regexes, lines, fast_info);
             break;
         }
         default:

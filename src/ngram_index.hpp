@@ -60,6 +60,8 @@ class NGramIndex {
 
     virtual size_t get_bytes_used() const = 0;
 
+    void set_thread_count(int thread_count) { thread_count_ = thread_count; }
+
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 
     void write_to_file(const std::string & str) const { *outfile_ << str; }   

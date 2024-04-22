@@ -423,14 +423,7 @@ std::ofstream open_summary(const std::filesystem::path & dir_path) {
     return std::move(outfile);
 }
 
-// int benchmark(const expr_info & expr_info, 
-//                const rei_info & rei_info, const free_info & free_info, 
-//                const best_info & best_info, const fast_info & fast_info) {
-  
-
-//     return EXIT_SUCCESS;
-// }
-void benchmarkRei(std::ofstream & outfile, 
+void benchmarkRei(const std::filesystem::path dir_path,
                   const std::vector<std::string> regexes, 
                   const std::vector<std::string> lines,
                   const rei_info & rei_info) {
@@ -453,6 +446,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
         stats_name << "FREE_";
         pi = new free_index::MultigramIndex(lines, free_info.sel_threshold);
     }
+    pi->set_thread_count(free_info.num_threads); // currently not effective
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_k);
 
@@ -574,10 +568,53 @@ void benchmarkBest(const std::filesystem::path dir_path,
     statsfile.close();
 }
 
-void benchmarkFast(std::ofstream & outfile, 
+void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const fast_info & fast_info) {}
+                   const fast_info & fast_info) {
+
+    std::ofstream outfile = open_summary(dir_path);
+
+    std::ostringstream stats_name;
+    // index building
+    auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.rtype);
+    pi->set_thread_count(fast_info.num_threads);
+    pi->set_outfile(outfile);
+    pi->build_index();
+
+    for (size_t i = 0; i < fast_info.num_repeat; i++) {
+        if (i >= kNumIndexBuilding) {
+            // not re-running the time consuming index afterwards,
+            // filling the empty slots
+            pi->write_to_file(",,,,,,,,,");
+        }
+        // matching; add match time to the overall file
+        auto matcher = SimpleQueryMatcher(*pi);
+        matcher.match_all();
+    }
+
+    outfile.close();
+
+    // open stats file
+    stats_name << "FAST_" << fast_info.num_threads << "_" << "-1";
+    stats_name << "_" << "-1" << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
+
+    auto matcher = SimpleQueryMatcher(*pi, false);
+
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
+
+    statsfile.close();
+}
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
 template std::pair<double, double> getStats(std::vector<double> & arr);
