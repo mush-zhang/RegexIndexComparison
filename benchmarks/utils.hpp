@@ -119,7 +119,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
                    const std::vector<std::string> lines,
                    const free_info & free_info);
 
-void benchmarkBest(std::ofstream & outfile, 
+void benchmarkBest(const std::filesystem::path dir_path,
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
                    const best_info & best_info);

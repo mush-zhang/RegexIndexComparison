@@ -41,7 +41,7 @@ long SimpleQueryMatcher::match_one_helper(
     return count;
 }
 
-void SimpleQueryMatcher::match_all() {
+std::vector<long> SimpleQueryMatcher::match_all() {
     if (reg_evals_.size() < k_index_.get_queries().size()) {
         compile_all_queries(k_index_.get_queries(), false);
     }
@@ -56,14 +56,11 @@ void SimpleQueryMatcher::match_all() {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Match All End in " << elapsed << " s" << std::endl;
     k_index_.write_to_file(std::to_string(elapsed) + "\n");
-
-    for (long c : counts) {
-        // std::cout << "[" << reg << "] : " << c << std::endl;
-        std::cout << c << std::endl;
-    }
+    
+    return counts;
 }
 
-void SimpleQueryMatcher::match_one(const std::string & reg) {
+long SimpleQueryMatcher::match_one(const std::string & reg) {
     auto start = std::chrono::high_resolution_clock::now();
     if (reg_evals_.find(reg) == reg_evals_.end()) {
         reg_evals_[reg] = std::make_shared<RE2>(reg); 
@@ -77,6 +74,7 @@ void SimpleQueryMatcher::match_one(const std::string & reg) {
     std::ostringstream log;
     log << elapsed << "\t" << count << "\t";
     k_index_.write_to_file(log.str());
+    return count;
 }
 
 size_t SimpleQueryMatcher::get_num_after_filter(const std::string & reg) const {

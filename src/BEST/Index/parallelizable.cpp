@@ -86,12 +86,12 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
     auto dist_mtx = calculate_pairwise_dist(qg_gram_set, pre_suf_count);
 
     std::unordered_map<size_t, std::vector<size_t>> cmap;
-    if (k_num_clusters_ >= k_queries_size_) {
+    if (thread_count_ >= k_queries_size_) {
         for (size_t q_idx = 0; q_idx < k_queries_size_; q_idx++) {
             cmap[q_idx] = std::vector<size_t>({q_idx});
         }
     } else {
-        cmap = k_medians(dist_mtx, dist_mtx.size(), k_num_clusters_);
+        cmap = k_medians(dist_mtx, dist_mtx.size(), thread_count_);
     }
 
     // build gr_list, qg_list, rc for each partition

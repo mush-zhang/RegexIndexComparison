@@ -29,9 +29,9 @@ class SimpleQueryMatcher {
         }
     }
 
-    void match_all();
+    std::vector<long> match_all();
 
-    void match_one(const std::string & reg);
+    long match_one(const std::string & reg);
 
     size_t get_num_after_filter(const std::string & reg) const;
 

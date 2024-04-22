@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
             benchmarkFree(dir_path, regexes, lines, free_info);
             break;
         case selection_type::kBest: {
-
+            benchmarkBest(dir_path, regexes, lines, best_info);
             break;
         }
         case selection_type::kFast: {

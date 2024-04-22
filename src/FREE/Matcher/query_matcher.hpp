@@ -21,28 +21,26 @@ class QueryMatcher {
         }
     }
 
-    void match_all() {
+    std::vector<long> match_all() {
         if (reg_evals_.size() < k_queries_.size()) {
             compile_all_queries(k_queries_, false);
         }
         auto start = std::chrono::high_resolution_clock::now();
         std::vector<long> counts;
         counts.reserve(reg_evals_.size());
-        for (const auto & [reg_str, comps] : reg_evals_) {
-            long count = match_one_helper(comps.first, comps.second);
+        for (const auto & reg : k_queries_) {
+            const auto & [parser, regex] = reg_evals_[reg];
+            counts.push_back(match_one_helper(parser, regex));
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
         std::cout << "Match All End in " << elapsed << " s" << std::endl;
         k_index_.write_to_file(std::to_string(elapsed) + "\n");
 
-        for (long c : counts) {
-            // std::cout << "[" << reg << "] : " << c << std::endl;
-            std::cout << c << std::endl;
-        }
+        return counts;
     }
 
-    void match_one(const std::string & reg) {
+    long match_one(const std::string & reg) {
         auto start = std::chrono::high_resolution_clock::now();
         add_query(reg);
         const auto & [parser, regex] = reg_evals_[reg];
@@ -54,6 +52,7 @@ class QueryMatcher {
         std::ostringstream log;
         log << elapsed << "\t" << count << "\t";
         k_index_.write_to_file(log.str());
+        return count;
     }
 
     size_t get_num_after_filter(const std::string & reg) const {

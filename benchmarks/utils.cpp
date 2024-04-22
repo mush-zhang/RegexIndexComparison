@@ -24,7 +24,7 @@ inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 inline constexpr const std::string_view kSummaryHeader = "\
     name,num_threads,gram_size,selectivity,selection_time,build_time,overall_time,num_keys,index_size,compile_time,match_time";
 
-inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter"
+inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter";
 
 selection_type get_method(const std::string gs) {
     if (gs == "REI") {
@@ -42,9 +42,13 @@ selection_type get_method(const std::string gs) {
     return selection_type::kInvalid;
 }
 
-int error_return(const std::string msg) {
+void error_print(const std::string & msg) {
     std::cerr << "Error: " << msg << std::endl;
     std::cerr << kUsage << std::endl;
+}
+
+int error_return(const std::string & msg) {
+    error_print(msg);
     return EXIT_FAILURE;
 }
 
@@ -174,6 +178,9 @@ int parseArgs(int argc, char ** argv,
             if (!wl_reduce_string.empty()) {
                 if (wl_reduce_string.find('.') != std::string::npos) {
                     best_info.wl_reduced_frac = std::stod(wl_reduce_string);
+                    if (best_info.wl_reduced_frac <= 0 || best_info.wl_reduced_frac > 1) {
+                        return error_return("Invalid fraction of workload reduction.");                        
+                    }
                 } else {
                     best_info.wl_reduced_size = std::stoi(wl_reduce_string);
                 }
@@ -363,17 +370,17 @@ int readWorkload(const expr_info & expr_info,
 
 void run_end_to_end(const std::vector<std::string> & regexes, 
                     const std::vector<std::string> & lines) {
-    std::vector<double> threshs({0.1, 0.3, 0.6, 0.8, 1});
-    for (double t : threshs) {
-        std::cout << "Start with threshold = " << t << std::endl;
-        std::cout << "--------------------------------------" << std::endl;
-        auto pi = best_index::ParallelizableIndex(lines, regexes, t);
-        pi.build_index();
-        pi.print_index(true);
-        auto matcher = SimpleQueryMatcher(pi);
-        matcher.match_all();
-        std::cout << "--------------------------------------" << std::endl;
-    }
+    // std::vector<double> threshs({0.1, 0.3, 0.6, 0.8, 1});
+    // for (double t : threshs) {
+    //     std::cout << "Start with threshold = " << t << std::endl;
+    //     std::cout << "--------------------------------------" << std::endl;
+    //     auto pi = best_index::ParallelizableIndex(lines, regexes, t);
+    //     pi.build_index();
+    //     pi.print_index(true);
+    //     auto matcher = SimpleQueryMatcher(pi);
+    //     matcher.match_all();
+    //     std::cout << "--------------------------------------" << std::endl;
+    // }
 
     // std::cout << "Start with FAST" << std::endl;
     // std::cout << "--------------------------------------" << std::endl;
@@ -468,7 +475,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
     statsfile.open(stats_path, std::ios::out);
-    outfile << kExprHeader << std::endl;
+    statsfile << kExprHeader << std::endl;
     pi->set_outfile(statsfile);
 
     auto matcher = free_index::QueryMatcher(*pi, regexes, false);
@@ -483,10 +490,89 @@ void benchmarkFree(const std::filesystem::path dir_path,
     statsfile.close();
 }
 
-void benchmarkBest(std::ofstream & outfile, 
+void benchmarkBest(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const best_info & best_info) {}
+                   const best_info & best_info) {
+    if (best_info.wl_reduced_size > int(regexes.size())) {
+        std::cerr << best_info.wl_reduced_size << " " << regexes.size() << std::endl;
+        error_print("Invalid workload reduction size larger than number of queries.");
+        return;
+    }
+    std::ofstream outfile = open_summary(dir_path);
+
+    bool reduce = true;
+    double red_size = best_info.wl_reduced_size;
+    if (red_size < 0) {
+        if (best_info.wl_reduced_frac < 0) {
+            reduce = false;
+        } else {
+            red_size = std::min(
+                std::max(best_info.wl_reduced_frac * regexes.size(), 1.0), 
+                static_cast<double>(regexes.size())
+            );
+        }
+    } 
+
+    std::ostringstream stats_name;
+    // index building
+    best_index::SingleThreadedIndex * pi = nullptr;
+    if (best_info.num_threads > 1) {
+        if (reduce) {
+            pi = new best_index::ParallelizableIndex(
+                    lines, regexes, best_info.sel_threshold, best_info.num_threads,
+                    red_size, best_info.dtype);
+        } else {
+            pi = new best_index::ParallelizableIndex(
+                    lines, regexes, best_info.sel_threshold, best_info.num_threads);
+        }
+    } else {
+        if (reduce) {
+            pi = new best_index::SingleThreadedIndex(
+                    lines, regexes, best_info.sel_threshold,
+                    red_size, best_info.dtype);
+        } else {
+            pi = new best_index::SingleThreadedIndex(
+                    lines, regexes, best_info.sel_threshold);
+        }
+
+    }
+    pi->set_outfile(outfile);
+    pi->build_index();
+
+    for (size_t i = 0; i < best_info.num_repeat; i++) {
+        if (i >= kNumIndexBuilding) {
+            // not re-running the time consuming index afterwards,
+            // filling the empty slots
+            pi->write_to_file(",,,,,,,,,");
+        }
+        // matching; add match time to the overall file
+        auto matcher = SimpleQueryMatcher(*pi);
+        matcher.match_all();
+    }
+
+    outfile.close();
+
+    // open stats file
+    stats_name << "BEST_" << best_info.num_threads << "_" << "-1";
+    stats_name << "_" << best_info.sel_threshold << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
+
+    auto matcher = SimpleQueryMatcher(*pi, false);
+
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
+
+    statsfile.close();
+}
 
 void benchmarkFast(std::ofstream & outfile, 
                    const std::vector<std::string> regexes, 

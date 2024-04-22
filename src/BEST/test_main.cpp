@@ -138,7 +138,7 @@ void simple_parallelizable() {
     });;
 
     auto pi = best_index::ParallelizableIndex(test_dataset, test_query, 1, 4, 
-        best_index::dist_type::kMaxDevDist1);
+        4, best_index::dist_type::kMaxDevDist1);
     pi.build_index();
     pi.print_index();
 }
