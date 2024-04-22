@@ -45,14 +45,12 @@ int main(int argc, char** argv) {
         case selection_type::kFree: 
             benchmarkFree(dir_path, regexes, lines, free_info);
             break;
-        case selection_type::kBest: {
+        case selection_type::kBest:
             benchmarkBest(dir_path, regexes, lines, best_info);
             break;
-        }
-        case selection_type::kFast: {
+        case selection_type::kFast:
             benchmarkFast(dir_path, regexes, lines, fast_info);
             break;
-        }
         default:
             // should not have reached here.
             return EXIT_FAILURE;
