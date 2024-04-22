@@ -368,47 +368,6 @@ int readWorkload(const expr_info & expr_info,
     return EXIT_SUCCESS;
 }
 
-void run_end_to_end(const std::vector<std::string> & regexes, 
-                    const std::vector<std::string> & lines) {
-    // std::vector<double> threshs({0.1, 0.3, 0.6, 0.8, 1});
-    // for (double t : threshs) {
-    //     std::cout << "Start with threshold = " << t << std::endl;
-    //     std::cout << "--------------------------------------" << std::endl;
-    //     auto pi = best_index::ParallelizableIndex(lines, regexes, t);
-    //     pi.build_index();
-    //     pi.print_index(true);
-    //     auto matcher = SimpleQueryMatcher(pi);
-    //     matcher.match_all();
-    //     std::cout << "--------------------------------------" << std::endl;
-    // }
-
-    // std::cout << "Start with FAST" << std::endl;
-    // std::cout << "--------------------------------------" << std::endl;
-    // auto pi = fast_index::LpmsIndex(lines, regexes);
-    // pi.build_index();
-    // std::cout << "------print index------------------------------" << std::endl;
-    // pi.print_index(true);
-    // std::cout << "--------------------------------------" << std::endl;
-    // auto matcher = SimpleQueryMatcher(pi);
-    // matcher.match_all();
-    // std::cout << "--------------------------------------" << std::endl;
-
-    // double threshold = 0.3;
-    // std::vector<size_t> upper_k({3, 5, 7, 10});
-    // for (size_t t : upper_k) {
-    //     std::cout << "Start with max_k = " << t << std::endl;
-    //     std::cout << "--------------------------------------" << std::endl;
-    //     auto pi = free_index::MultigramIndex(lines, threshold);
-    //     pi.build_index(t);
-    //     // pi.print_index(true);
-    //     auto matcher = free_index::QueryMatcher(pi, regexes);
-    //     matcher.match_all();
-    //     std::cout << "--------------------------------------" << std::endl;
-    // }
-
-
-}
-
 std::ofstream open_summary(const std::filesystem::path & dir_path) {
     // open summary csv file
     std::filesystem::path out_path = dir_path / "summary.csv";
