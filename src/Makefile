@@ -42,15 +42,13 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: CPPFLAGS+=-DARMA_NO_DEBUG
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
-	 $(REI_BASE_DIR)/test_rei.out $\
-	 $(FAST_BASE_DIR)/test_fast.out 
+	 $(REI_BASE_DIR)/test_rei.out 
 
 .PHONY: debug
 debug: CPPFLAGS+=-DDEBUG -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
-		$(REI_BASE_DIR)/test_rei.out $\
-		$(FAST_BASE_DIR)/test_fast.out 
+		$(REI_BASE_DIR)/test_rei.out  
 		
 $(REI_BASE_DIR)/test_rei.out: $(REI_IDX) $(REI_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
@@ -58,11 +56,11 @@ $(REI_BASE_DIR)/test_rei.out: $(REI_IDX) $(REI_BASE_DIR)/test_main.cpp
 $(REI_IDX_DIR)/freq_ngram.o: $(REI_IDX_DIR)/freq_ngram.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-$(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
-
-$(FAST_IDX_DIR)/lpms.o: $(FAST_IDX_DIR)/lpms.cpp
-	$(CXX) -c $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(LDFLAGS) -o  $@
+# $(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
+# 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
+# 
+# $(FAST_IDX_DIR)/lpms.o: $(FAST_IDX_DIR)/lpms.cpp
+# 	$(CXX) -c $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(LDFLAGS) -o  $@
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
