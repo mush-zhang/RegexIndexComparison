@@ -5,7 +5,7 @@
 #include <string>
 
 #include "../src/BEST/Index/single_threaded.hpp"
-#include "../src/FAST/Index/lpms.hpp"
+//#include "../src/FAST/Index/lpms.hpp"
 
 inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 
@@ -81,7 +81,7 @@ struct best_info {
 struct fast_info {
     int num_repeat = 10;
     int num_threads;
-    fast_index::relaxation_type rtype;
+//    fast_index::relaxation_type rtype;
 };
 
 std::string getCmdOption(char ** begin, char ** end, const std::string & option);

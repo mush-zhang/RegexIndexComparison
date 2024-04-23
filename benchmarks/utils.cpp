@@ -214,12 +214,12 @@ int parseArgs(int argc, char ** argv,
             auto relax_string = getCmdOption(argv, argv + argc, "--relax");
             if (relax_string.empty()) {
                 return error_return("Missing type of relaxation.");
-            } else if (relax_string == "DETERM") {
-                fast_info.rtype = fast_index::relaxation_type::kDeterministic;
-            } else if (relax_string == "RANDOM") {
-                fast_info.rtype = fast_index::relaxation_type::kRandomized;
-            } else {
-                return error_return("Invalid relaxation type.");
+            //} else if (relax_string == "DETERM") {
+            //    fast_info.rtype = fast_index::relaxation_type::kDeterministic;
+            //} else if (relax_string == "RANDOM") {
+            //    fast_info.rtype = fast_index::relaxation_type::kRandomized;
+            //} else {
+            //    return error_return("Invalid relaxation type.");
             }
             break;
         }
@@ -661,47 +661,47 @@ void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> lines,
                    const fast_info & fast_info) {
 
-    std::ofstream outfile = open_summary(dir_path);
+    //std::ofstream outfile = open_summary(dir_path);
 
-    std::ostringstream stats_name;
-    // index building
-    auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.rtype);
-    pi->set_thread_count(fast_info.num_threads);
-    pi->set_outfile(outfile);
-    pi->build_index();
+    //std::ostringstream stats_name;
+    //// index building
+    //auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.rtype);
+    //pi->set_thread_count(fast_info.num_threads);
+    //pi->set_outfile(outfile);
+    //pi->build_index();
 
-    for (size_t i = 0; i < fast_info.num_repeat; i++) {
-        if (i >= kNumIndexBuilding) {
-            // not re-running the time consuming index afterwards,
-            // filling the empty slots
-            pi->write_to_file(",,,,,,,,,");
-        }
-        // matching; add match time to the overall file
-        auto matcher = SimpleQueryMatcher(*pi);
-        matcher.match_all();
-    }
+    //for (size_t i = 0; i < fast_info.num_repeat; i++) {
+    //    if (i >= kNumIndexBuilding) {
+    //        // not re-running the time consuming index afterwards,
+    //        // filling the empty slots
+    //        pi->write_to_file(",,,,,,,,,");
+    //    }
+    //    // matching; add match time to the overall file
+    //    auto matcher = SimpleQueryMatcher(*pi);
+    //    matcher.match_all();
+    // }
 
-    outfile.close();
+    // outfile.close();
 
-    // open stats file
-    stats_name << "FAST_" << fast_info.num_threads << "_" << "-1";
-    stats_name << "_" << "-1" << "_stats.csv";
-    std::filesystem::path stats_path = dir_path / stats_name.str();
-    std::ofstream statsfile;
-    statsfile.open(stats_path, std::ios::out);
-    statsfile << kExprHeader << std::endl;
-    pi->set_outfile(statsfile);
+    //// open stats file
+    //stats_name << "FAST_" << fast_info.num_threads << "_" << "-1";
+    //stats_name << "_" << "-1" << "_stats.csv";
+    //std::filesystem::path stats_path = dir_path / stats_name.str();
+    //std::ofstream statsfile;
+    //statsfile.open(stats_path, std::ios::out);
+    //statsfile << kExprHeader << std::endl;
+    //pi->set_outfile(statsfile);
 
-    auto matcher = SimpleQueryMatcher(*pi, false);
+    //auto matcher = SimpleQueryMatcher(*pi, false);
 
-    // Get individual stats
-    for (const auto & regex : regexes) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    //// Get individual stats
+    //for (const auto & regex : regexes) {
+    //    statsfile << regex << "\t";
+    //    matcher.match_one(regex);
+    //    statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    //}
 
-    statsfile.close();
+    //statsfile.close();
 }
 
 template std::pair<int, int> getStats(std::vector<int> & arr);

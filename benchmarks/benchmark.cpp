@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> regexes;
     std::vector<std::string> lines;
-    status = readWorkload(expr_info, regexes, lines, 100000);
+    // status = readWorkload(expr_info, regexes, lines, 100000);
+    status = readWorkload(expr_info, regexes, lines);
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
