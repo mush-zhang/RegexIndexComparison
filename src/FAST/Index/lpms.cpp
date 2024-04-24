@@ -259,7 +259,7 @@ void fast_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
 }
 
 // Algorithm 1: LPMS multigram selection algorithm
-void fast_index::LpmsIndex::select_grams(int upper_k) {
+void fast_index::LpmsIndex::select_grams(int upper_n) {
     GRBEnv* env = new GRBEnv();
     // env->set("OutputFlag", 0);
 
@@ -313,14 +313,14 @@ void fast_index::LpmsIndex::select_grams(int upper_k) {
     delete env;
 }
 
-void fast_index::LpmsIndex::build_index(int upper_k) {
+void fast_index::LpmsIndex::build_index(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
-    select_grams(upper_k);
+    select_grams(upper_n);
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams and Index Building End in " << elapsed << " s" << std::endl;
     std::ostringstream log;    
-    log << "FAST," << thread_count_ << "," << upper_k << ",";
+    log << "FAST," << thread_count_ << "," << upper_n << ",";
     log << "-1," << elapsed << ",";  // selectivity threshold, select time
     log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
     log << get_num_keys() << "," << get_bytes_used() << ",";

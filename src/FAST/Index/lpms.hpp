@@ -27,10 +27,10 @@ class LpmsIndex : public NGramInvertedIndex {
     
     ~LpmsIndex() {}
 
-    void build_index(int upper_k=-1) override;
+    void build_index(int upper_n=-1) override;
 
  protected:
-    void select_grams(int upper_k=-1) override;
+    void select_grams(int upper_n=-1) override;
     
  private:
     const relaxation_type k_relaxation_type_;
