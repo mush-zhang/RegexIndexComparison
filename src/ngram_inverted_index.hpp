@@ -25,7 +25,7 @@ class NGramInvertedIndex : public NGramIndex {
 
     virtual void build_index(int upper_k) {}
 
-    std::vector<std::string> find_all_indexed(const std::string & line) const override;
+    std::vector<std::string> find_all_indexed(const std::string & reg) const override;
 
     void print_index(bool size_only=false) const override;
     
@@ -41,6 +41,9 @@ class NGramInvertedIndex : public NGramIndex {
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
     std::unordered_map<std::string, std::vector<size_t>> k_index_;
     std::set<std::string> k_index_keys_;
+
+    void find_all_indexed_helper(
+        const std::string & line,  std::vector<std::string> & found_keys) const override;
 };
 
 #endif // NGRAM_INVERTED_INDEX_HPP_

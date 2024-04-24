@@ -37,7 +37,7 @@ class SimpleQueryMatcher {
 
     ~SimpleQueryMatcher() {}
 
- private:
+ protected:
     const NGramIndex & k_index_;
 
     std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;

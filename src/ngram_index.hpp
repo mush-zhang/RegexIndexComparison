@@ -78,6 +78,9 @@ class NGramIndex {
 
     int thread_count_ = 1;
 
+    virtual void find_all_indexed_helper(
+        const std::string & line,  std::vector<std::string> & found_keys) const = 0;
+
  private:
     std::ostream* outfile_ = &std::cout;
 };

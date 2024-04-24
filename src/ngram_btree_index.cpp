@@ -30,8 +30,17 @@ const std::vector<size_t> & NGramBtreeIndex::get_line_pos_at(
 }
 
 std::vector<std::string> NGramBtreeIndex::find_all_indexed(
-        const std::string & line) const {
+        const std::string & reg) const {
     std::vector<std::string> found_keys;
+    auto literals = extract_literals(reg);
+    for (const auto & lit : literals) {
+        find_all_indexed_helper(lit, found_keys);
+    }
+    return found_keys;
+}
+
+void NGramBtreeIndex::find_all_indexed_helper(
+        const std::string & line, std::vector<std::string> & found_keys) const {
     for (size_t i = 0; i < line.size(); i++) {
         auto curr_c = line.at(i);
         std::string curr_key = line.substr(i,1);
@@ -49,6 +58,4 @@ std::vector<std::string> NGramBtreeIndex::find_all_indexed(
             }
         }
     }
-    return found_keys;
 }
-

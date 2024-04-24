@@ -36,6 +36,9 @@ class NGramBtreeIndex : public NGramIndex {
      * value address of is a sorted (ascending) list of line indices**/
     btree::set<std::string> k_index_keys_;
     btree::map<std::string, std::vector<size_t>> k_index_;
+
+    void find_all_indexed_helper(
+        const std::string & line,  std::vector<std::string> & found_keys) const override;
 };
 
 #endif // NGRAM_BTREE_INDEX_HPP_

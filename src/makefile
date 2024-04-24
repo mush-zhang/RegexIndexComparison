@@ -32,7 +32,7 @@ GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 
 .PHONY: all
-all: $(FAST_BASE_DIR)/test_fast.out $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out
+all: $(FAST_BASE_DIR)/test_fast.out $(BEST_BASE_DIR)/test_best.out $(FREE_BASE_DIR)/test_free.out bitvec_index.o
 
 $(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
@@ -61,13 +61,13 @@ $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-utils/hash_pair.o: utils/hash_pair.cpp
-	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
-
 simple_query_matcher.o: simple_query_matcher.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
 inverted_index.o: ngram_inverted_index.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+bitvec_index.o: ngram_bitvec_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 btree_index.o: ngram_btree_index.cpp
@@ -75,6 +75,9 @@ btree_index.o: ngram_btree_index.cpp
 
 # btree.o: utils/btree.cpp
 # 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+utils/hash_pair.o: utils/hash_pair.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 .PHONY: clean
 clean:
