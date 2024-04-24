@@ -161,7 +161,7 @@ int parseArgs(int argc, char ** argv,
             if (n == 0) {
                 return error_return("Missing/Invalid upper bound on n of n-gram.");
             }
-            free_info.upper_k = n;
+            free_info.upper_n = n;
             if (selec > 0 && selec <= 1) {
                 free_info.sel_threshold = selec;
             } 
@@ -407,7 +407,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     }
     pi->set_thread_count(free_info.num_threads); // currently not effective
     pi->set_outfile(outfile);
-    pi->build_index(free_info.upper_k);
+    pi->build_index(free_info.upper_n);
 
     for (size_t i = 0; i < free_info.num_repeat; i++) {
         if (i >= kNumIndexBuilding) {
@@ -423,7 +423,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     outfile.close();
 
     // open stats file
-    stats_name << free_info.num_threads << "_" << free_info.upper_k;
+    stats_name << free_info.num_threads << "_" << free_info.upper_n;
     stats_name << "_" << free_info.sel_threshold << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;

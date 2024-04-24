@@ -43,7 +43,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
 
     ~ParallelizableIndex() {}
  private:
-    void select_grams(int upper_k=-1) override;
+    void select_grams(int upper_n=-1) override;
 
     void build_qg_list_local(std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 

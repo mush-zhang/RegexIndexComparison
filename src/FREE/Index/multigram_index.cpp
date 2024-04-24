@@ -20,19 +20,19 @@ static void insert_or_increment(std::unordered_map<T, long double, hash_T> & kgr
 /**-----------------------------Helpers End----------------------------------**/
 
 // Algorithm 3.1 Multigram Index
-void free_index::MultigramIndex::build_index(int upper_k) {
+void free_index::MultigramIndex::build_index(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
-    select_grams(upper_k);
+    select_grams(upper_n);
     auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     
     std::ostringstream log;
-    log << "FREE," << thread_count_ << "," << upper_k << "," << k_threshold_ << ",";
+    log << "FREE," << thread_count_ << "," << upper_n << "," << k_threshold_ << ",";
     log << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
-    fill_posting(upper_k);
+    fill_posting(upper_n);
     auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     
@@ -43,11 +43,11 @@ void free_index::MultigramIndex::build_index(int upper_k) {
     write_to_file(log.str());
 }
 
-void free_index::MultigramIndex::fill_posting(int upper_k) {
+void free_index::MultigramIndex::fill_posting(int upper_n) {
     for (auto i = 0; i < k_dataset_size_; i++) {
         auto line = k_dataset_[i];
         for (auto pos = 0; pos < line.size(); pos++) {
-            for (auto k = 1; k <= upper_k && k + pos <= line.size(); k++) {
+            for (auto k = 1; k <= upper_n && k + pos <= line.size(); k++) {
                 const auto curr_substr = line.substr(pos, k);
                 if (k_index_keys_.find(curr_substr) != k_index_keys_.end() &&
                     (k_index_[curr_substr].size() == 0 ||
@@ -62,7 +62,7 @@ void free_index::MultigramIndex::fill_posting(int upper_k) {
     }
 }
 
-void free_index::MultigramIndex::select_grams(int upper_k) {
+void free_index::MultigramIndex::select_grams(int upper_n) {
     gram_set expand; // stores useless prefix
 
     // Opimization page 6
@@ -75,7 +75,7 @@ void free_index::MultigramIndex::select_grams(int upper_k) {
     decltype(bigrams)().swap(bigrams);
 
     int k = 3;
-    while (!expand.empty() && k <= upper_k) {
+    while (!expand.empty() && k <= upper_n) {
         // get all k-grams whose prefix not in index already
         std::unordered_map<std::string, long double> curr_kgrams = {};
         get_kgrams_not_indexed(curr_kgrams, expand, k);

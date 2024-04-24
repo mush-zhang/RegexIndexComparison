@@ -2,20 +2,20 @@
 #include <algorithm>
 
 // Section 3.2 Observation 3.13 proof
-void free_index::PresufShell::build_index(int upper_k) {
+void free_index::PresufShell::build_index(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
-    select_grams(upper_k);
+    select_grams(upper_n);
     compute_suffix_free_set();
     auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
 
     std::ostringstream log;    
-    log << "FREE-presuf," << thread_count_ << "," << upper_k << ",";
+    log << "FREE-presuf," << thread_count_ << "," << upper_n << ",";
     log  << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
-    fill_posting(upper_k);
+    fill_posting(upper_n);
     auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Index Building End in " << build_time << std::endl;

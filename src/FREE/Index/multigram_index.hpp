@@ -16,11 +16,11 @@ class MultigramIndex : public NGramInvertedIndex {
     
     ~MultigramIndex() {}
 
-    void build_index(int upper_k) override;
+    void build_index(int upper_n) override;
 
  protected:
-    void select_grams(int upper_k) override;
-    void fill_posting(int upper_k);
+    void select_grams(int upper_n) override;
+    void fill_posting(int upper_n);
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
         

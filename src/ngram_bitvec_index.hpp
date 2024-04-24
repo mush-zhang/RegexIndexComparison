@@ -1,13 +1,13 @@
 #ifndef NGRAM_BITVEC_INDEX_HPP_
 #define NGRAM_BITVEC_INDEX_HPP_
 
-#include <unordered_map>
 #include <bitset>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "utils/hash_pair.hpp"
 
@@ -27,7 +27,7 @@ class NGramBitvecIndex {
 
     ~NGramBitvecIndex() {}
 
-    void build_index(int upper_k) {}
+    void build_index(int upper_n) {}
 
     std::vector<std::string> find_all_indexed(const std::string & line) const;
 
@@ -60,7 +60,7 @@ class NGramBitvecIndex {
     void write_to_file(const std::string & str) const { *outfile_ << str; }  
 
  protected:
-    void select_grams(int upper_k) {};
+    void select_grams(int upper_n) {};
 
     std::vector<std::bitset<K>> k_index_;
     std::unordered_map<std::array<char,N>, size_t, hash_array> k_index_keys_;
@@ -80,9 +80,6 @@ class NGramBitvecIndex {
         const std::string & line,  std::vector<std::string> & found_keys) const;
 
     std::bitset<K> GetBitMask(const std::string & reg_string) const;
-
-    // std::unordered_set<std::array<char,N>, hash_array> make_unique_ngrams(const std::string& s) const;
-
 };
 
 #endif // NGRAM_BITVEC_INDEX_HPP_

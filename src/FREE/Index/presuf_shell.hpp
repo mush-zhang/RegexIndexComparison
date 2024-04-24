@@ -12,7 +12,7 @@ class PresufShell: public MultigramIndex {
     PresufShell(const std::vector<std::string> & dataset, double sel_threshold)
         : MultigramIndex(dataset, sel_threshold) {}
     ~PresufShell() {}
-    void build_index(int upper_k) override;
+    void build_index(int upper_n) override;
 
  private:
     void compute_suffix_free_set();

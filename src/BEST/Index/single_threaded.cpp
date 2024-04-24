@@ -511,7 +511,7 @@ void best_index::SingleThreadedIndex::build_job(
 // Improved greedy gram selection algorightm
 //   TODO: no point of seperating select gram and build index;
 //         only do that if we need some consistent interface later for experiments
-void best_index::SingleThreadedIndex::select_grams(int upper_k) {
+void best_index::SingleThreadedIndex::select_grams(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
     auto query_literals = get_query_literals();
     auto pre_suf_count = get_all_gram_counts(query_literals);
@@ -567,7 +567,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
 
     std::ostringstream log;
-    log << "BEST," << thread_count_ << "," << upper_k << ",";
+    log << "BEST," << thread_count_ << "," << upper_n << ",";
     log << k_threshold_ << "," << selection_time << ",";
     
     start = std::chrono::high_resolution_clock::now();
@@ -587,7 +587,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_k) {
 }
 
 // Algorithm 2 in Figure 3
-void best_index::SingleThreadedIndex::build_index(int upper_k) {
+void best_index::SingleThreadedIndex::build_index(int upper_n) {
     select_grams();
 }
 

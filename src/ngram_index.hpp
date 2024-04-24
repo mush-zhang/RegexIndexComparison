@@ -26,7 +26,7 @@ class NGramIndex {
 
     ~NGramIndex() {}
 
-    virtual void build_index(int upper_k) {}
+    virtual void build_index(int upper_n) {}
 
     // return all substrings of the given string that are keys in the index
     virtual std::vector<std::string> find_all_indexed(const std::string & line) const = 0;
@@ -67,7 +67,7 @@ class NGramIndex {
     void write_to_file(const std::string & str) const { *outfile_ << str; }   
 
  protected:
-    virtual void select_grams(int upper_k) {};
+    virtual void select_grams(int upper_n) {};
     
     // the index structure should be stored here
     const std::vector<std::string> & k_dataset_;

@@ -60,7 +60,7 @@ bool best_index::ParallelizableIndex::multi_all_covered(
 
 // Algorithm 4 in Figure 5
 // Parallelizable greedy gram selection algorightm
-void best_index::ParallelizableIndex::select_grams(int upper_k) {
+void best_index::ParallelizableIndex::select_grams(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
 
     auto query_literals = get_query_literals();
@@ -175,7 +175,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_k) {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     std::ostringstream log;
-    log << "BEST," << thread_count_ << "," << upper_k << ",";
+    log << "BEST," << thread_count_ << "," << upper_n << ",";
     log << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();

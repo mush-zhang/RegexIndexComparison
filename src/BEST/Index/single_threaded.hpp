@@ -55,7 +55,7 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
     ~SingleThreadedIndex() {}
 
     // No constraint on size of gram in BEST, use build_index();
-    void build_index(int upper_k=-1) override;
+    void build_index(int upper_n=-1) override;
 
     void set_max_num_keys(int max_num_keys) { k_max_num_keys_ = max_num_keys; }
 
@@ -67,8 +67,8 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
 
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
-    
-    void select_grams(int upper_k=-1) override;
+
+    void select_grams(int upper_n=-1) override;
 
     std::vector<std::string> candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals,

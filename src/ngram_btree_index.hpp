@@ -14,7 +14,7 @@ class NGramBtreeIndex : public NGramIndex {
         const std::vector<std::string> & queries) : NGramIndex(dataset, queries) {}
     ~NGramBtreeIndex() {}
 
-    virtual void build_index(int upper_k) {}
+    virtual void build_index(int upper_n) {}
 
     std::vector<std::string> find_all_indexed(const std::string & line) const override;
 

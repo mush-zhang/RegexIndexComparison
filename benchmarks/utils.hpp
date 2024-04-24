@@ -64,7 +64,7 @@ struct free_info {
     int num_repeat = 10;
     int num_threads;
     double sel_threshold = 0.1;
-    int upper_k; // k
+    int upper_n; // k
     bool use_presuf = false;
 };
 
