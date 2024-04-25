@@ -1,9 +1,9 @@
-#include "single_threaded.hpp"
 #include <cstring>
 #include <random>
 #include <ranges>
 #include <stdexcept>
 
+#include "single_threaded.hpp"
 #include "../../utils/utils.hpp"
 
 // #include "../../utils/trie.hpp"

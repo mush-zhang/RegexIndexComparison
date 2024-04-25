@@ -25,7 +25,12 @@ class NGramInvertedIndex : public NGramIndex {
 
     virtual void build_index(int upper_n) {}
 
-    std::vector<std::string> find_all_indexed(const std::string & reg) const override;
+    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
+        std::cerr << "should not be called" << std::endl;
+        return true;
+    };
+
+    std::vector<std::string> find_all_keys(const std::string & reg) const override;
 
     void print_index(bool size_only=false) const override;
     
@@ -42,7 +47,7 @@ class NGramInvertedIndex : public NGramIndex {
     std::unordered_map<std::string, std::vector<size_t>> k_index_;
     std::set<std::string> k_index_keys_;
 
-    void find_all_indexed_helper(
+    void find_all_keys_helper(
         const std::string & line,  std::vector<std::string> & found_keys) const override;
 };
 

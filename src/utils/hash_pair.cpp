@@ -53,7 +53,7 @@ template size_t hash_pair::operator()<char>(const std::pair<char, char>& p) cons
 template size_t hash_tuple::operator()<char>(const std::tuple<char, char, char>& p) const;
 template size_t hash_tuple::operator()<char>(const std::tuple<char, char>& p) const;
 
-
+template size_t hash_array::operator()<char>(const std::array<char, 4>& p) const;
 template size_t hash_array::operator()<char>(const std::array<char, 3>& p) const;
 template size_t hash_array::operator()<char>(const std::array<char, 2>& p) const;
 

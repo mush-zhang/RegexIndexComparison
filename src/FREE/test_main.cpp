@@ -3,7 +3,6 @@
 #include "Matcher/query_parser.hpp"
 #include "Matcher/query_matcher.hpp"
 
-// #include <iostream> 
 #include <cassert>
 
 const double k_number_repeat = 10;
@@ -154,10 +153,10 @@ void simple_find_keys() {
     pi.build_index(5);
     pi.print_index();
 
-    assert(pi.find_all_indexed("Bill").empty() && "Bill not in index");
-    assert(compare_lists(pi.find_all_indexed("William"), {"Will", "liam"}) && 
+    assert(pi.find_all_keys("Bill").empty() && "Bill not in index");
+    assert(compare_lists(pi.find_all_keys("William"), {"Will", "liam"}) && 
            "2 Keys indexed in William");
-    assert(compare_lists(pi.find_all_indexed("Clinton"), {"Clint", "nton"}) && 
+    assert(compare_lists(pi.find_all_keys("Clinton"), {"Clint", "nton"}) && 
            "2 Keys indexed in Clinton");
 }
 

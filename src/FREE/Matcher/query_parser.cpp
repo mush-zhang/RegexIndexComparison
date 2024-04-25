@@ -1,7 +1,7 @@
+#include <iostream>
+
 #include "query_parser.hpp"
 #include "../../utils/utils.hpp"
-
-#include <iostream>
 
 using QueryPlanNode = free_index::QueryPlanNode;
 using AndNode = free_index::AndNode;
@@ -230,7 +230,7 @@ void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNod
         rewrite_node_by_index(node->left_);
         rewrite_node_by_index(node->right_);
     } else if (node->get_type() == free_index::NodeType::kLiteralNode) {
-        auto all_keys = k_index_.find_all_indexed(node->to_string());
+        auto all_keys = k_index_.find_all_keys(node->to_string());
         if (all_keys.empty()) {
             node = make_const_node("");
         } else {

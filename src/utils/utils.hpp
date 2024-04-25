@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cassert>
 
+#include "hash_pair.hpp"
+
 // #ifdef NDEBUG
 // #define assert(x) (void(0))
 // #endif
@@ -86,4 +88,26 @@ static std::vector<T> sorted_lists_intersection(const std::vector<T> & l,
     } 
     return temp;
 }
+
+template<size_t N> 
+static void insert_unique_ngrams_to_set(
+        std::unordered_set<std::array<char,N>, hash_array> & ngrams, const std::string & s) {
+    if (s.size() >= N) {
+        const auto end_iter = s.end() - (N - 1);
+        for(auto it = s.cbegin(); it != end_iter; ++it) {
+            std::array<char, N> temp;
+            std::copy_n(it, N, temp.begin());
+            ngrams.insert(temp);
+        }
+    }
+}
+
+template<size_t N> 
+static std::unordered_set<std::array<char,N>, hash_array> 
+make_unique_ngrams(const std::string& s) {
+    std::unordered_set<std::array<char,N>, hash_array> ngrams;
+    insert_unique_ngrams_to_set<N>(ngrams, s);
+    return ngrams;
+}
+
 #endif // UTILS_UTILS_HPP_

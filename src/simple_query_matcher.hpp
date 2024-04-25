@@ -42,7 +42,7 @@ class SimpleQueryMatcher {
 
     std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;
 
-    bool get_indexed(const std::string & reg, std::vector<size_t> & container) const;
+    virtual bool get_indexed(const std::string & reg, std::vector<size_t> & container) const;
 
     long match_one_helper(const std::string & reg, const std::shared_ptr<RE2> compiled_reg);
 

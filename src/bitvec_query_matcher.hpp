@@ -4,29 +4,28 @@
 #include "simple_query_matcher.hpp"
 #include "ngram_bitvec_index.hpp"
 
-class BitvecQueryMatcher : SimpleQueryMatcher {
+template<size_t N, size_t K> 
+class BitvecQueryMatcher : public SimpleQueryMatcher {
  public:
     BitvecQueryMatcher() = delete;
 
-    BitvecQueryMatcher(const NGramIndex & index, 
+    BitvecQueryMatcher(const NGramBitvecIndex<N,K> & index, 
                  const std::vector<std::string> & regs,
                  bool compile=true) 
                  : SimpleQueryMatcher(index, regs, compile) {}
 
-    BitvecQueryMatcher(const NGramIndex & index, bool compile=true) 
+    BitvecQueryMatcher(const NGramBitvecIndex<N,K> & index, bool compile=true) 
         : SimpleQueryMatcher(index, compile) {}
 
     ~BitvecQueryMatcher() {}
 
  protected:
-    const NGramIndex & k_index_;
-    std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;
+    // const NGramIndex & k_index_;
+    // std::unordered_map<std::string, std::shared_ptr<RE2>> reg_evals_;
 
     bool get_indexed(const std::string & reg, 
                      std::vector<size_t> & container) const override {
-        std::cout << "correctly called" << std::endl;
-        auto k_bit_index = dynamic_cast<NGramBitvecIndex>(k_index_);
-        return k_bit_index.get_all_idxs(reg, container);
+        return k_index_.get_all_idxs(reg, container);
     }
 };
 

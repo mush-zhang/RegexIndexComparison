@@ -3,7 +3,6 @@
 
 #include "../simple_query_matcher.hpp"
 
-// #include <iostream> 
 #include <cassert>
 #include <unordered_set>
 

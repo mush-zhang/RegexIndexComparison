@@ -16,7 +16,7 @@ class NGramBtreeIndex : public NGramIndex {
 
     virtual void build_index(int upper_n) {}
 
-    std::vector<std::string> find_all_indexed(const std::string & line) const override;
+    std::vector<std::string> find_all_keys(const std::string & line) const override;
 
     void print_index(bool size_only=false) const override;
     
@@ -30,6 +30,11 @@ class NGramBtreeIndex : public NGramIndex {
         return k_index_.bytes_used() + k_index_keys_.bytes_used(); 
     };
 
+    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
+        std::cerr << "should not be called" << std::endl;
+        return true;
+    };
+    
  protected:
     // TODO: we can use abseil-btree also at https://abseil.io/about/design/btree
     /**Key is address of the multigram in k_index_keys_, 
@@ -37,7 +42,7 @@ class NGramBtreeIndex : public NGramIndex {
     btree::set<std::string> k_index_keys_;
     btree::map<std::string, std::vector<size_t>> k_index_;
 
-    void find_all_indexed_helper(
+    void find_all_keys_helper(
         const std::string & line,  std::vector<std::string> & found_keys) const override;
 };
 

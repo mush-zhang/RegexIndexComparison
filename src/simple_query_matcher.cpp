@@ -4,7 +4,7 @@
 bool SimpleQueryMatcher::get_indexed(const std::string & reg,
                                      std::vector<size_t> & container) const {
     long count = 0;
-    auto all_keys = k_index_.find_all_indexed(reg);
+    auto all_keys = k_index_.find_all_keys(reg);
     if (all_keys.empty()) {
         return false;
     }

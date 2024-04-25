@@ -29,7 +29,7 @@ class NGramIndex {
     virtual void build_index(int upper_n) {}
 
     // return all substrings of the given string that are keys in the index
-    virtual std::vector<std::string> find_all_indexed(const std::string & line) const = 0;
+    virtual std::vector<std::string> find_all_keys(const std::string & line) const = 0;
 
     virtual void print_index(bool size_only=false) const = 0;
     
@@ -60,6 +60,8 @@ class NGramIndex {
 
     virtual size_t get_bytes_used() const = 0;
 
+    virtual bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const = 0;
+
     void set_thread_count(int thread_count) { thread_count_ = thread_count; }
 
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
@@ -78,7 +80,7 @@ class NGramIndex {
 
     int thread_count_ = 1;
 
-    virtual void find_all_indexed_helper(
+    virtual void find_all_keys_helper(
         const std::string & line,  std::vector<std::string> & found_keys) const = 0;
 
  private:

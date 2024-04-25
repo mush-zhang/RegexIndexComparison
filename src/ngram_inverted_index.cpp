@@ -56,17 +56,17 @@ const std::vector<size_t> & NGramInvertedIndex::get_line_pos_at(
     return k_empty_pos_list_;
 }
 
-std::vector<std::string> NGramInvertedIndex::find_all_indexed(
+std::vector<std::string> NGramInvertedIndex::find_all_keys(
         const std::string & reg) const {
     std::vector<std::string> found_keys;
     auto literals = extract_literals(reg);
     for (const auto & lit : literals) {
-        find_all_indexed_helper(lit, found_keys);
+        find_all_keys_helper(lit, found_keys);
     }
     return found_keys;
 }
 
-void NGramInvertedIndex::find_all_indexed_helper(
+void NGramInvertedIndex::find_all_keys_helper(
         const std::string & line, std::vector<std::string> & found_keys) const {
     for (size_t i = 0; i < line.size(); i++) {
         auto curr_c = line.at(i);

@@ -17,7 +17,7 @@ typedef __gnu_pbds::trie<std::string, mapped_type, cmp_fn, tag_type,
 
 
 // // This is for when k_index_keys_ is implemented using trie
-// std::vector<std::string> free_index::MultigramIndex::find_all_indexed(const std::string line) {
+// std::vector<std::string> free_index::MultigramIndex::find_all_keys(const std::string line) {
 //     std::vector<std::string> found_keys;
 //     for (size_t i = 0; i < line.size(); i++) {
 //         auto match_range = k_index_keys_.prefix_range(line.substr(i,1));
