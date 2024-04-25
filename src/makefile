@@ -40,8 +40,8 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
 	 $(REI_BASE_DIR)/test_rei.out $\
-	 $(FAST_BASE_DIR)/test_fast.out bitvec_index.o
-
+	 $(FAST_BASE_DIR)/test_fast.out 
+	 
 $(REI_BASE_DIR)/test_rei.out: $(REI_IDX) $(REI_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
