@@ -45,3 +45,4 @@ data/*
 
 # my test result files
 *Test/*
+result/*
