@@ -37,6 +37,7 @@ void NGramBitvecIndex<N,K>::print_index(bool size_only) const {
     for (const auto & [key, val] : k_index_keys_) {
         std::cout << "\"" << std::string(key.data(), N) << "\"" << ": ";
     }
+    std::cout << std::endl;
 }
 
 template<size_t N, size_t K> 
@@ -44,21 +45,6 @@ const std::vector<size_t> & NGramBitvecIndex<N,K>::get_line_pos_at(
         const std::string & key) const { 
     std::cerr << "this should not be called really" << std::endl;
     return k_empty_pos_list_;
-}
-
-template<size_t N> 
-std::unordered_set<std::array<char,N>, hash_array> 
-make_unique_ngrams(const std::string& s) {
-    std::unordered_set<std::array<char,N>, hash_array> ngrams;
-    if (s.size() >= N) {
-        const auto end_iter = s.end() - (N - 1);
-        for(auto it = s.cbegin(); it != end_iter; ++it) {
-            std::array<char, N> temp;
-            std::copy_n(it, N, temp.begin());
-            ngrams.insert(temp);
-        }
-    }
-    return ngrams;
 }
 
 template<size_t N, size_t K> 
@@ -84,7 +70,7 @@ std::bitset<K> NGramBitvecIndex<N,K>::GetBitMask(const std::string & reg) const 
 }
 
 template<size_t N, size_t K> 
-std::vector<std::string> NGramBitvecIndex<N,K>::find_all_indexed(
+std::vector<std::string> NGramBitvecIndex<N,K>::find_all_keys(
         const std::string & reg) const {
     std::cerr << "should not be called during normal matching " << std::endl;
 
@@ -122,11 +108,14 @@ bool NGramBitvecIndex<N,K>::get_all_idxs(
 }
 
 template<size_t N, size_t K> 
-void NGramBitvecIndex<N,K>::find_all_indexed_helper(
+void NGramBitvecIndex<N,K>::find_all_keys_helper(
         const std::string & line, std::vector<std::string> & found_keys) const {
     std::cerr << "SHould not be called" << std::endl;
 }
 
+template class NGramBitvecIndex<2, 8>;
 template class NGramBitvecIndex<2, 64>;
+template class NGramBitvecIndex<3, 4>;
+template class NGramBitvecIndex<4, 4>;
 
 // template std::unordered_set<std::array<char,2>, hash_array> make_unique_ngrams(const std::string& s);
