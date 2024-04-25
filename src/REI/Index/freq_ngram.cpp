@@ -106,7 +106,44 @@ void rei_index::FreqNgramIndex<N,K>::build_index(int upper_n) {
     this->write_to_file(log.str());
 }
 
+template class rei_index::FreqNgramIndex<2, 4>;
 template class rei_index::FreqNgramIndex<2, 8>;
+template class rei_index::FreqNgramIndex<2, 16>;
+template class rei_index::FreqNgramIndex<2, 32>;
 template class rei_index::FreqNgramIndex<2, 64>;
+template class rei_index::FreqNgramIndex<2, 96>;
+template class rei_index::FreqNgramIndex<2, 128>;
+template class rei_index::FreqNgramIndex<2, 192>;
+template class rei_index::FreqNgramIndex<2, 256>;
+template class rei_index::FreqNgramIndex<2, 320>;
+template class rei_index::FreqNgramIndex<2, 384>;
+template class rei_index::FreqNgramIndex<2, 448>;
+template class rei_index::FreqNgramIndex<2, 512>;
+
 template class rei_index::FreqNgramIndex<3, 4>;
+template class rei_index::FreqNgramIndex<3, 8>;
+template class rei_index::FreqNgramIndex<3, 16>;
+template class rei_index::FreqNgramIndex<3, 32>;
+template class rei_index::FreqNgramIndex<3, 64>;
+template class rei_index::FreqNgramIndex<3, 96>;
+template class rei_index::FreqNgramIndex<3, 128>;
+template class rei_index::FreqNgramIndex<3, 192>;
+template class rei_index::FreqNgramIndex<3, 256>;
+template class rei_index::FreqNgramIndex<3, 320>;
+template class rei_index::FreqNgramIndex<3, 384>;
+template class rei_index::FreqNgramIndex<3, 448>;
+template class rei_index::FreqNgramIndex<3, 512>;
+
 template class rei_index::FreqNgramIndex<4, 4>;
+template class rei_index::FreqNgramIndex<4, 8>;
+template class rei_index::FreqNgramIndex<4, 16>;
+template class rei_index::FreqNgramIndex<4, 32>;
+template class rei_index::FreqNgramIndex<4, 64>;
+template class rei_index::FreqNgramIndex<4, 96>;
+template class rei_index::FreqNgramIndex<4, 128>;
+template class rei_index::FreqNgramIndex<4, 192>;
+template class rei_index::FreqNgramIndex<4, 256>;
+template class rei_index::FreqNgramIndex<4, 320>;
+template class rei_index::FreqNgramIndex<4, 384>;
+template class rei_index::FreqNgramIndex<4, 448>;
+template class rei_index::FreqNgramIndex<4, 512>;

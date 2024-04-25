@@ -113,9 +113,44 @@ void NGramBitvecIndex<N,K>::find_all_keys_helper(
     std::cerr << "SHould not be called" << std::endl;
 }
 
+template class NGramBitvecIndex<2, 4>;
 template class NGramBitvecIndex<2, 8>;
+template class NGramBitvecIndex<2, 16>;
+template class NGramBitvecIndex<2, 32>;
 template class NGramBitvecIndex<2, 64>;
-template class NGramBitvecIndex<3, 4>;
-template class NGramBitvecIndex<4, 4>;
+template class NGramBitvecIndex<2, 96>;
+template class NGramBitvecIndex<2, 128>;
+template class NGramBitvecIndex<2, 192>;
+template class NGramBitvecIndex<2, 256>;
+template class NGramBitvecIndex<2, 320>;
+template class NGramBitvecIndex<2, 384>;
+template class NGramBitvecIndex<2, 448>;
+template class NGramBitvecIndex<2, 512>;
 
-// template std::unordered_set<std::array<char,2>, hash_array> make_unique_ngrams(const std::string& s);
+template class NGramBitvecIndex<3, 4>;
+template class NGramBitvecIndex<3, 8>;
+template class NGramBitvecIndex<3, 16>;
+template class NGramBitvecIndex<3, 32>;
+template class NGramBitvecIndex<3, 64>;
+template class NGramBitvecIndex<3, 96>;
+template class NGramBitvecIndex<3, 128>;
+template class NGramBitvecIndex<3, 192>;
+template class NGramBitvecIndex<3, 256>;
+template class NGramBitvecIndex<3, 320>;
+template class NGramBitvecIndex<3, 384>;
+template class NGramBitvecIndex<3, 448>;
+template class NGramBitvecIndex<3, 512>;
+
+template class NGramBitvecIndex<4, 4>;
+template class NGramBitvecIndex<4, 8>;
+template class NGramBitvecIndex<4, 16>;
+template class NGramBitvecIndex<4, 32>;
+template class NGramBitvecIndex<4, 64>;
+template class NGramBitvecIndex<4, 96>;
+template class NGramBitvecIndex<4, 128>;
+template class NGramBitvecIndex<4, 192>;
+template class NGramBitvecIndex<4, 256>;
+template class NGramBitvecIndex<4, 320>;
+template class NGramBitvecIndex<4, 384>;
+template class NGramBitvecIndex<4, 448>;
+template class NGramBitvecIndex<4, 512>;

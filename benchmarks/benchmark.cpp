@@ -38,10 +38,9 @@ int main(int argc, char** argv) {
     std::cout << "start best end-to-end" << std::endl;
 
     switch (expr_info.stype) {
-        case selection_type::kRei: {
-
+        case selection_type::kRei:
+            benchmarkRei(dir_path, regexes, lines, rei_info);
             break;
-        }
         case selection_type::kFree: 
             benchmarkFree(dir_path, regexes, lines, free_info);
             break;

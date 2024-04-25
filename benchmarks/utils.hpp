@@ -27,7 +27,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
-    \t             \t The default is 0.1 for FREE and for BEST; not applicable to FAST and REI.\n\
+    \t             \t The default is 0.1 for FREE and for BEST, optional for REI, and not applicable to FAST.\n\
       REI specific options:\n\
     \t -n, required \t Length of n-grams used for indexing.\n\
     \t -k, required \t Number of n-grams used for indexing. \n\
@@ -56,6 +56,7 @@ struct expr_info {
 struct rei_info {
     int num_repeat = 10;
     int num_threads;
+    double sel_threshold;
     int gram_size; // n
     int num_grams; // k
 };

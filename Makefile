@@ -17,11 +17,15 @@ FAST_BASE_DIR=$(SRC_DIR)/FAST
 FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
 FAST_DIRS=$(FAST_IDX_DIR)
 
+REI_BASE_DIR=$(SRC_DIR)/REI
+REI_IDX_DIR=$(REI_BASE_DIR)/Index
+REI_DIRS=$(REI_IDX_DIR)
+
 BEST_BASE_DIR=$(SRC_DIR)/BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_IDX_DIR)
 
-DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
+DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(REI_DIRS) $(FAST_DIRS)
 OBJECT_PATTERNS=*.o
 OBJECTS := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(OBJECT_PATTERNS)))
 
@@ -33,10 +37,11 @@ $(info $(OBJECT_LIST))
 all: benchmark.out
 
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
-			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $\
+			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $(SRC_DIR)/bitvec_index.o $\
 			   $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $\
 			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $(FREE_MCH_DIR)/free_parser.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
+			   $(REI_IDX_DIR)/freq_ngram.o $\
 			   $(FAST_IDX_DIR)/lpms.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
