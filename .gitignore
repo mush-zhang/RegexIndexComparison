@@ -46,3 +46,6 @@ data/*
 # my test result files
 *Test/*
 result/*
+
+# notbook checkpoint
+.ipynb_checkpoint*
