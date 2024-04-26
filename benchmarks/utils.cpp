@@ -25,8 +25,8 @@ inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 
-inline constexpr const std::string_view kSummaryHeader = "\
-    name,num_threads,gram_size,selectivity,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
+inline constexpr const std::string_view kSummaryHeader = 
+    "name,num_threads,gram_size,selectivity,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
 
 inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter";
 
