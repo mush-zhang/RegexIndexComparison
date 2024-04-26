@@ -91,7 +91,8 @@ void rei_index::FreqNgramIndex<N,K>::build_index(int upper_n) {
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     
     std::ostringstream log;
-    log << "REI," << this->thread_count_ << "," << N << "," << k_threshold_ << ",";
+    log << "REI-" << N << "-" << K << ","; // e.g.. REI-2-4
+    log << this->thread_count_ << "," << N << "," << k_threshold_ << ",";
     log << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();

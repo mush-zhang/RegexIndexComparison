@@ -424,7 +424,7 @@ void benchmark_rei_helper(const std::filesystem::path dir_path,
 
     // open stats file
     stats_name << "REI-" << rei_info.gram_size << "-"<< rei_info.num_grams; // e.g.. REI-2-4
-    stats_name << "," << rei_info.num_threads << "_" << rei_info.gram_size;
+    stats_name << "_" << rei_info.num_threads << "_" << rei_info.gram_size;
     stats_name << "_" << rei_info.sel_threshold << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
