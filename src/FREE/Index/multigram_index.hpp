@@ -23,7 +23,17 @@ class MultigramIndex : public NGramInvertedIndex {
     void fill_posting(int upper_n);
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
-        
+
+    void get_uni_bigram_helper(const std::string & line,
+        std::unordered_map<char, long double> & unigrams,
+        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);    
+    
+    void insert_uni_bigram_into_index(
+        const std::unordered_map<char, long double> & unigrams,
+        const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
+        std::unordered_set<std::string> & expand,
+        std::set<std::string> & index_keys);
+
  private:
     /**Select Grams Helpers**/
     void get_kgrams_not_indexed(
@@ -38,10 +48,9 @@ class MultigramIndex : public NGramInvertedIndex {
         const std::unordered_map<std::string, long double> & kgrams,
         std::unordered_set<std::string> & expand);
 
-    void insert_uni_bigram_into_index(
-        const std::unordered_map<char, long double> & unigrams,
-        const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
-        std::unordered_set<std::string> & expand);
+    void get_uni_bigram(
+        std::unordered_map<char, long double> & unigrams,
+        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);
     /**Select Grams Helpers End**/
 };
 

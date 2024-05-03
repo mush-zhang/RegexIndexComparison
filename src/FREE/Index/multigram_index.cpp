@@ -70,7 +70,7 @@ void free_index::MultigramIndex::select_grams(int upper_n) {
     std::unordered_map<char, long double> unigrams;
     std::unordered_map<std::pair<char, char>, long double, hash_pair> bigrams;
     get_uni_bigram(unigrams, bigrams);
-    insert_uni_bigram_into_index(unigrams, bigrams, expand);
+    insert_uni_bigram_into_index(unigrams, bigrams, expand, k_index_keys_);
     decltype(unigrams)().swap(unigrams);
     decltype(bigrams)().swap(bigrams);
 
@@ -111,40 +111,48 @@ void free_index::MultigramIndex::get_kgrams_not_indexed(
     }
 } 
 
+void free_index::MultigramIndex::get_uni_bigram_helper(
+        const std::string & line,
+        std::unordered_map<char, long double> & unigrams,
+        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) {
+    std::unordered_set<char> visited_unigrams;
+    std::unordered_set<std::pair<char, char>, hash_pair> visited_bigrams;
+    for (size_t i = 0; i + 1 < line.size(); i++) {
+        // optimize: Naively get all chars
+        char c1 = line.at(i);
+        char c2 = line.at(i+1);
+        if (visited_unigrams.find(c1) == visited_unigrams.end()) {
+            insert_or_increment(unigrams, c1, visited_unigrams);
+        }
+        if (visited_unigrams.find(c2) == visited_unigrams.end()) {
+            insert_or_increment(unigrams, c2, visited_unigrams);
+        }
+        auto curr_bigram = std::make_pair(c1, c2);
+        if (visited_bigrams.find(curr_bigram) == visited_bigrams.end()) {
+            insert_or_increment(bigrams, curr_bigram, visited_bigrams);
+        }
+    }
+}
+
 void free_index::MultigramIndex::get_uni_bigram(
         std::unordered_map<char, long double> & unigrams,
         std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) {
     for (const auto & line : k_dataset_) {
-        std::unordered_set<char> visited_unigrams;
-        std::unordered_set<std::pair<char, char>, hash_pair> visited_bigrams;
-        for (size_t i = 0; i + 1 < line.size(); i++) {
-            // optimize: Naively get all chars
-            char c1 = line.at(i);
-            char c2 = line.at(i+1);
-            if (visited_unigrams.find(c1) == visited_unigrams.end()) {
-                insert_or_increment(unigrams, c1, visited_unigrams);
-            }
-            if (visited_unigrams.find(c2) == visited_unigrams.end()) {
-                insert_or_increment(unigrams, c2, visited_unigrams);
-            }
-            auto curr_bigram = std::make_pair(c1, c2);
-            if (visited_bigrams.find(curr_bigram) == visited_bigrams.end()) {
-                insert_or_increment(bigrams, curr_bigram, visited_bigrams);
-            }
-        }
+        get_uni_bigram_helper(line, unigrams, bigrams);
     }
 }
 
 void free_index::MultigramIndex::insert_uni_bigram_into_index(
         const std::unordered_map<char, long double> & unigrams,
         const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
-        std::unordered_set<std::string> & expand) {
+        std::unordered_set<std::string> & expand,
+        std::set<std::string> & index_keys) {
     // for each gram, if selectivity <= threshold, insert to index
     //    else insert to expand
     std::unordered_set<char> uni_expand;
     for (const auto & [c, c_count] : unigrams) {
         if (c_count/((double)k_dataset_size_) <= k_threshold_) {
-            k_index_keys_.insert(std::string(1, c));
+            index_keys.insert(std::string(1, c));
         } else {
             uni_expand.insert(c);
         }
@@ -154,7 +162,7 @@ void free_index::MultigramIndex::insert_uni_bigram_into_index(
         if (uni_expand.find(p.first) != uni_expand.end()) {
             std::string curr_str{p.first, p.second};
             if (p_count/((double)k_dataset_size_) <= k_threshold_) {
-                k_index_keys_.insert(curr_str);
+                index_keys.insert(curr_str);
             } else {
                 expand.insert(curr_str);
             }
