@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 
-CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
+CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -Wno-format -Wno-unused-result
 LDFLAGS=-pthread -lstdc++fs
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2
@@ -32,8 +32,12 @@ OBJECTS := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(OBJECT_PATTERNS)))
 OBJECT_LIST=$(shell echo $(OBJECTS))
 $(info $(OBJECT_LIST))
 
-.PHONY: all
+.PHONY: debug
+debug: CPPFLAGS+=-DDEBUG -g
+debug:benchmark.out
 
+.PHONY: all
+all: CPPFLAGS+=-DARMA_NO_DEBUG
 all: benchmark.out
 
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\

@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 RM=rm -rf
-CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -DARMA_NO_DEBUG -Wno-format -Wno-unused-result
+CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto -Wno-format -Wno-unused-result
 LDFLAGS=-pthread
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2
@@ -37,11 +37,19 @@ GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 
 .PHONY: all
+all: CPPFLAGS+=-DARMA_NO_DEBUG
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
 	 $(REI_BASE_DIR)/test_rei.out $\
 	 $(FAST_BASE_DIR)/test_fast.out 
-	 
+
+.PHONY: debug
+debug: CPPFLAGS+=-DDEBUG -g
+debug:  $(BEST_BASE_DIR)/test_best.out $\
+		$(FREE_BASE_DIR)/test_free.out $\
+		$(REI_BASE_DIR)/test_rei.out $\
+		$(FAST_BASE_DIR)/test_fast.out 
+		
 $(REI_BASE_DIR)/test_rei.out: $(REI_IDX) $(REI_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
