@@ -8,9 +8,9 @@
 
 #include "hash_pair.hpp"
 
-// #ifdef NDEBUG
-// #define assert(x) (void(0))
-// #endif
+#ifdef NDEBUG
+#define assert(x) (void(0))
+#endif
 
 template <typename T>
 size_t calculate_vector_size(const std::vector<T> & vec) {

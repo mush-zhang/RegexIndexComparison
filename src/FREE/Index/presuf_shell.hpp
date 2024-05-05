@@ -10,7 +10,9 @@ class PresufShell: public MultigramIndex {
     PresufShell() = delete;
     PresufShell(const PresufShell &&) = delete;
     PresufShell(const std::vector<std::string> & dataset, double sel_threshold)
-        : MultigramIndex(dataset, sel_threshold) {}
+        : MultigramIndex(dataset, sel_threshold) {
+            k_tag_ = "-presuf";
+        }
     ~PresufShell() {}
     void build_index(int upper_n) override;
 

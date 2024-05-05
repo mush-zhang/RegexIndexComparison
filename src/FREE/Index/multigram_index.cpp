@@ -28,7 +28,7 @@ void free_index::MultigramIndex::build_index(int upper_n) {
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     
     std::ostringstream log;
-    log << "FREE," << thread_count_ << "," << upper_n << "," << k_threshold_ << ",";
+    log << "FREE" << k_tag_ << "," << thread_count_ << "," << upper_n << "," << k_threshold_ << ",";
     log << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
@@ -111,34 +111,27 @@ void free_index::MultigramIndex::get_kgrams_not_indexed(
     }
 } 
 
-void free_index::MultigramIndex::get_uni_bigram_helper(
-        const std::string & line,
-        std::unordered_map<char, long double> & unigrams,
-        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) {
-    std::unordered_set<char> visited_unigrams;
-    std::unordered_set<std::pair<char, char>, hash_pair> visited_bigrams;
-    for (size_t i = 0; i + 1 < line.size(); i++) {
-        // optimize: Naively get all chars
-        char c1 = line.at(i);
-        char c2 = line.at(i+1);
-        if (visited_unigrams.find(c1) == visited_unigrams.end()) {
-            insert_or_increment(unigrams, c1, visited_unigrams);
-        }
-        if (visited_unigrams.find(c2) == visited_unigrams.end()) {
-            insert_or_increment(unigrams, c2, visited_unigrams);
-        }
-        auto curr_bigram = std::make_pair(c1, c2);
-        if (visited_bigrams.find(curr_bigram) == visited_bigrams.end()) {
-            insert_or_increment(bigrams, curr_bigram, visited_bigrams);
-        }
-    }
-}
-
 void free_index::MultigramIndex::get_uni_bigram(
         std::unordered_map<char, long double> & unigrams,
         std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) {
     for (const auto & line : k_dataset_) {
-        get_uni_bigram_helper(line, unigrams, bigrams);
+        std::unordered_set<char> visited_unigrams;
+        std::unordered_set<std::pair<char, char>, hash_pair> visited_bigrams;
+        for (size_t i = 0; i + 1 < line.size(); i++) {
+            // optimize: Naively get all chars
+            char c1 = line.at(i);
+            char c2 = line.at(i+1);
+            if (visited_unigrams.find(c1) == visited_unigrams.end()) {
+                insert_or_increment(unigrams, c1, visited_unigrams);
+            }
+            if (visited_unigrams.find(c2) == visited_unigrams.end()) {
+                insert_or_increment(unigrams, c2, visited_unigrams);
+            }
+            auto curr_bigram = std::make_pair(c1, c2);
+            if (visited_bigrams.find(curr_bigram) == visited_bigrams.end()) {
+                insert_or_increment(bigrams, curr_bigram, visited_bigrams);
+            }
+        }
     }
 }
 

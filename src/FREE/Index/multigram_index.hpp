@@ -12,7 +12,7 @@ class MultigramIndex : public NGramInvertedIndex {
     MultigramIndex() = delete;
     MultigramIndex(const MultigramIndex &&) = delete;
     MultigramIndex(const std::vector<std::string> & dataset, double sel_threshold)
-      : NGramInvertedIndex(dataset), k_threshold_(sel_threshold) {}
+      : NGramInvertedIndex(dataset), k_threshold_(sel_threshold), k_tag_("") {}
     
     ~MultigramIndex() {}
 
@@ -20,29 +20,16 @@ class MultigramIndex : public NGramInvertedIndex {
 
  protected:
     void select_grams(int upper_n) override;
-    void fill_posting(int upper_n);
+    virtual void fill_posting(int upper_n);
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
-
-    void get_uni_bigram_helper(const std::string & line,
-        std::unordered_map<char, long double> & unigrams,
-        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);    
-    
-    void insert_uni_bigram_into_index(
-        const std::unordered_map<char, long double> & unigrams,
-        const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
-        std::unordered_set<std::string> & expand,
-        std::set<std::string> & index_keys);
+    std::string k_tag_;
 
  private:
     /**Select Grams Helpers**/
     void get_kgrams_not_indexed(
             std::unordered_map<std::string, long double> & kgrams,
             const std::unordered_set<std::string> & expand, size_t k);
-
-    void get_uni_bigram(
-        std::unordered_map<char, long double> & unigrams,
-        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);
 
     void insert_kgram_into_index(
         const std::unordered_map<std::string, long double> & kgrams,
@@ -51,6 +38,12 @@ class MultigramIndex : public NGramInvertedIndex {
     void get_uni_bigram(
         std::unordered_map<char, long double> & unigrams,
         std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams);
+
+    void insert_uni_bigram_into_index(
+        const std::unordered_map<char, long double> & unigrams,
+        const std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams,
+        std::unordered_set<std::string> & expand,
+        std::set<std::string> & index_keys);
     /**Select Grams Helpers End**/
 };
 

@@ -1,6 +1,9 @@
 #ifndef FREE_INDEX_PARALLEL_MULTIGRAM_INDEX_HPP_
 #define FREE_INDEX_PARALLEL_MULTIGRAM_INDEX_HPP_
 
+#include <atomic>
+#include <shared_mutex>
+
 #include "multigram_index.hpp"
 
 namespace free_index {
@@ -28,25 +31,48 @@ class ParallelMultigramIndex : public MultigramIndex {
 
  protected:
     void select_grams(int upper_n) override;
-    void fill_posting(int upper_n);
+    void fill_posting(int upper_n) override;
     /** The selectivity of the gram in index will be <= k_threshold_**/
     const double k_threshold_;
     std::vector<size_t> k_line_range_;
-        
+    std::shared_mutex grams_mutex_;
+
  private:
     /**Select Grams Helpers**/
-    void get_kgrams_not_indexed(
-            std::unordered_map<std::string, long double> & kgrams,
-            const std::unordered_set<std::string> & expand, size_t k);
-
+    template <typename T, class hash_T>
+    void add_or_inc_w_lock(
+        std::map<T, std::atomic_ulong, hash_T> & kgrams, 
+        const T & key, std::unordered_set<T, hash_T> & loc_visited_kgrams);
+    
     void get_uni_bigram(size_t idx,
-        std::unordered_map<char, long double> & unigrams,
-        std::unordered_map<std::pair<char, char>, long double, hash_pair> & bigrams) ;
+        std::map<char, std::atomic_ulong> & unigrams,
+        std::map<std::pair<char, char>, std::atomic_ulong, hash_pair> & bigrams);
+    
+    void insert_unigram_into_index(const std::map<char, std::atomic_ulong> & unigrams,
+        std::vector<char> & loc_uni_expand,
+        std::vector<char> & loc_index_keys);
+    
+    void insert_bigram_into_index(
+        const std::map<std::pair<char, char>, std::atomic_ulong> & bigrams,
+        const std::unordered_set<char> & uni_expand,
+        std::vector<std::pair<char, char>> & loc_bi_expand,
+        std::vector<std::pair<char, char>> & loc_index_keys);
+
+    void get_kgrams_not_indexed(size_t idx,
+        std::map<std::string, std::atomic_ulong> & kgrams,
+        const std::unordered_set<std::string> & expand, size_t k);
 
     void insert_kgram_into_index(
-        const std::unordered_map<std::string, long double> & kgrams,
-        std::unordered_set<std::string> & expand);
+        const std::map<std::string, std::atomic_ulong> & kgrams,
+        std::vector<std::string> & loc_expand,
+        std::vector<std::string> & loc_index_keys);
     /**Select Grams Helpers End**/
+
+    void kgrams_in_line(int upper_n, size_t idx, 
+        std::unordered_map<std::string, std::vector<size_t>> local_idx);
+    
+    void merge_lists(const std::set<std::string> & loc_idx_keys,
+        const std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs);
 };
 
 } // namespace free_index

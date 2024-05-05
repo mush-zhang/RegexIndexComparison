@@ -11,7 +11,7 @@ void free_index::PresufShell::build_index(int upper_n) {
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
 
     std::ostringstream log;    
-    log << "FREE-presuf," << thread_count_ << "," << upper_n << ",";
+    log << "FREE" << k_tag_ << "," << thread_count_ << "," << upper_n << ",";
     log  << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
