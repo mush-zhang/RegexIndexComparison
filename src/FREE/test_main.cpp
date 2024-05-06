@@ -1,5 +1,6 @@
 #include "Index/multigram_index.hpp"
 #include "Index/presuf_shell.hpp"
+#include "Index/parallel_multigram_index.hpp"
 #include "Matcher/query_parser.hpp"
 #include "Matcher/query_matcher.hpp"
 
@@ -135,6 +136,29 @@ void simple_presuf() {
            compare_lists(pi.get_line_pos_at("e"), {4}) &&
            compare_lists(pi.get_line_pos_at("f"), {5}) &&  
             "Alphabet char should have their respecting line idx and ony the one line idx");
+}
+
+void simple_multi_parallel() {
+    std::vector<std::string> test_keys({
+        "Will",
+        "liam",
+        "Clint",
+        "nton"
+    });
+
+    std::vector<std::string> test_dataset;
+    double threshold;
+    make_dataset_with_keys(test_keys, test_dataset, threshold);
+
+    auto pi = free_index::ParallelMultigramIndex(test_dataset, threshold, 4);
+    pi.build_index(5);
+    pi.print_index();
+
+    assert(pi.find_all_keys("Bill").empty() && "Bill not in index");
+    assert(compare_lists(pi.find_all_keys("William"), {"Will", "liam"}) && 
+           "2 Keys indexed in William");
+    assert(compare_lists(pi.find_all_keys("Clinton"), {"Clint", "nton"}) && 
+           "2 Keys indexed in Clinton");
 }
 
 void simple_find_keys() {
@@ -349,6 +373,8 @@ int main() {
     simple_index_threshold();
     std::cout << "\t SIMPLE PRESUF-------------------------------------------" << std::endl;
     simple_presuf();
+    std::cout << "\t SIMPLE PARALLEL MULTIGRAM-------------------------------------------" << std::endl;
+    simple_multi_parallel();
     std::cout << "\t SIMPLE FIND KEYS-------------------------------------------" << std::endl;
     simple_find_keys();
     std::cout << "BEGIN PARSER TESTS-------------------------------------------" << std::endl;

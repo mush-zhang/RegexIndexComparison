@@ -12,7 +12,9 @@ FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
 FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR) $(FREE_MCH_DIR)
 FREE_MCH=$(FREE_MCH_DIR)/free_parser.o
 FREE_IDX=inverted_index.o utils/hash_pair.o $\
-		 $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o 
+		 $(FREE_IDX_DIR)/free_multigram.o $\
+		 $(FREE_IDX_DIR)/free_presuf.o $\
+		 $(FREE_IDX_DIR)/free_multi_parallel.o
 
 BEST_BASE_DIR=BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
@@ -75,6 +77,9 @@ $(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_MCH) $(FREE_BASE_DIR)/test_ma
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
 $(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp
+	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+$(FREE_IDX_DIR)/free_multi_parallel.o: $(FREE_IDX_DIR)/parallel_multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp 
