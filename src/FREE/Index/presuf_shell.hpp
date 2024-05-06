@@ -16,6 +16,9 @@ class PresufShell: public MultigramIndex {
     ~PresufShell() {}
     void build_index(int upper_n) override;
 
+ protected:
+    void fill_posting(int upper_n) override { MultigramIndex::fill_posting(upper_n); }
+
  private:
     void compute_suffix_free_set();
 };

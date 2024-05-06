@@ -20,6 +20,7 @@ class ParallelMultigramIndex : public MultigramIndex {
     ParallelMultigramIndex(const std::vector<std::string> & dataset, 
                    double sel_threshold, int num_threads)
       : MultigramIndex(dataset, sel_threshold) {
+            k_tag_ = "-parallel";
             size_t ds_size = dataset.size();
             thread_count_ = std::min(ds_size, size_t(std::max(4, num_threads)));
             k_line_range_.assign(thread_count_+1, 0);
@@ -28,11 +29,11 @@ class ParallelMultigramIndex : public MultigramIndex {
                 k_line_range_[i] = k_line_range_[i-1] + group_size;
             }
             k_line_range_[thread_count_] = ds_size;
-      }
+        }
     
     ~ParallelMultigramIndex() {}
 
-    void build_index(int upper_n) override;
+    void build_index(int upper_n) override { MultigramIndex::build_index(upper_n); }
 
  protected:
     void select_grams(int upper_n) override;

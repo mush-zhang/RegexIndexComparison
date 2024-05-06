@@ -15,7 +15,7 @@ template <typename T, class hash_T>
 void free_index::ParallelMultigramIndex::add_or_inc_w_lock(
         std::map<T, atomic_ptr_t> & kgrams, 
         const T & key, std::unordered_set<T, hash_T> & loc_visited_kgrams) {
-    if (kgrams.contains(key)) {
+    if (!kgrams.contains(key)) {
         grams_mutex_.lock();
         kgrams.insert({ key, atomic_ptr_t(new std::atomic_ulong(1))});
         grams_mutex_.unlock();
@@ -392,7 +392,6 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
     decltype(threads)().swap(threads);
 
     assert(k_index_keys_.empty() && "Index keys become empty");
-
 }
 
 template 
