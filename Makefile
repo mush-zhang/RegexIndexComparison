@@ -43,7 +43,8 @@ all: benchmark.out
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
 			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $(SRC_DIR)/bitvec_index.o $\
 			   $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $\
-			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $(FREE_MCH_DIR)/free_parser.o $\
+			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $\
+			    $(FREE_IDX_DIR)/free_multi_parallel.o $(FREE_MCH_DIR)/free_parser.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
 			   $(REI_IDX_DIR)/freq_ngram.o $\
 			   $(FAST_IDX_DIR)/lpms.o $\

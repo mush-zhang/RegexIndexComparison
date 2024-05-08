@@ -10,6 +10,7 @@
 
 #include "../src/FREE/Index/multigram_index.hpp"
 #include "../src/FREE/Index/presuf_shell.hpp"
+#include "../src/FREE/Index/parallel_multigram_index.hpp"
 #include "../src/FREE/Matcher/query_matcher.hpp"
 
 #include "../src/REI/Index/freq_ngram.hpp"
@@ -526,9 +527,14 @@ void benchmarkFree(const std::filesystem::path dir_path,
         pi = new free_index::PresufShell(lines, free_info.sel_threshold);
     } else {
         stats_name << "FREE_";
-        pi = new free_index::MultigramIndex(lines, free_info.sel_threshold);
+        if (free_info.num_threads <= 1) {
+            pi = new free_index::MultigramIndex(lines, free_info.sel_threshold);
+        } else {
+            pi = new free_index::ParallelMultigramIndex(lines, 
+                 free_info.sel_threshold, free_info.num_threads);
+        }
     }
-    pi->set_thread_count(free_info.num_threads); // currently not effective
+    // pi->set_thread_count(free_info.num_threads); // currently not effective
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_n);
 
