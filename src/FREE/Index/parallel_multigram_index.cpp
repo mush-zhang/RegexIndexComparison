@@ -2,6 +2,7 @@
 #include <future>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 #include "parallel_multigram_index.hpp"
 
@@ -61,39 +62,34 @@ void free_index::ParallelMultigramIndex::insert_unigram_into_index(
         std::map<char, atomic_ptr_t>::iterator d,
         std::vector<char> & loc_uni_expand,
         std::vector<char> & loc_index_keys) {
-    std::cout << "geting unigrams for " << unigrams.size() << " unigrams in " << std::this_thread::get_id() << std::endl;
     for (; s != d; s++) {
-    // for (const auto & [c, c_count] : unigrams) {
         char c = s->first;
-        std::cout << "key " << c << " in " << std::this_thread::get_id() << std::endl;
-
         if (*(s->second)/((double)k_dataset_size_) <= k_threshold_) {
             loc_index_keys.push_back(c);
         } else {
             loc_uni_expand.push_back(c);
         }
     }
-    std::cout << "ending unigrams in " << std::this_thread::get_id() << std::endl;    
 }
 
 void free_index::ParallelMultigramIndex::insert_bigram_into_index(
         const std::map<std::pair<char, char>, atomic_ptr_t> & bigrams,
+        std::map<std::pair<char, char>, atomic_ptr_t>::iterator s,
+        std::map<std::pair<char, char>, atomic_ptr_t>::iterator d,
         const std::unordered_set<char> & uni_expand,
         std::vector<std::pair<char, char>> & loc_bi_expand,
         std::vector<std::pair<char, char>> & loc_index_keys) {
-    std::cout << "geting bigrams in " << std::this_thread::get_id() << std::endl;
-
-    for (const auto & [p, p_count] : bigrams) {
+    for (; s != d; s++) {
+        auto p = s->first;
         // check if it is expand
         if (uni_expand.find(p.first) != uni_expand.end()) {
-            if (*p_count/((double)k_dataset_size_) <= k_threshold_) {
+            if (*(s->second)/((double)k_dataset_size_) <= k_threshold_) {
                 loc_index_keys.push_back(p);
             } else {
                 loc_bi_expand.push_back(p);
             }
         }
     }
-    std::cout << "ending bigrams in " << std::this_thread::get_id() << std::endl;    
 }
 
 void free_index::ParallelMultigramIndex::get_kgrams_not_indexed(size_t idx,
@@ -116,15 +112,18 @@ void free_index::ParallelMultigramIndex::get_kgrams_not_indexed(size_t idx,
 
 void free_index::ParallelMultigramIndex::insert_kgram_into_index(
         const std::map<std::string, atomic_ptr_t> & kgrams,
+        std::map<std::string, atomic_ptr_t>::iterator s,
+        std::map<std::string, atomic_ptr_t>::iterator d,
         std::vector<std::string> & loc_expand,
         std::vector<std::string> & loc_index_keys) {
     // for each gram, if selectivity <= threshold, insert to index
     //    else insert to expand
-    for (const auto & [s, s_count] : kgrams) {
-        if (*s_count/((double)k_dataset_size_) <= k_threshold_) {
-            loc_index_keys.push_back(s);
+    for (; s != d; s++) {
+        auto str = s->first;
+        if (*(s->second)/((double)k_dataset_size_) <= k_threshold_) {
+            loc_index_keys.push_back(str);
         } else {
-            loc_expand.push_back(s);
+            loc_expand.push_back(str);
         }
     }
 }
@@ -145,18 +144,15 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         th.join();
     }
     decltype(threads)().swap(threads);
-    std::cout << "get all uni bi" << std::endl;
 
-    for (const auto & [c, v] : unigrams) {
-        std::cout << c << " ";
-    }
-    std::cout << std::endl;
-    // TODO: do the writing of vector of vector actually conflict?
-    //   try use vector of vector shared pointers
     std::unordered_set<char> uni_expand;
     std::vector<std::vector<char>> loc_uni_expands(thread_count_);
     std::vector<std::vector<char>> loc_index_keys_char(thread_count_);
-    auto num_per_thread = std::max(1, int(unigrams.size() / thread_count_));
+    auto num_per_thread = std::ceil(unigrams.size() / ((double) thread_count_));
+    for (size_t j = 0; j < thread_count_; j++) {
+        loc_uni_expands[j].reserve(num_per_thread);
+        loc_index_keys_char[j].reserve(num_per_thread);
+    }
     int i = 0;
     auto uni_start_it = unigrams.begin();
     auto uni_end_it = uni_start_it;
@@ -169,19 +165,16 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         ));
         uni_start_it = uni_end_it;
     }
-    std::cout << " finished first several job inits for unigrams " << std::distance(unigrams.begin(), uni_start_it);
-    std::cout << " total is " << unigrams.size() << std::endl;
-
-    std::cout << " last job inits for unigrams idx " << num_per_thread * i << std::endl;
-    threads.push_back(std::thread(
-        &free_index::ParallelMultigramIndex::insert_unigram_into_index, this,
-            std::cref(unigrams), uni_start_it, unigrams.end(),
-            std::ref(loc_uni_expands[i]), std::ref(loc_index_keys_char[i])
-    ));
+    if (i < thread_count_) {
+        threads.push_back(std::thread(
+            &free_index::ParallelMultigramIndex::insert_unigram_into_index, this,
+                std::cref(unigrams), uni_start_it, unigrams.end(),
+                std::ref(loc_uni_expands[i]), std::ref(loc_index_keys_char[i])
+        ));
+    }
     for (auto &th : threads) {
         th.join();
     }
-    std::cout << " finished all jobs for unigrams " << std::endl;
     for (const auto & thread_local_vect : loc_uni_expands) {
         for (const auto & c : thread_local_vect) {
             uni_expand.insert(c);
@@ -198,40 +191,35 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     decltype(loc_uni_expands)().swap(loc_uni_expands);
     decltype(loc_index_keys_char)().swap(loc_index_keys_char);
     decltype(threads)().swap(threads);
-    std::cout << "get all uni in index" << std::endl;
 
     if (upper_n < 2) return;
 
     std::vector<std::vector<std::pair<char,char>>> loc_bi_expands(thread_count_);
     std::vector<std::vector<std::pair<char,char>>> loc_index_keys_pair(thread_count_);
-    num_per_thread = std::max(1, int(bigrams.size() / thread_count_));
+    num_per_thread = std::ceil(bigrams.size() / ((double) thread_count_));
     i = 0;
     auto bi_start_it = bigrams.begin();
     auto bi_end_it = bi_start_it;
     for (; i < thread_count_ && num_per_thread*(i+1) < bigrams.size(); i++) {
         std::advance(bi_end_it, num_per_thread);
-        std::map<std::pair<char, char>, atomic_ptr_t> curr_bi_map(
-            std::make_move_iterator(bi_start_it),
-            std::make_move_iterator(bi_end_it)
-        );
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::insert_bigram_into_index, this,
-                std::cref(curr_bi_map), std::cref(uni_expand),
+                std::cref(bigrams), bi_start_it, bi_end_it,
+                std::cref(uni_expand),
                 std::ref(loc_bi_expands[i]), 
                 std::ref(loc_index_keys_pair[i])
         ));
         bi_start_it = bi_end_it;
     }
-    std::map<std::pair<char, char>, atomic_ptr_t> curr_bi_map(
-        std::make_move_iterator(bi_start_it),
-        std::make_move_iterator(bigrams.end())
-    );
-    threads.push_back(std::thread(
-        &free_index::ParallelMultigramIndex::insert_bigram_into_index, this,
-            std::cref(curr_bi_map), std::cref(uni_expand),
-            std::ref(loc_bi_expands[i]), 
-            std::ref(loc_index_keys_pair[i])
-    ));
+    if (i < thread_count_) {
+        threads.push_back(std::thread(
+            &free_index::ParallelMultigramIndex::insert_bigram_into_index, this,
+                std::cref(bigrams), bi_start_it, bigrams.end(),
+                std::cref(uni_expand),
+                std::ref(loc_bi_expands[i]), 
+                std::ref(loc_index_keys_pair[i])
+        ));
+    }
     for (auto &th : threads) {
         th.join();
     }
@@ -252,7 +240,6 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     decltype(loc_bi_expands)().swap(loc_bi_expands);
     decltype(loc_index_keys_pair)().swap(loc_index_keys_pair);
     decltype(threads)().swap(threads);
-    std::cout << "get all bi in index" << std::endl;
 
     int k = 3;
     while (!expand.empty() && k <= upper_n) {
@@ -274,32 +261,28 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
 
         std::vector<std::vector<std::string>> loc_expands(thread_count_);
         std::vector<std::vector<std::string>> loc_index_keys(thread_count_);
-        num_per_thread = std::max(1, int(curr_kgrams.size() / thread_count_));
-        int i = 0;
+        num_per_thread = std::ceil(curr_kgrams.size() / ((double) thread_count_));
+        i = 0;
         auto start_it = curr_kgrams.begin();
         auto end_it = start_it;
         for (; i < thread_count_ && num_per_thread*(i+1) < curr_kgrams.size(); i++) {
             std::advance(end_it, num_per_thread);
-            std::map<std::string, atomic_ptr_t> curr_k_map(
-                std::make_move_iterator(start_it),
-                std::make_move_iterator(end_it)
-            );
             threads.push_back(std::thread(
                 &free_index::ParallelMultigramIndex::insert_kgram_into_index, this,
-                    std::cref(curr_k_map), std::ref(loc_expands[i]), 
+                    std::cref(curr_kgrams), start_it, end_it, 
+                    std::ref(loc_expands[i]), 
                     std::ref(loc_index_keys[i])
             ));
             start_it = end_it;
         }
-        std::map<std::string, atomic_ptr_t> curr_k_map(
-            std::make_move_iterator(start_it),
-            std::make_move_iterator(curr_kgrams.end())
-        );
-        threads.push_back(std::thread(
-            &free_index::ParallelMultigramIndex::insert_kgram_into_index, this,
-                std::cref(curr_k_map), std::ref(loc_expands[i]), 
-                std::ref(loc_index_keys[i])
-        ));
+        if (i < thread_count_) {
+            threads.push_back(std::thread(
+                &free_index::ParallelMultigramIndex::insert_kgram_into_index, this,
+                    std::cref(curr_kgrams), start_it, curr_kgrams.end(), 
+                    std::ref(loc_expands[i]), 
+                    std::ref(loc_index_keys[i])
+            ));
+        }
         for (auto &th : threads) {
             th.join();
         }
@@ -318,8 +301,6 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         decltype(loc_expands)().swap(loc_expands);
         decltype(loc_index_keys)().swap(loc_index_keys);
         decltype(threads)().swap(threads);
-        std::cout << "get all " << k << " gram in index" << std::endl;
-
         k++;
     }
 }
@@ -344,9 +325,11 @@ void free_index::ParallelMultigramIndex::kgrams_in_line(int upper_n, size_t idx,
     }
 }
 
-void free_index::ParallelMultigramIndex::merge_lists(const std::set<std::string> & loc_idx_keys,
+void free_index::ParallelMultigramIndex::merge_lists(
+        std::set<std::string>::iterator s, std::set<std::string>::iterator d,
         std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs) {
-    for (const auto & key : loc_idx_keys) {
+    for (; s != d; s++) {
+        auto key = *s;
         for (auto & sub_map : loc_idxs) {
             k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
         }
@@ -354,8 +337,6 @@ void free_index::ParallelMultigramIndex::merge_lists(const std::set<std::string>
 }
 
 void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
-    std::cout << "fill k_index_" << std::endl;
-
     std::vector<std::thread> threads;
     std::vector<std::unordered_map<std::string, std::vector<size_t>>> loc_idxs(thread_count_);
     for (int i = 0; i < thread_count_; i++) {
@@ -369,41 +350,31 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
     }
     decltype(threads)().swap(threads);
 
-    std::cout << "get all linew with gram in index" << std::endl;
-
-
-    auto num_per_thread = std::max(1, int(k_index_keys_.size() / thread_count_));
+    auto num_per_thread = std::ceil(k_index_keys_.size() / ((double) thread_count_));
     int i = 0;
     auto start_it = k_index_keys_.begin();
     auto end_it = start_it;
     for (; i < thread_count_ && num_per_thread*(i+1) < k_index_keys_.size(); i++) {
         std::advance(end_it, num_per_thread);
-        std::set<std::string> key_set(
-            std::make_move_iterator(start_it),
-            std::make_move_iterator(end_it)
-        );
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::merge_lists, this,
-                std::cref(key_set), std::ref(loc_idxs)
+                start_it, end_it, std::ref(loc_idxs)
         ));
         start_it = end_it;
     }
-    std::set<std::string> key_set(
-        std::make_move_iterator(start_it),
-        std::make_move_iterator(k_index_keys_.end())
-    );
-    threads.push_back(std::thread(
-        &free_index::ParallelMultigramIndex::merge_lists, this,
-            std::cref(key_set), std::ref(loc_idxs)
-    ));
+    if (i < thread_count_) {
+        threads.push_back(std::thread(
+            &free_index::ParallelMultigramIndex::merge_lists, this,
+                start_it, end_it, std::ref(loc_idxs)
+        ));
+    }
     for (auto &th : threads) {
         th.join();
     }
 
     decltype(loc_idxs)().swap(loc_idxs);
     decltype(threads)().swap(threads);
-
-    assert(k_index_keys_.empty() && "Index keys become empty");
+    // assert(!k_index_keys_.empty() && "Index keys become empty");
 }
 
 template 

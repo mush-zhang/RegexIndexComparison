@@ -61,6 +61,8 @@ class ParallelMultigramIndex : public MultigramIndex {
     
     void insert_bigram_into_index(
         const std::map<std::pair<char, char>, atomic_ptr_t> & bigrams,
+        std::map<std::pair<char, char>, atomic_ptr_t>::iterator s,
+        std::map<std::pair<char, char>, atomic_ptr_t>::iterator d,
         const std::unordered_set<char> & uni_expand,
         std::vector<std::pair<char, char>> & loc_bi_expand,
         std::vector<std::pair<char, char>> & loc_index_keys);
@@ -71,6 +73,8 @@ class ParallelMultigramIndex : public MultigramIndex {
 
     void insert_kgram_into_index(
         const std::map<std::string, atomic_ptr_t> & kgrams,
+        std::map<std::string, atomic_ptr_t>::iterator s,
+        std::map<std::string, atomic_ptr_t>::iterator d,
         std::vector<std::string> & loc_expand,
         std::vector<std::string> & loc_index_keys);
     /**Select Grams Helpers End**/
@@ -78,7 +82,8 @@ class ParallelMultigramIndex : public MultigramIndex {
     void kgrams_in_line(int upper_n, size_t idx, 
         std::unordered_map<std::string, std::vector<size_t>> & local_idx);
     
-    void merge_lists(const std::set<std::string> & loc_idx_keys,
+    void merge_lists(std::set<std::string>::iterator s, 
+        std::set<std::string>::iterator d,
         std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs);
 };
 
