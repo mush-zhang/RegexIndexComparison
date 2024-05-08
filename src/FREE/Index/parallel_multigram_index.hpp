@@ -54,6 +54,8 @@ class ParallelMultigramIndex : public MultigramIndex {
         std::map<std::pair<char, char>, atomic_ptr_t> & bigrams);
     
     void insert_unigram_into_index(const std::map<char, atomic_ptr_t> & unigrams,
+        std::map<char, atomic_ptr_t>::iterator s,
+        std::map<char, atomic_ptr_t>::iterator d,
         std::vector<char> & loc_uni_expand,
         std::vector<char> & loc_index_keys);
     
