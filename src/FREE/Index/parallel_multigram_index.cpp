@@ -131,6 +131,8 @@ void free_index::ParallelMultigramIndex::insert_kgram_into_index(
 void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     std::unordered_set<std::string> expand; // stores useless prefix
 
+    size_t posting_resv_size = std::ceil(k_dataset_size_*sel_threshold);
+
     std::map<char, atomic_ptr_t> unigrams;
     std::map<std::pair<char, char>, atomic_ptr_t> bigrams;
     std::vector<std::thread> threads;
@@ -185,6 +187,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str = std::string(1, c);
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
+            k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(unigrams)().swap(unigrams);
@@ -234,6 +237,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str{p.first, p.second};
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
+            k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(bigrams)().swap(bigrams);
@@ -295,6 +299,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             for (const auto & s : thread_local_vect) {
                 k_index_keys_.insert(s);
                 k_index_.insert({s, std::vector<size_t>()});
+                k_index_[s].reserve(posting_resv_size);
             }
         }
         decltype(curr_kgrams)().swap(curr_kgrams);
@@ -370,6 +375,9 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
     }
     for (auto &th : threads) {
         th.join();
+    }
+    for (const auto & key : k_index_keys_) {
+        k_index_[key].shrink_to_fit();
     }
 
     decltype(loc_idxs)().swap(loc_idxs);
