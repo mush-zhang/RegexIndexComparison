@@ -30,7 +30,11 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> regexes;
     std::vector<std::string> lines;
+#ifdef NDEBUG
     status = readWorkload(expr_info, regexes, lines, 100000);
+#else
+    status = readWorkload(expr_info, regexes, lines);
+#endif
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
