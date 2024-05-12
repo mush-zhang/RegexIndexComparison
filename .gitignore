@@ -41,6 +41,7 @@
 *gurobi.log
 
 # Sensitive data files
+data
 data/*
 
 # my test result files

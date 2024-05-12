@@ -1,7 +1,7 @@
 #! /bin/bash
 
-dirname=traffic_result_new
-mkdir ${dirname} 
+dirname=result/traffic_result_new
+mkdir -p ${dirname} 
 
 # Free
 for n in 2 4 6 8 10; do
