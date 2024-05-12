@@ -2,6 +2,8 @@
 
 ### Pre-requisite
 
+- git submodule update --init --recursive
+
 - sudo apt-get -y install pkg-config
 
 - Gurobi for Lp solver: https://www.gurobi.com/downloads/gurobi-software/
