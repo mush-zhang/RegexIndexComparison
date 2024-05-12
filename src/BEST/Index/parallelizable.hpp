@@ -18,7 +18,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
     //            const std::vector<std::string> & queries, 
     //            double sel_threshold)
     //   : SingleThreadedIndex(dataset, queries, sel_threshold),
-    //     thread_count_(std::max(4, int(queries.size()/5))) {
+    //     thread_count_(std::max(2, int(queries.size()/5))) {
     //         dist_measure_type_ = dist_type::kMaxDevDist2;
     //     }
     
@@ -27,7 +27,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
                double sel_threshold, int num_threads)
       : SingleThreadedIndex(dataset, queries, sel_threshold) {
             dist_measure_type_ = dist_type::kMaxDevDist2;
-            thread_count_ = std::max(4, num_threads);
+            thread_count_ = std::max(2, num_threads);
         }
     
     ParallelizableIndex(const std::vector<std::string> & dataset, 
@@ -38,7 +38,7 @@ class ParallelizableIndex : public SingleThreadedIndex {
       : SingleThreadedIndex(dataset, queries, sel_threshold,
                             workload_reduced_size, dist_measure_type)
         {
-            thread_count_ = std::max(4, num_threads);
+            thread_count_ = std::max(2, num_threads);
         }
 
     ~ParallelizableIndex() {}

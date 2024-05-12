@@ -22,7 +22,7 @@ class ParallelMultigramIndex : public MultigramIndex {
       : MultigramIndex(dataset, sel_threshold) {
             k_tag_ = "-parallel";
             size_t ds_size = dataset.size();
-            thread_count_ = std::min(ds_size, size_t(std::max(4, num_threads)));
+            thread_count_ = std::min(ds_size, size_t(std::max(2, num_threads)));
             k_line_range_.assign(thread_count_+1, 0);
             auto group_size = ds_size / thread_count_;
             for (size_t i = 1; i < thread_count_; i++) {
