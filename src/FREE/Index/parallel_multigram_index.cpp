@@ -131,7 +131,7 @@ void free_index::ParallelMultigramIndex::insert_kgram_into_index(
 void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     std::unordered_set<std::string> expand; // stores useless prefix
 
-    size_t posting_resv_size = std::ceil(k_dataset_size_*sel_threshold);
+    size_t posting_resv_size = std::ceil(k_dataset_size_*k_threshold_);
 
     std::map<char, atomic_ptr_t> unigrams;
     std::map<std::pair<char, char>, atomic_ptr_t> bigrams;
@@ -167,7 +167,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         ));
         uni_start_it = uni_end_it;
     }
-    if (i < thread_count_) {
+    if (num_per_thread * i < unigrams.size()) {
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::insert_unigram_into_index, this,
                 std::cref(unigrams), uni_start_it, unigrams.end(),
@@ -187,7 +187,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str = std::string(1, c);
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            k_index_[curr_str].reserve(posting_resv_size);
+            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(unigrams)().swap(unigrams);
@@ -214,7 +214,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         ));
         bi_start_it = bi_end_it;
     }
-    if (i < thread_count_) {
+    if (num_per_thread * i < bigrams.size()) {
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::insert_bigram_into_index, this,
                 std::cref(bigrams), bi_start_it, bigrams.end(),
@@ -237,7 +237,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str{p.first, p.second};
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            k_index_[curr_str].reserve(posting_resv_size);
+            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(bigrams)().swap(bigrams);
@@ -279,7 +279,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             ));
             start_it = end_it;
         }
-        if (i < thread_count_) {
+        if (num_per_thread * i < curr_kgrams.size()) {
             threads.push_back(std::thread(
                 &free_index::ParallelMultigramIndex::insert_kgram_into_index, this,
                     std::cref(curr_kgrams), start_it, curr_kgrams.end(), 
@@ -299,7 +299,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             for (const auto & s : thread_local_vect) {
                 k_index_keys_.insert(s);
                 k_index_.insert({s, std::vector<size_t>()});
-                k_index_[s].reserve(posting_resv_size);
+                // k_index_[s].reserve(posting_resv_size);
             }
         }
         decltype(curr_kgrams)().swap(curr_kgrams);
@@ -318,10 +318,10 @@ void free_index::ParallelMultigramIndex::kgrams_in_line(int upper_n, size_t idx,
             for (auto k = 1; k <= upper_n && k + pos <= line.size(); k++) {
                 const auto curr_substr = line.substr(pos, k);
                 if (k_index_keys_.find(curr_substr) != k_index_keys_.end() &&
-                    (k_index_[curr_substr].size() == 0 ||
-                     k_index_[curr_substr].back() < i)
+                    (local_idx[curr_substr].size() == 0 ||
+                     local_idx[curr_substr].back() < i)
                     ) {
-                    k_index_[curr_substr].push_back(i);
+                    local_idx[curr_substr].push_back(i);
                     // any longer ones will not be in the index; increment to next pos
                     break;
                 }
@@ -336,7 +336,8 @@ void free_index::ParallelMultigramIndex::merge_lists(
     for (; s != d; s++) {
         auto key = *s;
         for (auto & sub_map : loc_idxs) {
-            k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
+            if (!sub_map[key].empty())
+                k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
         }
     }
 }
@@ -359,7 +360,7 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
     int i = 0;
     auto start_it = k_index_keys_.begin();
     auto end_it = start_it;
-    for (; i < thread_count_ && num_per_thread*(i+1) < k_index_keys_.size(); i++) {
+    for (; i < thread_count_ && num_per_thread*(i+1) <= k_index_keys_.size(); i++) {
         std::advance(end_it, num_per_thread);
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::merge_lists, this,
@@ -367,17 +368,14 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
         ));
         start_it = end_it;
     }
-    if (i < thread_count_) {
+    if (num_per_thread * i < k_index_keys_.size()) {
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::merge_lists, this,
-                start_it, end_it, std::ref(loc_idxs)
+                start_it, k_index_keys_.end(), std::ref(loc_idxs)
         ));
     }
     for (auto &th : threads) {
         th.join();
-    }
-    for (const auto & key : k_index_keys_) {
-        k_index_[key].shrink_to_fit();
     }
 
     decltype(loc_idxs)().swap(loc_idxs);
