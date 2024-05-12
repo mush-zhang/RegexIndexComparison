@@ -8,10 +8,6 @@
 
 - Gurobi for Lp solver: https://www.gurobi.com/downloads/gurobi-software/
 
-- git submodule init
-
-- git submodule update
-
 ```
 cd src/utils/abseil-cpp
 mkdir build && cd build
