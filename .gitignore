@@ -50,3 +50,6 @@ result/*
 
 # notbook checkpoint
 .ipynb_checkpoint*
+
+# re2 added file
+*re2/python/LICENSE*
