@@ -106,7 +106,6 @@ std::unordered_map<size_t, std::vector<size_t>>
 best_index::SingleThreadedIndex::k_medians(
         const std::vector<std::vector<double>> & dist_mtx, 
         int num_queries, int num_clusters) {
-    std::cout << "k medians start" << std::endl;
 
     // 1. randomly pick k queries as centroids
     std::vector<size_t> centroids;
