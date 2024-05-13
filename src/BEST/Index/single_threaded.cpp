@@ -133,7 +133,6 @@ best_index::SingleThreadedIndex::k_medians(
 
     size_t curr_it = 0;
     while(!centroid_final && curr_it++ < max_iteration_) {
-        std::cout << "iteration " << curr_it << std::endl;
         centroid_final = true;
         // 2. assign data points to nearest centroids
         std::unordered_map<size_t, std::vector<size_t>>().swap(cmap);
@@ -147,7 +146,6 @@ best_index::SingleThreadedIndex::k_medians(
             }
             // curr_closest: [idx of closet centroid in centroids] 
             auto curr_closest = centroids[argmin(c_dists)];
-            // std::cout << "\t\t curr_closest " << curr_closest << std::endl;
             if (closest_c_idxs[q_idx] != curr_closest) {
                 centroid_final = false;
                 closest_c_idxs[q_idx] = curr_closest;
