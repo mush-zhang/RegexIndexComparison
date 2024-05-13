@@ -35,10 +35,13 @@ int main(int argc, char** argv) {
 #else
     status = readWorkload(expr_info, regexes, lines);
 #endif
+    // status = readWorkload(expr_info, regexes, lines, 100000);
+
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
 
+    std::cout << "start end-to-end" << std::endl;
 
     switch (expr_info.stype) {
         case selection_type::kRei:

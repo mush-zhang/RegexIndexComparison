@@ -78,7 +78,6 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
               keeping only the reduced set of queries.**/
     auto candidates = candidate_gram_set_gen(query_literals, pre_suf_count);
     size_t candidates_size = candidates.size();
-    // std::cout << "candidate set generated " << std::endl;
 
     // Partition Q into k disjoint sets
     // Note: now query literals and presufcount is the one after workload reduction
