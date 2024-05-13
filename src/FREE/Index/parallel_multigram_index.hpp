@@ -82,8 +82,10 @@ class ParallelMultigramIndex : public MultigramIndex {
     void kgrams_in_line(int upper_n, size_t idx, 
         std::unordered_map<std::string, std::vector<size_t>> & local_idx);
     
-    void merge_lists(std::set<std::string>::iterator s, 
-        std::set<std::string>::iterator d,
+    void merge_lists(
+        // std::set<std::string>::iterator s, 
+        // std::set<std::string>::iterator d,
+        const std::set<std::string>::iterator s_o, const std::set<std::string>::iterator d_o,
         std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs);
 };
 

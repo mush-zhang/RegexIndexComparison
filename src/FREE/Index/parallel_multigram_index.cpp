@@ -331,11 +331,14 @@ void free_index::ParallelMultigramIndex::kgrams_in_line(int upper_n, size_t idx,
 }
 
 void free_index::ParallelMultigramIndex::merge_lists(
-        std::set<std::string>::iterator s, std::set<std::string>::iterator d,
+        const std::set<std::string>::iterator s_o, const std::set<std::string>::iterator d_o,
         std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs) {
-    for (; s != d; s++) {
+    for (auto s = s_o; s != d_o; s++) {
         auto key = *s;
         for (auto & sub_map : loc_idxs) {
+            if (k_index_[key].capacity() < k_index_[key].size() + sub_map[key].size()) {
+                std::cout << "capacity at " << key << " " << k_index_[key].capacity() << " < total size " <<  k_index_[key].size() + sub_map[key].size() << std::endl;
+            }
             if (!sub_map[key].empty())
                 k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
         }
@@ -380,7 +383,6 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
 
     decltype(loc_idxs)().swap(loc_idxs);
     decltype(threads)().swap(threads);
-    // assert(!k_index_keys_.empty() && "Index keys become empty");
 }
 
 template 
