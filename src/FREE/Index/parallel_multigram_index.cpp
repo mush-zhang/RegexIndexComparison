@@ -187,7 +187,6 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str = std::string(1, c);
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(unigrams)().swap(unigrams);
@@ -237,7 +236,6 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str{p.first, p.second};
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(bigrams)().swap(bigrams);
@@ -299,7 +297,6 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             for (const auto & s : thread_local_vect) {
                 k_index_keys_.insert(s);
                 k_index_.insert({s, std::vector<size_t>()});
-                // k_index_[s].reserve(posting_resv_size);
             }
         }
         decltype(curr_kgrams)().swap(curr_kgrams);
@@ -336,11 +333,7 @@ void free_index::ParallelMultigramIndex::merge_lists(
     for (auto s = s_o; s != d_o; s++) {
         auto key = *s;
         for (auto & sub_map : loc_idxs) {
-            if (k_index_[key].capacity() < k_index_[key].size() + sub_map[key].size()) {
-                std::cout << "capacity at " << key << " " << k_index_[key].capacity() << " < total size " <<  k_index_[key].size() + sub_map[key].size() << std::endl;
-            }
-            if (!sub_map[key].empty())
-                k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
+            k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
         }
     }
 }
