@@ -187,7 +187,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str = std::string(1, c);
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            k_index_[curr_str].reserve(posting_resv_size);
+            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(unigrams)().swap(unigrams);
@@ -237,7 +237,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             std::string curr_str{p.first, p.second};
             k_index_keys_.insert(curr_str);
             k_index_.insert({curr_str, std::vector<size_t>()});
-            k_index_[curr_str].reserve(posting_resv_size);
+            // k_index_[curr_str].reserve(posting_resv_size);
         }
     }
     decltype(bigrams)().swap(bigrams);
@@ -299,7 +299,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
             for (const auto & s : thread_local_vect) {
                 k_index_keys_.insert(s);
                 k_index_.insert({s, std::vector<size_t>()});
-                k_index_[s].reserve(posting_resv_size);
+                // k_index_[s].reserve(posting_resv_size);
             }
         }
         decltype(curr_kgrams)().swap(curr_kgrams);
