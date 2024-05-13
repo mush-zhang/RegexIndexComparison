@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "start best end-to-end" << std::endl;
 
     switch (expr_info.stype) {
         case selection_type::kRei:
