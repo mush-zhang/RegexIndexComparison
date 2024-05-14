@@ -328,12 +328,12 @@ void free_index::ParallelMultigramIndex::kgrams_in_line(int upper_n, size_t idx,
 }
 
 void free_index::ParallelMultigramIndex::merge_lists(
-        const std::set<std::string>::iterator s_o, const std::set<std::string>::iterator d_o,
-        std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs) {
-    for (auto s = s_o; s != d_o; s++) {
+        std::set<std::string>::const_iterator s_o, std::set<std::string>::const_iterator d_o,
+        const std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs) {
+    for (std::set<std::string>::const_iterator s = s_o; s != d_o; ++s) {
         auto key = *s;
         for (auto & sub_map : loc_idxs) {
-            k_index_[key].insert(k_index_[key].end(), sub_map[key].begin(), sub_map[key].end());            
+            k_index_[key].insert(k_index_[key].end(), sub_map.at(key).cbegin(), sub_map.at(key).cend());            
         }
     }
 }
@@ -354,20 +354,20 @@ void free_index::ParallelMultigramIndex::fill_posting(int upper_n) {
 
     auto num_per_thread = std::ceil(k_index_keys_.size() / ((double) thread_count_));
     int i = 0;
-    auto start_it = k_index_keys_.begin();
+    auto start_it = k_index_keys_.cbegin();
     auto end_it = start_it;
     for (; i < thread_count_ && num_per_thread*(i+1) <= k_index_keys_.size(); i++) {
         std::advance(end_it, num_per_thread);
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::merge_lists, this,
-                start_it, end_it, std::ref(loc_idxs)
+                start_it, end_it, std::cref(loc_idxs)
         ));
         start_it = end_it;
     }
     if (num_per_thread * i < k_index_keys_.size()) {
         threads.push_back(std::thread(
             &free_index::ParallelMultigramIndex::merge_lists, this,
-                start_it, k_index_keys_.end(), std::ref(loc_idxs)
+                start_it, k_index_keys_.cend(), std::cref(loc_idxs)
         ));
     }
     for (auto &th : threads) {

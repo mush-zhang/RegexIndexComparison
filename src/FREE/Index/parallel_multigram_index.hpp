@@ -83,8 +83,8 @@ class ParallelMultigramIndex : public MultigramIndex {
         std::unordered_map<std::string, std::vector<size_t>> & local_idx);
     
     void merge_lists(
-        const std::set<std::string>::iterator s_o, const std::set<std::string>::iterator d_o,
-        std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs);
+        std::set<std::string>::const_iterator s_o, std::set<std::string>::const_iterator d_o,
+        const std::vector<std::unordered_map<std::string, std::vector<size_t>>> & loc_idxs);
 };
 
 } // namespace free_index
