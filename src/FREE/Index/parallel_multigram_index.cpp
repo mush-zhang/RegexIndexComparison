@@ -333,7 +333,8 @@ void free_index::ParallelMultigramIndex::merge_lists(
     for (std::set<std::string>::const_iterator s = s_o; s != d_o; ++s) {
         auto key = *s;
         for (auto & sub_map : loc_idxs) {
-            k_index_[key].insert(k_index_[key].end(), sub_map.at(key).cbegin(), sub_map.at(key).cend());            
+            if (sub_map.contains(key))
+                k_index_[key].insert(k_index_[key].end(), sub_map.at(key).cbegin(), sub_map.at(key).cend());            
         }
     }
 }
