@@ -154,9 +154,9 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         // Note: Definition of c in Section 3.1, formulae (5)
         x = model.addVars(num_grams, GRB_CONTINUOUS);
         for (const auto & [g_idx, curr_r_count] : r_count) {
-            long double curr_q_count = 1;
+            long double curr_q_count = 0;
             if (q_count.contains(g_idx)) curr_q_count = q_count.at(g_idx); 
-            double c_g = curr_r_count / (k * curr_q_count);
+            double c_g = (curr_r_count / k) * curr_q_count;
             x[g_idx].set(GRB_DoubleAttr_Obj, c_g);
             x[g_idx].set(GRB_StringAttr_VarName, "x_" + std::to_string(g_idx));
         }
@@ -164,16 +164,20 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         // qg_map : key: q; value: set of g in q
         for (size_t q_idx = 0; q_idx < num_queries; ++q_idx) {
             auto curr_grams_in_q = qg_map[q_idx];
-            // 4. populate vector b, where b_q denote the smallest
-            //    r_count among all grams in query q; b length num_query
-            // Note: Definition of b in Section 3.1, formulae (3)
-            size_t b_q = 0;
-            for (const auto & curr_gram_idx : curr_grams_in_q) {
-                long double curr_r_count = 1;
-                if (r_count.contains(curr_gram_idx)) 
-                    curr_r_count = q_count.at(curr_gram_idx);
-                if (curr_r_count > b_q) {
-                    b_q = curr_r_count;
+            size_t b_q = k_dataset_size_;
+            if (curr_grams_in_q.empty()) {
+                b_q = 0;
+            } else {
+                // 4. populate vector b, where b_q denote the smallest
+                //    r_count among all grams in query q; b length num_query
+                // Note: Definition of b in Section 3.1, formulae (3)
+                for (const auto & curr_gram_idx : curr_grams_in_q) {
+                    long double curr_r_count = 0;
+                    if (r_count.contains(curr_gram_idx)) 
+                        curr_r_count = q_count.at(curr_gram_idx);
+                    if (curr_r_count < b_q) {
+                        b_q = curr_r_count;
+                    }
                 }
             }
             // 3. populate matrix A, where A_{q, g} denote 
@@ -188,7 +192,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             // This should follow the order of the temp vector grams_ordered!
             for (size_t g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
                 size_t A_qg = 0;
-                if (qg_map[q_idx].contains(g_inner_idx) && r_count.contains(g_inner_idx)) {
+                if (r_count.contains(g_inner_idx) && qg_map[q_idx].contains(g_inner_idx)) {
                     A_qg = r_count.at(g_inner_idx);
                 }
                 A_q[g_inner_idx] = A_qg;
