@@ -33,7 +33,7 @@ OBJECT_LIST=$(shell echo $(OBJECTS))
 $(info $(OBJECT_LIST))
 
 .PHONY: debug
-debug: CPPFLAGS+=-DDEBUG -g
+debug: CPPFLAGS+=-DNDEBUG -g
 debug:benchmark.out
 
 .PHONY: all

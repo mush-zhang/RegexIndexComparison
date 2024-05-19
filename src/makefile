@@ -46,7 +46,7 @@ all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FAST_BASE_DIR)/test_fast.out 
 
 .PHONY: debug
-debug: CPPFLAGS+=-DDEBUG -g
+debug: CPPFLAGS+=-DNDEBUG -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
 		$(REI_BASE_DIR)/test_rei.out $\
