@@ -15,7 +15,7 @@ for c in ${sel_list[*]}; do
 done
 # Free
 for n in 2 4 6 8 10; do
-    for c in ${sel_list[*]} 0.7; do
+    for c in ${sel_list[*]}; do
         echo benchmark.out FREE -t 1 -w 1 -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat}
         ./benchmark.out FREE -t 1 -w 1 -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat}
         for t in ${thread_list[*]}; do
@@ -24,3 +24,7 @@ for n in 2 4 6 8 10; do
         done
     done
 done
+echo benchmark.out FAST -t 1 -w 1 -o ${dirname}  --relax DETERM -e ${num_repeat}
+./benchmark.out FAST -t 1 -w 1 -o ${dirname} --relax DETERM -e ${num_repeat}
+echo benchmark.out FAST -t 1 -w 1 -o ${dirname}  --relax RANDOM -e ${num_repeat}
+./benchmark.out FAST -t 1 -w 1 -o ${dirname} --relax RANDOM -e ${num_repeat}
