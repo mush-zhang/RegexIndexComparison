@@ -144,7 +144,6 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         GRBModel model = GRBModel(*env);
         model.set(GRB_IntParam_OutputFlag, 0);
         model.set(GRB_StringAttr_ModelName, "model");
-        std::cout << "0" << std::endl;
 
         // minimize \sum_{g \in G} c_g x_g ; x \in {0, 1}
         // Gurobi by default minimize the objective
@@ -161,7 +160,6 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             x[g_idx].set(GRB_DoubleAttr_Obj, c_g);
             x[g_idx].set(GRB_StringAttr_VarName, "x_" + std::to_string(g_idx));
         }
-        std::cout << "1" << std::endl;
 
         // qg_map : key: q; value: set of g in q
         for (size_t q_idx = 0; q_idx < num_queries; ++q_idx) {
@@ -182,7 +180,6 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
                     }
                 }
             }
-            std::cout << "2-" << q_idx << " - 0" << std::endl;
             // 3. populate matrix A, where A_{q, g} denote 
             //    r_count of g if g \in q; A has size num_query * num_gram
             // Note: Definition of A in Section 3.1, formulae (2)
@@ -191,10 +188,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             //    number of records in the whole dataset that 
             //    contains this gram
             GRBLinExpr Ax_q = 0;
-            std::cout << "2-" << q_idx << " 1" << std::endl;
-            // double A_q[num_grams];
-            std::cout << "2-" << q_idx << " 2" << std::endl;
-            bool all_zero = true;
+
             // This should follow the order of the temp vector grams_ordered!
             for (size_t g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
                 size_t A_qg = 0;
@@ -202,25 +196,14 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
                 if (r_count.contains(g_inner_idx) && qg_map[q_idx].contains(g_inner_idx)) {
                     A_qg = r_count.at(g_inner_idx);
                 }
-                if (A_qg > 0) all_zero = false;
-
-                // A_q[g_inner_idx] = A_qg;
-                // Ax_q.addTerm(A_qg, x[g_inner_idx]);
                 Ax_q += A_qg*x[g_inner_idx];
             }
-            std::cout << "all zero? " << all_zero << std::endl;
-
-            std::cout << "3-" << q_idx << std::endl;
-
-            // Ax_q.addTerms(A_q, x, num_grams);
+            
             model.addConstr(Ax_q >= b_q, "Ax_" + std::to_string(q_idx));
-            std::cout << "4-" << q_idx << std::endl;
         }
-        std::cout << "begin opt" << std::endl;
 
         // Solve
         model.optimize();
-        std::cout << "end opt" << std::endl;
 
         // 6. use lp solver with deterministic relaxation 
         //    or random rounding to find x
@@ -313,11 +296,10 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
         std::vector<std::set<size_t>> qg_map(k_queries_size_, std::set<size_t>());
         std::unordered_map<size_t, long double> q_count;
         get_kgrams_q(query_literals, q_count, kgrams, qg_map, expand, k);
-        std::cout << "get all " << k << "-grams for q and r" << std::endl;
-        std::cout << "Sizes rcount=" << r_count.size() << ", gr_map=" << gr_map.size() << ", q_count=" << q_count.size() << std::endl;
 
+        if (q_count.empty()) break;
+        
         std::vector<bool> mask = build_model(k, r_count, q_count, qg_map, env);
-        std::cout << "built model" << std::endl;
         
         decltype(expand)().swap(expand);
 
@@ -332,7 +314,7 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
                 expand.insert(curr_kgram);
             }
         }
-        std::cout << "finished with k = " << k << std::endl;
+
         k++;
     }
     delete env;
