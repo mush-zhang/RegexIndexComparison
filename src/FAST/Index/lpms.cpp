@@ -192,28 +192,26 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             //    contains this gram
             GRBLinExpr Ax_q = 0;
             std::cout << "2-" << q_idx << " 1" << std::endl;
-            double A_q[num_grams];
+            // double A_q[num_grams];
             std::cout << "2-" << q_idx << " 2" << std::endl;
+            bool all_zero = true;
             // This should follow the order of the temp vector grams_ordered!
             for (size_t g_inner_idx = 0; g_inner_idx < num_grams; ++g_inner_idx) {
                 size_t A_qg = 0;
-                // if (k > 14) {
-                //     std::cout << "2-" << q_idx << "-" << g_inner_idx << " - 0 " << std::endl;
-                //     std::cout << "qg_map[q_idx].contains(g_inner_idx) eval " << qg_map[q_idx].contains(g_inner_idx) << std::endl;
-                //     std::cout << "r_count.contains(g_inner_idx) eval " << r_count.contains(g_inner_idx) << std::endl;
-                // }
 
                 if (r_count.contains(g_inner_idx) && qg_map[q_idx].contains(g_inner_idx)) {
                     A_qg = r_count.at(g_inner_idx);
                 }
-                // if (k > 14)
-                //     std::cout << "2-" << q_idx << "-" << g_inner_idx << " - 1 " << std::endl;
-                A_q[g_inner_idx] = A_qg;
-                // Ax_q.addTerms(A_qg, x[g_inner_idx]);
+                if (A_qg > 0) all_zero = false;
+
+                // A_q[g_inner_idx] = A_qg;
+                Ax_q.addTerms(A_qg, x[g_inner_idx]);
             }
+            std::cout << "all zero? " << all_zero << std::endl;
+
             std::cout << "3-" << q_idx << std::endl;
 
-            Ax_q.addTerms(A_q, x, num_grams);
+            // Ax_q.addTerms(A_q, x, num_grams);
             model.addConstr(Ax_q >= b_q, "Ax_" + std::to_string(q_idx));
             std::cout << "4-" << q_idx << std::endl;
         }
