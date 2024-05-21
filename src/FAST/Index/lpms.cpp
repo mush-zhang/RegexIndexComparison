@@ -205,7 +205,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
                 if (A_qg > 0) all_zero = false;
 
                 // A_q[g_inner_idx] = A_qg;
-                Ax_q.addTerms(A_qg, x[g_inner_idx]);
+                Ax_q.addTerm(A_qg, x[g_inner_idx]);
             }
             std::cout << "all zero? " << all_zero << std::endl;
 
