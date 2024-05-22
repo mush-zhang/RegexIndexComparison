@@ -11,7 +11,7 @@ else
     exit 1
 fi
 
-timeout_prefix="timeout 6h --foreground"
+timeout_prefix="timeout --foreground 6h"
 
 dirname=result/${1}_result_new
 echo ${dirname}
