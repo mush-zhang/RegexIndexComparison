@@ -665,7 +665,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
 
     std::ostringstream stats_name;
     // index building
-    auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.rtype);
+    auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.num_threads, fast_info.rtype);
     pi->set_thread_count(fast_info.num_threads);
     pi->set_outfile(outfile);
     pi->build_index();

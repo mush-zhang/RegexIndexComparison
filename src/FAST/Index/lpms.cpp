@@ -144,6 +144,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         GRBModel model = GRBModel(*env);
         model.set(GRB_IntParam_OutputFlag, 0);
         model.set(GRB_StringAttr_ModelName, "model");
+        model.set(GRB_IntParam_Threads, thread_count_);
 
         // minimize \sum_{g \in G} c_g x_g ; x \in {0, 1}
         // Gurobi by default minimize the objective
