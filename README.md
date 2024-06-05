@@ -52,3 +52,7 @@ sudo make install
 3. Decompress the file
 
 `gzip -d [filename]`
+
+4. Use `warcio` `cdx-toolkit` to read the packets (https://pypi.org/project/cdx-toolkit/)
+
+`pip install cdx-toolkit` 
