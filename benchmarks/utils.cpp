@@ -13,8 +13,6 @@
 #include "../src/FREE/Index/parallel_multigram_index.hpp"
 #include "../src/FREE/Matcher/query_matcher.hpp"
 
-#include "../src/REI/Index/freq_ngram.hpp"
-
 #include "../src/bitvec_query_matcher.hpp"
 #include "../src/simple_query_matcher.hpp"
 
@@ -32,9 +30,6 @@ inline constexpr const std::string_view kSummaryHeader =
 inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter";
 
 selection_type get_method(const std::string gs) {
-    if (gs == "REI") {
-        return selection_type::kRei;
-    }
     if (gs == "FREE") {
         return selection_type::kFree;
     }
@@ -82,7 +77,7 @@ std::pair<T, T> getStats(std::vector<T> & arr) {
 }
 
 int parseArgs(int argc, char ** argv, 
-             expr_info & expr_info, rei_info & rei_info, 
+             expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
              fast_info & fast_info) {
 
@@ -145,22 +140,6 @@ int parseArgs(int argc, char ** argv,
         selec = std::stod(selec_string);
     }
     switch (expr_info.stype) {
-        case selection_type::kRei: {
-            rei_info.num_repeat = rep;
-            rei_info.num_threads = thread_count;
-            rei_info.sel_threshold = selec;
-            if (n > 1) {
-                return error_return("Missing/Invalid size n of n-gram.");
-            }
-            rei_info.gram_size = n;
-            auto gram_num_string = getCmdOption(argv, argv + argc, "-k");
-            if (gram_num_string.empty()) {
-                return error_return("Missing number of grams.");
-            } else {
-                rei_info.num_grams = std::stoi(gram_num_string);
-            }
-            break;
-        }
         case selection_type::kFree: {
             free_info.num_repeat = rep;
             free_info.num_threads = thread_count;
@@ -388,131 +367,6 @@ std::ofstream open_summary(const std::filesystem::path & dir_path) {
     return std::move(outfile);
 }
 
-template <size_t n, size_t k>
-void benchmark_rei_helper(const std::filesystem::path dir_path,
-                         const std::vector<std::string> regexes, 
-                         const std::vector<std::string> lines,
-                         const rei_info & rei_info) {
-    std::ofstream outfile = open_summary(dir_path);
-
-    std::ostringstream stats_name;
-    // index building
-    rei_index::FreqNgramIndex<n,k> * pi = nullptr;
-    if (rei_info.sel_threshold > 0 && rei_info.sel_threshold <= 1) {
-        pi = new rei_index::FreqNgramIndex<n,k>(
-                lines, regexes, rei_info.sel_threshold);
-    } else {
-        pi = new rei_index::FreqNgramIndex<n,k>(
-                lines, regexes);
-    }
-
-    pi->set_thread_count(rei_info.num_threads); // currently not effective
-    pi->set_outfile(outfile);
-    pi->build_index();
-
-    for (size_t i = 0; i < rei_info.num_repeat; i++) {
-        if (i >= kNumIndexBuilding) {
-            // not re-running the time consuming index afterwards,
-            // filling the empty slots
-            pi->write_to_file(",,,,,,,,,");
-        }
-        // matching; add match time to the overall file
-        auto matcher = BitvecQueryMatcher<n,k>(*pi, regexes);
-        matcher.match_all();
-    }
-
-    outfile.close();
-
-    // open stats file
-    stats_name << "REI-" << rei_info.gram_size << "-"<< rei_info.num_grams; // e.g.. REI-2-4
-    stats_name << "_" << rei_info.num_threads << "_" << rei_info.gram_size;
-    stats_name << "_" << rei_info.sel_threshold << "_stats.csv";
-    std::filesystem::path stats_path = dir_path / stats_name.str();
-    std::ofstream statsfile;
-    statsfile.open(stats_path, std::ios::out);
-    statsfile << kExprHeader << std::endl;
-    pi->set_outfile(statsfile);
-
-    auto matcher = BitvecQueryMatcher<n,k>(*pi, regexes, false);
-
-    // Get individual stats
-    for (const auto & regex : regexes) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
-
-    statsfile.close();
-}
-
-template <size_t n> 
-void benchmark_rei_helper2(const std::filesystem::path dir_path,
-                           const std::vector<std::string> regexes, 
-                           const std::vector<std::string> lines,
-                           const rei_info & rei_info) {
-    switch (rei_info.num_grams) {
-        case 4:
-            benchmark_rei_helper<n, 4>(dir_path, regexes, lines, rei_info);
-            break;
-        case 8:
-            benchmark_rei_helper<n, 8>(dir_path, regexes, lines, rei_info);
-            break;
-        case 16:
-            benchmark_rei_helper<n, 16>(dir_path, regexes, lines, rei_info);
-            break;
-        case 32:
-            benchmark_rei_helper<n, 32>(dir_path, regexes, lines, rei_info);
-            break;
-        case 64:
-            benchmark_rei_helper<n, 64>(dir_path, regexes, lines, rei_info);
-            break;
-        case 96:
-            benchmark_rei_helper<n, 96>(dir_path, regexes, lines, rei_info);
-            break;
-        case 128:
-            benchmark_rei_helper<n, 128>(dir_path, regexes, lines, rei_info);
-            break;
-        case 192:
-            benchmark_rei_helper<n, 192>(dir_path, regexes, lines, rei_info);
-            break;
-        case 256:
-            benchmark_rei_helper<n, 256>(dir_path, regexes, lines, rei_info);
-            break;
-        case 320:
-            benchmark_rei_helper<n, 320>(dir_path, regexes, lines, rei_info);
-            break;
-        case 384:
-            benchmark_rei_helper<n, 384>(dir_path, regexes, lines, rei_info);
-            break;
-        case 448:
-            benchmark_rei_helper<n, 448>(dir_path, regexes, lines, rei_info);
-            break;
-        case 512:
-            benchmark_rei_helper<n, 512>(dir_path, regexes, lines, rei_info);
-            break;
-        default:
-            error_print("Invalid number of ngram indexed; modify the code to pre-compile this config");
-    }
-}
-void benchmarkRei(const std::filesystem::path dir_path,
-                  const std::vector<std::string> regexes, 
-                  const std::vector<std::string> lines,
-                  const rei_info & rei_info) {
-    switch (rei_info.gram_size) {
-        case 2:
-            benchmark_rei_helper2<2>(dir_path, regexes, lines, rei_info);
-            break;
-        case 3:
-            benchmark_rei_helper2<3>(dir_path, regexes, lines, rei_info);
-            break;
-        case 4:
-            benchmark_rei_helper2<4>(dir_path, regexes, lines, rei_info);
-            break;
-        default:
-            error_print("Invalid ngram length; modify the code to pre-compile this config");
-    }
-}
-
 void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
@@ -706,174 +560,3 @@ void benchmarkFast(const std::filesystem::path dir_path,
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
 template std::pair<double, double> getStats(std::vector<double> & arr);
-
-template void benchmark_rei_helper2<2>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<2,4>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<2,8>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);                                       
-template void benchmark_rei_helper<2,16>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<2,32>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<2,64>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<2,96>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);      
-template void benchmark_rei_helper<2,128>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<2,192>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<2,256>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<2,320>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<2,384>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<2,448>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<2,512>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-                                                                                                                                                                                                                                                                                                                                               
-template void benchmark_rei_helper2<3>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<3,4>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<3,8>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);                                       
-template void benchmark_rei_helper<3,16>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<3,32>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<3,64>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<3,96>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);      
-template void benchmark_rei_helper<3,128>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<3,192>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<3,256>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<3,320>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<3,384>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<3,448>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<3,512>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info); 
-                                                                           
-template void benchmark_rei_helper2<4>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<4,4>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);
-template void benchmark_rei_helper<4,8>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);                                       
-template void benchmark_rei_helper<4,16>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<4,32>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<4,64>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<4,96>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);      
-template void benchmark_rei_helper<4,128>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);  
-template void benchmark_rei_helper<4,192>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<4,256>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);   
-template void benchmark_rei_helper<4,320>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<4,384>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<4,448>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);    
-template void benchmark_rei_helper<4,512>(const std::filesystem::path dir_path,
-                                       const std::vector<std::string> regexes, 
-                                       const std::vector<std::string> lines,
-                                       const rei_info & rei_info);                                        

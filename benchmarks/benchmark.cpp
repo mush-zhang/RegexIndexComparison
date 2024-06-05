@@ -12,12 +12,12 @@ int main(int argc, char** argv) {
     }
 
     expr_info expr_info;
-    rei_info rei_info;
     free_info free_info;
     best_info best_info;
     fast_info fast_info;
 
-    int status = parseArgs(argc, argv, expr_info, rei_info, free_info, best_info, fast_info);
+    int status = parseArgs(argc, argv, expr_info, 
+                           free_info, best_info, fast_info);
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
@@ -43,9 +43,6 @@ int main(int argc, char** argv) {
     std::cout << "start end-to-end" << std::endl;
 
     switch (expr_info.stype) {
-        case selection_type::kRei:
-            benchmarkRei(dir_path, regexes, lines, rei_info);
-            break;
         case selection_type::kFree: 
             benchmarkFree(dir_path, regexes, lines, free_info);
             break;

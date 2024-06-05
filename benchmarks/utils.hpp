@@ -12,7 +12,7 @@ inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'FAST', 'BEST', 'FREE', 'REI'. \n\
+    \t                 \t Options available are 'FAST', 'BEST', 'FREE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0|1|2|3], required \t Workload used. \n\
@@ -27,10 +27,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
-    \t             \t The default is 0.1 for FREE and for BEST, optional for REI, and not applicable to FAST.\n\
-      REI specific options:\n\
-    \t -n, required \t Length of n-grams used for indexing.\n\
-    \t -k, required \t Number of n-grams used for indexing. \n\
+    \t             \t The default is 0.1 for FREE and for BEST, and not applicable to FAST.\n\
       FREE specific options:\n\
     \t -n [int], required \t Upper bound of multi-gram size.\n\
     \t --presuf \t Use presuf shell to generate a gram set that is also suffix-free; default not used.\n\
@@ -43,7 +40,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t --relax [DETERM|RANDOM], required \t Type of relaxation method.";
 /*-------------------------------------------------------------------------------------------------------------------*/
 
-enum selection_type { kFast, kBest, kFree, kRei, kInvalid };
+enum selection_type { kFast, kBest, kFree, kInvalid };
 
 struct expr_info {
     selection_type stype;
@@ -51,14 +48,6 @@ struct expr_info {
     std::string reg_file = "";
     std::string data_file = "";
     std::string out_dir;
-};
-
-struct rei_info {
-    int num_repeat = 10;
-    int num_threads;
-    double sel_threshold;
-    int gram_size; // n
-    int num_grams; // k
 };
 
 struct free_info {
@@ -92,7 +81,7 @@ template<class T>
 std::pair<T, T> getStats(std::vector<T> & arr);
 
 int parseArgs(int argc, char ** argv, 
-             expr_info & expr_info, rei_info & rei_info, 
+             expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
              fast_info & fast_info);
 
@@ -100,11 +89,6 @@ int readWorkload(const expr_info & expr_info,
                  std::vector<std::string> & regexes, 
                  std::vector<std::string> & lines,
                  int max_lines=-1);
-
-void benchmarkRei(const std::filesystem::path dir_path,
-                  const std::vector<std::string> regexes, 
-                  const std::vector<std::string> lines,
-                  const rei_info & rei_info);
 
 void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
