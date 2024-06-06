@@ -52,7 +52,6 @@ void fast_index::LpmsIndex::get_unigram_r(
                 if (uni_count.size() > uni_gr_map.size()) {
                     uni_gr_map.push_back(std::vector<size_t>{r});
                 } else {
-                    assert(unigrams.size() > c && "line 55 unigrams size < c");
                     uni_gr_map[unigrams.at(c)].push_back(r);
                 }
             }
@@ -72,8 +71,7 @@ void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits,
                 char c = lit.at(i);
                 if (visited_unigrams.find(c) == visited_unigrams.end()) {
                     insert_or_increment(uni_count, c, visited_unigrams, unigrams);
-                    assert(unigrams.size() > c && "line 77 unigrams size < c");
-                    assert(uni_qg_map.size() > q && "line 77 uni_qg_map size < q");
+                    assert(uni_qg_map.size() > q && "line 75 uni_qg_map size < q");
                     uni_qg_map[q].insert(unigrams.at(c));
                 }             
             }
@@ -122,6 +120,7 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
                 if (visited_kgrams.find(curr_kgram) == visited_kgrams.end() &&
                         expand.find(lit.substr(i, k-1)) != expand.end()) {
                     insert_or_increment(q_count, curr_kgram, visited_kgrams, kgrams);
+                    assert(qg_map.size() > kgrams.at(curr_kgram) && "line 124 gr_map size");
                     qg_map[q].insert(kgrams.at(curr_kgram));
                 }            
             }
