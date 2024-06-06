@@ -1,7 +1,12 @@
 #include <exception>
+#include <cassert>
 
 #include "lpms.hpp"
 #include "../../utils/utils.hpp"
+
+#ifdef NDEBUG
+#define assert(x) (void(0))
+#endif
 
 static const double k_deterministic_threshold_ = 0.99;
 
@@ -47,6 +52,7 @@ void fast_index::LpmsIndex::get_unigram_r(
                 if (uni_count.size() > uni_gr_map.size()) {
                     uni_gr_map.push_back(std::vector<size_t>{r});
                 } else {
+                    assert(unigrams.size() < c && "line 55 unigrams size < c");
                     uni_gr_map[unigrams.at(c)].push_back(r);
                 }
             }
@@ -66,6 +72,8 @@ void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits,
                 char c = lit.at(i);
                 if (visited_unigrams.find(c) == visited_unigrams.end()) {
                     insert_or_increment(uni_count, c, visited_unigrams, unigrams);
+                    assert(unigrams.size() < c && "line 77 unigrams size < c");
+                    assert(uni_qg_map.size() < q && "line 77 uni_qg_map size < q");
                     uni_qg_map[q].insert(unigrams.at(c));
                 }             
             }
@@ -91,6 +99,7 @@ void fast_index::LpmsIndex::get_kgrams_r(
                 if (r_count.size() > gr_map.size()) {
                     gr_map.push_back(std::vector<size_t>{r});
                 } else {
+                    assert(gr_map.size() < kgrams.at(curr_kgram) && "line 103 gr_map size");
                     gr_map[kgrams.at(curr_kgram)].push_back(r);
                 }
             }
@@ -156,7 +165,9 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         x = model.addVars(num_grams, GRB_CONTINUOUS);
         for (const auto & [g_idx, curr_r_count] : r_count) {
             long double curr_q_count = 0;
-            if (q_count.contains(g_idx)) curr_q_count = q_count.at(g_idx); 
+            if (q_count.contains(g_idx)) {
+                curr_q_count = q_count.at(g_idx); 
+            }
             double c_g = (curr_r_count / k) * curr_q_count;
             x[g_idx].set(GRB_DoubleAttr_Obj, c_g);
             x[g_idx].set(GRB_StringAttr_VarName, "x_" + std::to_string(g_idx));
@@ -174,8 +185,9 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
                 // Note: Definition of b in Section 3.1, formulae (3)
                 for (const auto & curr_gram_idx : curr_grams_in_q) {
                     long double curr_r_count = 0;
-                    if (r_count.contains(curr_gram_idx)) 
+                    if (r_count.contains(curr_gram_idx)) {
                         curr_r_count = q_count.at(curr_gram_idx);
+                    }
                     if (curr_r_count < b_q) {
                         b_q = curr_r_count;
                     }
@@ -309,6 +321,7 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
                 // 7. Move all multigtams in the children set
                 //    whose associated value in x is 1 to G (the index)
                 k_index_keys_.insert(curr_kgram); 
+                assert(gr_map.size() < idx && "line 324 gr_map size < idx");
                 k_index_[curr_kgram] = gr_map.at(idx);
             } else {
                 // 8. Those multigrams remainig become the new expand set
@@ -322,6 +335,7 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
 }
 
 void fast_index::LpmsIndex::build_index(int upper_n) {
+    assert(thread_count_ == 0 && "assert enabled")
     auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_n);
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(

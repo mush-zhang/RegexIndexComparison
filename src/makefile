@@ -28,12 +28,7 @@ FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
 FAST_DIRS=$(FAST_BASE_DIR) $(FAST_IDX_DIR)
 FAST_IDX=simple_query_matcher.o inverted_index.o $(FAST_IDX_DIR)/lpms.o
 
-REI_BASE_DIR=REI
-REI_IDX_DIR=$(REI_BASE_DIR)/Index
-REI_DIRS=$(REI_BASE_DIR) $(REI_IDX_DIR)
-REI_IDX=utils/hash_pair.o simple_query_matcher.o bitvec_index.o $(REI_IDX_DIR)/freq_ngram.o
-
-DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(REI_DIRS) $(FAST_DIRS)
+DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
 
 GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
@@ -42,21 +37,13 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: CPPFLAGS+=-DARMA_NO_DEBUG
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
-	 $(REI_BASE_DIR)/test_rei.out $\
 	 $(FAST_BASE_DIR)/test_fast.out 
 
 .PHONY: debug
 debug: CPPFLAGS+=-DNDEBUG -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
-		$(REI_BASE_DIR)/test_rei.out $\
 		$(FAST_BASE_DIR)/test_fast.out 
-		
-$(REI_BASE_DIR)/test_rei.out: $(REI_IDX) $(REI_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
-
-$(REI_IDX_DIR)/freq_ngram.o: $(REI_IDX_DIR)/freq_ngram.cpp
-	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 $(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
