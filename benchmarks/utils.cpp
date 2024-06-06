@@ -13,7 +13,6 @@
 #include "../src/FREE/Index/parallel_multigram_index.hpp"
 #include "../src/FREE/Matcher/query_matcher.hpp"
 
-#include "../src/bitvec_query_matcher.hpp"
 #include "../src/simple_query_matcher.hpp"
 
 #include "utils.hpp"

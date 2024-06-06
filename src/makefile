@@ -81,9 +81,6 @@ simple_query_matcher.o: simple_query_matcher.cpp
 inverted_index.o: ngram_inverted_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-bitvec_index.o: ngram_bitvec_index.cpp
-	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
-
 btree_index.o: ngram_btree_index.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
