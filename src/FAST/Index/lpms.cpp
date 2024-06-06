@@ -52,7 +52,7 @@ void fast_index::LpmsIndex::get_unigram_r(
                 if (uni_count.size() > uni_gr_map.size()) {
                     uni_gr_map.push_back(std::vector<size_t>{r});
                 } else {
-                    assert(unigrams.size() < c && "line 55 unigrams size < c");
+                    assert(unigrams.size() > c && "line 55 unigrams size < c");
                     uni_gr_map[unigrams.at(c)].push_back(r);
                 }
             }
@@ -72,8 +72,8 @@ void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits,
                 char c = lit.at(i);
                 if (visited_unigrams.find(c) == visited_unigrams.end()) {
                     insert_or_increment(uni_count, c, visited_unigrams, unigrams);
-                    assert(unigrams.size() < c && "line 77 unigrams size < c");
-                    assert(uni_qg_map.size() < q && "line 77 uni_qg_map size < q");
+                    assert(unigrams.size() > c && "line 77 unigrams size < c");
+                    assert(uni_qg_map.size() > q && "line 77 uni_qg_map size < q");
                     uni_qg_map[q].insert(unigrams.at(c));
                 }             
             }
@@ -99,7 +99,7 @@ void fast_index::LpmsIndex::get_kgrams_r(
                 if (r_count.size() > gr_map.size()) {
                     gr_map.push_back(std::vector<size_t>{r});
                 } else {
-                    assert(gr_map.size() < kgrams.at(curr_kgram) && "line 103 gr_map size");
+                    assert(gr_map.size() > kgrams.at(curr_kgram) && "line 103 gr_map size");
                     gr_map[kgrams.at(curr_kgram)].push_back(r);
                 }
             }
@@ -321,7 +321,7 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
                 // 7. Move all multigtams in the children set
                 //    whose associated value in x is 1 to G (the index)
                 k_index_keys_.insert(curr_kgram); 
-                assert(gr_map.size() < idx && "line 324 gr_map size < idx");
+                assert(gr_map.size() > idx && "line 324 gr_map size < idx");
                 k_index_[curr_kgram] = gr_map.at(idx);
             } else {
                 // 8. Those multigrams remainig become the new expand set
