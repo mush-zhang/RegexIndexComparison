@@ -335,7 +335,7 @@ void fast_index::LpmsIndex::select_grams(int upper_n) {
 }
 
 void fast_index::LpmsIndex::build_index(int upper_n) {
-    assert(thread_count_ == 0 && "assert enabled")
+    assert(thread_count_ == 0 && "assert enabled");
     auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_n);
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
