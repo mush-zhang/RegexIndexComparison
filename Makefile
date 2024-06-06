@@ -29,11 +29,11 @@ OBJECT_LIST=$(shell echo $(OBJECTS))
 $(info $(OBJECT_LIST))
 
 .PHONY: debug
-debug: CPPFLAGS+=-DNDEBUG -g
+debug: CPPFLAGS+= -g
 debug:benchmark.out
 
 .PHONY: all
-all: CPPFLAGS+=-DARMA_NO_DEBUG
+all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG
 all: benchmark.out
 
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
