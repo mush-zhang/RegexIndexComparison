@@ -43,7 +43,7 @@
 # Sensitive data files
 data/**/*txt
 data/**/*csv
-data/**/*warc
+data/**/*warc*
 data/**/*gz
 
 
