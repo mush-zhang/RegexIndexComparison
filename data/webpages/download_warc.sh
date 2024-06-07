@@ -9,12 +9,9 @@ gzip -d ${PATH_FILE}.gz
 
 num_file_read=0
 while read -r line; do
-    wget https://data.commoncrawl.org/${line}
-
-    num_file_read=$((num_file_read+1))
-    echo $num_file_read
-
     if [[ "${num_file_read}" -gt "${FILE_LIMIT}" ]]; then
         break
     fi
+    wget https://data.commoncrawl.org/${line}
+    num_file_read=$((num_file_read+1))
 done < "${PATH_FILE}"
