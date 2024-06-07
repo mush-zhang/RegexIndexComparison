@@ -15,12 +15,17 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr/local  -DCMAKE_CXX_STANDARD=20 -DCMAKE_POSITIO
 make -j
 sudo make install
 ```
+
+- sudo apt install python3-pip
+
+- pip3 install warcio
+
 ### Data
 
 #### Webpage
 
-Use python packages `warcio` `cdx-toolkit` to read the packets
-`pip install warcio cdx-toolkit` 
+<!-- Use python packages `warcio` `cdx-toolkit` to read the packets
+`pip install warcio cdx-toolkit`  -->
 
 ```
 pushd data/webpages
