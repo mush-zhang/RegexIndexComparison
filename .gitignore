@@ -41,8 +41,11 @@
 *gurobi.log
 
 # Sensitive data files
-data
-data/*
+data/**/*txt
+data/**/*csv
+data/**/*warc
+data/**/*gz
+
 
 # my test result files
 *Test/*
