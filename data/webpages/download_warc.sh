@@ -14,7 +14,7 @@ while read -r line; do
     num_file_read=$((num_file_read+1))
     echo $num_file_read
 
-    if [ ${num_file_read} -gt ${FILE_LIMIT} ]; then
+    if [[ "${num_file_read}" -gt "${FILE_LIMIT}" ]]; then
         break
     fi
 done < "${PATH_FILE}"
