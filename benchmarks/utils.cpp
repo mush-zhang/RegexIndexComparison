@@ -22,6 +22,8 @@ inline constexpr const int kNumIndexBuilding = 1;
 inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
+inline constexpr const char * kWebRegex = "data/webpages/regexes_webpages.txt";
+inline constexpr const char * kWebRegexFree = "data/webpages/regexes_webpages_free.txt";
 
 inline constexpr const std::string_view kSummaryHeader = 
     "name,num_threads,gram_size,selectivity,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
@@ -268,35 +270,38 @@ std::vector<std::string> read_dbx(int max_lines=-1) {
     return lines;
 }
 
-std::vector<std::string> read_sysy(int max_lines=-1) {
+auto read_file_to_string(const std::string & path) -> std::string {
+    constexpr auto read_size = std::size_t(4096);
+    auto stream = std::ifstream(path);
+    stream.exceptions(std::ios_base::badbit);
+
+    if (not stream) {
+        throw std::ios_base::failure("file does not exist");
+    }
+    
+    auto out = std::string();
+    auto buf = std::string(read_size, '\0');
+
+    while (stream.read(& buf[0], read_size)) {
+        out.append(buf, 0, stream.gcount());
+    }
+    out.append(buf, 0, stream.gcount());
+    stream.close();
+    return out;
+}
+
+std::vector<std::string> read_webpages(int max_lines=-1) {
     std::string line;
+
     std::vector<std::string> lines;
-    std::string data_file = "data/tagged_data.csv";
-
-    std::ifstream data_in(data_file);
-    if (!data_in.is_open()) {
-        std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
-        return lines;
-    }
-    while (getline(data_in, line)){
-        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-        std::stringstream streamData(line);
-        std::vector<std::string> curr_line;
-        std::string s; 
-        while (getline(streamData, s, '\t')) {
-            curr_line.push_back(s);
-        }
-        curr_line.resize(curr_line.size()-4);
-
-        std::string curr;
-        for (const auto &piece : curr_line) curr += piece;
-
-        lines.push_back(curr);
+    std::string path = "data/webpages/processed";
+    for (const auto & entry : std::filesystem::directory_iterator(path)) {
+        std::string data_file = entry.path();
+        lines.push_back(read_file_to_string(data_file));
         if (max_lines > 0 && lines.size() > max_lines) {
-            break;
+            return lines;
         }
     }
-    data_in.close();
     return lines;
 }
 
@@ -336,8 +341,14 @@ int readWorkload(const expr_info & expr_info,
             lines = read_dbx(max_lines);
             break;
         case 3:
-            regexes = read_file("regex", kSysyRegex);
-            lines = read_sysy(max_lines);
+            // regexes = read_file("regex", kSysyRegex);
+            // lines = read_sysy(max_lines);
+            if (expr_info.stype == selection_type::kFree) {
+                regexes = read_file("regex", kWebRegexFree);
+            } else {
+                regexes = read_file("regex", kWebRegex);
+            }
+            lines = read_webpages(std::min(max_lines, 7000000));
             break;
         default:
             regexes = read_file("regex", expr_info.reg_file);

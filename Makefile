@@ -33,7 +33,7 @@ debug: CPPFLAGS+= -g
 debug:benchmark.out
 
 .PHONY: all
-all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG
+all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: benchmark.out
 
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\

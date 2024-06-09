@@ -34,7 +34,7 @@ GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 
 .PHONY: all
-all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG
+all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
 	 $(FAST_BASE_DIR)/test_fast.out 
