@@ -2,7 +2,7 @@
 
 PATH_FILE="warc.paths"
 
-FILE_LIMIT=1
+FILE_LIMIT=70
 
 wget https://data.commoncrawl.org/crawl-data/CC-MAIN-2013-48/${PATH_FILE}.gz
 gzip -d ${PATH_FILE}.gz
