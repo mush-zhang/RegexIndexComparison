@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+
 #include "Index/multigram_index.hpp"
 #include "Index/presuf_shell.hpp"
 #include "Index/parallel_multigram_index.hpp"
@@ -8,6 +11,12 @@
 
 const double k_number_repeat = 10;
 
+inline constexpr const char * kTrafficRegex = "../../data/regexes_traffic.txt";
+inline constexpr const char * kDbxRegex = "../../data/regexes_dbx.txt";
+inline constexpr const char * kSysyRegex = "../../data/regexes_sysy.txt";
+inline constexpr const char * kWebRegex = "../../data/webpages/regexes_webpages.txt";
+inline constexpr const char * kWebRegexFree = "../../data/webpages/regexes_webpages_free.txt";
+
 template <typename T>
 bool compare_lists(const std::vector<T> & a, const std::vector<T> & b) {
     if (a.size() != b.size()) return false;
@@ -15,6 +24,34 @@ bool compare_lists(const std::vector<T> & a, const std::vector<T> & b) {
     std::unordered_set<T> bs(b.begin(), b.end());
     if (as.size() != a.size() || bs.size() != b.size()) return false;
     return as == bs;
+}
+
+std::vector<std::string> read_file(const std::string & infile_name) {
+    std::vector<std::string> in_strings;
+    std::ifstream data_in(infile_name);
+    if (!data_in.is_open()) {
+        std::cerr << "Could not open ";
+        std::cerr << infile_name << "'" << std::endl;
+    } else {
+        std::string line;
+        while (getline(data_in, line)){
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            in_strings.push_back(line);
+        }
+        data_in.close();
+    }
+    return in_strings;
+}
+
+std::set<std::string> literals_from_regexes(const std::vector<std::string> & regexes) {
+    std::set<std::string> results;
+    for (const auto & reg : regexes) {
+        auto literals = extract_literals(reg);
+        for (const auto & lit : literals) {
+            results.insert(lit);
+        }
+    }
+    return results;
 }
 
 void make_dataset_with_keys(const std::vector<std::string> & keys, std::vector<std::string> & dataset_container, double & threshold_constainer) {
@@ -242,6 +279,58 @@ void simple_query_plan_by_index() {
     qp.print_plan();
 }
 
+void complex_query_parser_traffic() {
+    std::vector<std::string> test_dataset;
+    auto pi = free_index::MultigramIndex(test_dataset, 1);
+
+    auto traffic_reg = read_file(kTrafficRegex);
+    auto traffic_grams = literals_from_regexes(traffic_reg);
+
+    pi.manual_select_grams(traffic_grams);
+
+    auto qp = free_index::QueryParser(pi);
+
+    for (const auto reg : traffic_reg) {
+        std::cout << reg << std::endl;
+        std::cout << "\t";
+        auto literals = extract_literals(reg);
+        for (const auto & lit : literals) {
+            std::cout << "[ " << lit << " ] ";
+        }
+        std::cout << std::endl;
+        qp.generate_query_plan(reg);
+        qp.remove_null();
+        qp.print_plan();        
+    }
+}
+
+void complex_query_parser_webpages() {
+    std::vector<std::string> test_dataset;
+    auto pi = free_index::MultigramIndex(test_dataset, 1);
+
+    auto web_reg = read_file(kWebRegexFree);
+    auto web_grams = literals_from_regexes(web_reg);
+
+    pi.manual_select_grams(web_grams);
+
+    auto qp = free_index::QueryParser(pi);
+
+    for (const auto reg : web_reg) {
+        std::cout << reg << std::endl;
+        std::cout << "\t";
+        auto literals = extract_literals(reg);
+        for (const auto & lit : literals) {
+            std::cout << "[ " << lit << " ] ";
+        }
+        std::cout << std::endl;
+        qp.generate_query_plan(reg);
+        qp.print_plan();
+
+        qp.remove_null();
+        qp.print_plan();        
+    }
+}
+
 void simple_lines_by_plan() {
     std::vector<std::string> test_keys({
         "Will",
@@ -327,9 +416,6 @@ void simple_match_all() {
     auto matcher = free_index::QueryMatcher(pi, reg_query);
 
     matcher.match_all();
-    
-    // assert(compare_lists(idx_list, {455}) && 
-    //        "Line 455 Clinton should be the only result");
 }
 
 void simple_match_one() {
@@ -389,5 +475,12 @@ int main() {
     simple_match_all();
     std::cout << "\t SIMPLE MATCH ONE -------------------------------------------" << std::endl;
     simple_match_one();
+
+    std::cout << "BEGIN COMPLEX PARSER TESTS -------------------------------------------" << std::endl;
+    std::cout << "\t TRAFFIC REGEX-------------------------------------------" << std::endl;
+    complex_query_parser_traffic();
+    std::cout << "\t WEBPAGE REGEX-------------------------------------------" << std::endl;
+    complex_query_parser_webpages();
+   
     return 0;
 }

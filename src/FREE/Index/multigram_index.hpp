@@ -18,6 +18,8 @@ class MultigramIndex : public NGramInvertedIndex {
 
     void build_index(int upper_n) override;
 
+    void manual_select_grams(std::set<std::string> & index_keys) { k_index_keys_ = index_keys; }
+
  protected:
     void select_grams(int upper_n) override;
     virtual void fill_posting(int upper_n);

@@ -354,12 +354,29 @@ int readWorkload(const expr_info & expr_info,
             regexes = read_file("regex", expr_info.reg_file);
             lines = read_file("data", expr_info.data_file, max_lines);
     }
-    if (regexes.empty() || lines.empty()) {
-        return EXIT_FAILURE;
-    }
+
     std::cout << "read workload end." << std::endl;
     std::cout << "Number of regexes: " << regexes.size() << "."<< std::endl;
     std::cout << "Number of data lines: " << lines.size() << "." << std::endl;
+
+#ifndef NDEBUG
+    std::cout << "Print literals" << std::endl;
+
+    for (const auto & reg : regexes) {
+        std::cout << reg << std::endl;
+        std::cout << "\t";
+        auto literals = extract_literals(reg);
+        for (const auto & lit : literals) {
+            std::cout << "[ " << lit << " ] ";
+        }
+        std::cout << std::endl;
+    }
+#endif  
+
+    if (regexes.empty() || lines.empty()) {
+        return EXIT_FAILURE;
+    }
+
     return EXIT_SUCCESS;
 }
 
