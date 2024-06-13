@@ -45,7 +45,6 @@ void make_or_assign_node(const std::string & str, char op_char,
 }
 
 std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str, OP op) {
-    std::cout << "build_rooted_op_plan : {" << reg_str << "}" << std::endl;
     size_t pos = 0;
     size_t prev_pos = 0;
     int pos2 = -1;
@@ -70,7 +69,6 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str,
             // if it is not escaped: it is a beginning of a capture group
             std::string curr_str = reg_str.substr(prev_pos, pos-prev_pos);
             if (!curr_str.empty()) {
-                std::cout << curr_str << " 1 " << op_char << std::endl;
                 make_or_assign_node(curr_str, op_char, curr);
             }
 
@@ -78,30 +76,28 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str,
             pos2 = pos;
             // should exists a matching bracket in our case
             //  TODO not supporting multi-level brackets currently
+
             // int l_count = 1;
-//             while (pos2 < reg_str.size()) {
-//                 if (reg_str.at(pos2) == ')' && (!char_escaped(reg_str, pos2))) {
-//                     l_count--;
-//                 } else if (reg_str.at(pos2) == '(' && (!char_escaped(reg_str, pos2))) {
-//                     l_count++;
-//                 }
-//                 if (l_count == 0) {
-//                     break;
-//                 }
-//                 pos2++;
-//             }
+            // while (pos2 < reg_str.size()) {
+            //     if (reg_str.at(pos2) == ')' && (!char_escaped(reg_str, pos2))) {
+            //         l_count--;
+            //     } else if (reg_str.at(pos2) == '(' && (!char_escaped(reg_str, pos2))) {
+            //         l_count++;
+            //     }
+            //     if (l_count == 0) {
+            //         break;
+            //     }
+            //     pos2++;
+            // }
             while ((pos2 = reg_str.find(r_char, pos2)) != std::string::npos) {
                 if (!char_escaped(reg_str, pos2)) {
                     if (pos2 == reg_str.size() - 1 || 
                         (reg_str.at(pos2+1) != '*' && reg_str.at(pos2+1) != '?')) {
                         // Another rooted plan for the substr in capture group
                         auto sub_btw_brackets = reg_str.substr(pos, pos2-pos);
-                        std::cout << sub_btw_brackets << " 2 " << op_char << std::endl;
                         make_or_assign_node(sub_btw_brackets, op_char, curr);
                     } else {
-                        std::cout << reg_str.substr(pos) << " const empty" << " 3 " << op_char << std::endl;
-                        auto temp = make_const_node("");
-                        curr = make_op_node(op_char, std::move(curr), std::move(temp));
+                        make_or_assign_node("", op_char, curr);
                     }
                     break;
                 }
@@ -110,17 +106,10 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str,
 
             if (pos2 == std::string::npos) {
                 auto sub_btw_brackets = reg_str.substr(pos);
-                std::cout << sub_btw_brackets << " 4 " << op_char << std::endl;
                 make_or_assign_node(sub_btw_brackets, op_char, curr);
                 break;
             } else {
                 pos2++; // passed the ")"
-                // if (pos2 < reg_str.size() && reg_str.at(pos2) == ')' &&
-                //     (reg_str.at(pos2+1) == '+' || 
-                //      reg_str.at(pos2+1) == '*' || 
-                //      reg_str.at(pos2+1) == '?')) {
-                //     pos2++;
-                // }
                 if (pos2 < reg_str.size() && reg_str.at(pos2-1) == ')' &&
                     (reg_str.at(pos2) == '+' || 
                      reg_str.at(pos2) == '*' || 
@@ -136,7 +125,6 @@ std::unique_ptr<QueryPlanNode> build_rooted_op_plan(const std::string & reg_str,
     }
     if (pos2 != -1 && pos2 < reg_str.size()) {
         auto sub_btw_brackets = reg_str.substr(pos2);
-        std::cout << sub_btw_brackets << " 5 " << op_char << std::endl;
         make_or_assign_node(sub_btw_brackets, op_char, curr);
     }
 
@@ -164,7 +152,6 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(const std::string & reg_str) {
     }
     // if still null, it is a constant
     if (check_special(reg_str)) {
-        std::cout << "Special " << reg_str << std::endl;
         return std::move(make_const_node(""));
     }
     auto new_reg = remove_escape(reg_str);
