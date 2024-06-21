@@ -8,6 +8,7 @@ import os
 import sys
 import gzip
 import random
+import multiprocessing 
 
 import re
 import wget
@@ -20,6 +21,8 @@ from warcio.archiveiterator import ArchiveIterator
 FILE_UPPER_LIMIT = 700000
 RAND_PROB = 0.002
 MIN_EACH_REG = 10000
+NUM_CONCURRENT = 12
+PER_FILE_TIMEOUT=3600 # SECONDS
 
 
 # In[3]:
@@ -52,36 +55,37 @@ print(paths[0])
 
 # get all webpage regexes
 regexes = []
-counts = []
+
 with open('regexes_webpages.txt', 'rb') as f:
     raw_regexes = f.read().splitlines() 
-for raw_reg in raw_regexes:
+counts = multiprocessing.Array('i', range(len(raw_regexes)))
+for i in range(len(raw_regexes)):
+    raw_reg = raw_regexes[i]
     print(raw_reg)
     regexp = re.compile(raw_reg)
     regexes.append(regexp) 
-    counts.append(0)
+    counts[i] = 0
 
 
 # In[ ]:
 
 
-def check_eligible(curr_content):
+def check_eligible(raw_regexes, regexes, shared_regex_counts, curr_content):
     # check if it has a regex match
     result = False
     for idx in range(len(regexes)):
+        if shared_regex_counts[idx] >= MIN_EACH_REG:
+            continue
         reg = regexes[idx]
         curr_result = reg.search(curr_content)
         if curr_result:
             result = True
-            counts[idx] += 1
-            if counts[idx] == 1:
+            shared_regex_counts[idx] += 1
+            if shared_regex_counts[idx] == 1:
                 print(f'Find match for {raw_regexes[idx]} 1st time')
 
-            if counts[idx] >= MIN_EACH_REG:
+            if shared_regex_counts[idx] >= MIN_EACH_REG:
                 print(f'NUMBER SATISFIED: {raw_regexes[idx]}')
-                del counts[idx]
-                del raw_regexes[idx]
-                del regexes[idx]
             break
 
     if not result:
@@ -92,7 +96,7 @@ def check_eligible(curr_content):
 # In[ ]:
 
 
-def extract_html(filename, curr_count):
+def extract_html(filename, raw_regexes, regexes, shared_regex_counts, shared_file_count):
     idx = 0
     full_fname = os.path.join(temp_file_fd, filename)
     with open(full_fname, 'rb') as stream:
@@ -106,33 +110,58 @@ def extract_html(filename, curr_count):
                 header = record.http_headers.get_header('Content-Type')
                 if header is not None and 'text/html' in header:
                     curr_content = record.content_stream().read()
-                    
-                    if check_eligible(curr_content):
+                    if check_eligible(raw_regexes, regexes, shared_regex_counts, curr_content):
                         with open(os.path.join(processed_data_dir, f'{filename}_{idx}.txt'), 'wb') as file:
                             file.write(curr_content)
-                        curr_count += 1
-                        if curr_count >= FILE_UPPER_LIMIT:
+                        shared_file_count.Value += 1
+                        if shared_file_count.Value % 1000 == 0:
+                            print(f'Writing {shared_file_count.Value}-th file')
+                        if shared_file_count.Value >= FILE_UPPER_LIMIT:
                             break
                     idx += 1
-    return curr_count
 
 
 # In[ ]:
 
 
-finish = False
+def task(p, raw_regexes, regexes, shared_regex_counts, shared_file_count):
+    print(p)
 
-webpage_count = 0
-
-for p in paths:
-    if finish:
-        break
     # download the warc file using path index
     wget.download(f'https://data.commoncrawl.org/{p}', temp_file_fd)
-    
+
     filename = p.split('/')[-1]
-    webpage_count = extract_html(filename, webpage_count)
+    
+    extract_html(filename, raw_regexes, regexes, shared_regex_counts, shared_file_count)
     os.remove(os.path.join(temp_file_fd, filename))
-    if webpage_count >= FILE_UPPER_LIMIT:
+
+
+# In[ ]:
+
+
+file_count = multiprocessing.Value('i', 0) #30731)
+# processed 5 already with single-thread version of code
+for i in range(0, len(paths), NUM_CONCURRENT):
+    p = paths[i]
+    processes = [multiprocessing.Process(target=task, args=[paths[j], raw_regexes, regexes, counts, file_count]) 
+                for j in range(i, i+NUM_CONCURRENT)]
+
+    for process in processes:
+        process.start()
+
+    for process in processes:
+        process.join(PER_FILE_TIMEOUT)
+    
+    for process in processes:
+        if process.is_alive()
+            print(f'Try terminate pid={process.pid()}')
+            process.terminate()
+            print(f'Finish terminate pid={process.pid()}')
+            process.join()
+            # clean up un deleted file
+            filename = p.split('/')[-1]
+            if os.path.isfile(filename):
+                os.remove(os.path.join(temp_file_fd, filename))
+    if file_count.Value >= FILE_UPPER_LIMIT:
         break
 
