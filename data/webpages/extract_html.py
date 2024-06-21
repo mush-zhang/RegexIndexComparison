@@ -57,8 +57,9 @@ counts = []
 with open('regexes_webpages.txt') as f:
     raw_regexes = f.readlines()
 for raw_reg in raw_regexes:
-    print(raw_reg)
-    regexp = re.compile(raw_reg)
+    reg_str = raw_reg.replace('\r', '').replace('\n', '')
+    print(reg_str)
+    regexp = re.compile(reg_str)
     regexes.append(regexp) 
     counts.append(0)
 
