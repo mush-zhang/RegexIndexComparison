@@ -153,7 +153,7 @@ for i in range(0, len(paths), NUM_CONCURRENT):
         process.join(PER_FILE_TIMEOUT)
     
     for process in processes:
-        if process.is_alive()
+        if process.is_alive():
             print(f'Try terminate pid={process.pid()}')
             process.terminate()
             print(f'Finish terminate pid={process.pid()}')
