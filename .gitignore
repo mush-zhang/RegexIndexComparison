@@ -45,6 +45,7 @@ data/**/*txt
 data/**/*csv
 data/**/*warc*
 data/**/*gz
+data/**/*.xml
 # except some open-source regex files
 !data/regexes_traffic.txt
 !data/webpages/regexes_webpages.txt
