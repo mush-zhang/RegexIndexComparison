@@ -53,7 +53,7 @@ print(paths[0])
 # get all webpage regexes
 regexes = []
 counts = []
-with open('regexes_webpages.txt') as f:
+with open('regexes_webpages.txt', 'rb') as f:
     raw_regexes = f.read().splitlines() 
 for raw_reg in raw_regexes:
     print(raw_reg)
