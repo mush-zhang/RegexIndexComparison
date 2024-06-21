@@ -42,9 +42,8 @@ if not os.path.isfile(os.path.join(raw_data_dir, 'warc.paths.gz')):
     wget.download('https://data.commoncrawl.org/crawl-data/CC-MAIN-2013-48/warc.paths.gz', raw_data_dir)
 
 with gzip.open('warc.paths.gz', 'rt') as f:
-    # for p in f.read():
-    #     print(p)
-    paths = f.readlines()
+    paths = f.read().splitlines() 
+
 print(paths[0])
 
 
@@ -55,11 +54,10 @@ print(paths[0])
 regexes = []
 counts = []
 with open('regexes_webpages.txt') as f:
-    raw_regexes = f.readlines()
+    raw_regexes = f.read().splitlines() 
 for raw_reg in raw_regexes:
-    reg_str = raw_reg.replace('\r', '').replace('\n', '')
-    print(reg_str)
-    regexp = re.compile(reg_str)
+    print(raw_reg)
+    regexp = re.compile(raw_reg)
     regexes.append(regexp) 
     counts.append(0)
 
