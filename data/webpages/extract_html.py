@@ -38,7 +38,7 @@ os.makedirs(processed_data_dir, exist_ok=True)
 temp_file_parent_fd = '.' #'/mnt/'
 temp_file_fd = os.path.join(temp_file_parent_fd, 'webtemp')
 os.makedirs(temp_file_fd, exist_ok=True)
-if not os.path.isfile(os.path.join(raw_data_dir, 'warc.paths.gz'))
+if not os.path.isfile(os.path.join(raw_data_dir, 'warc.paths.gz')):
     wget.download('https://data.commoncrawl.org/crawl-data/CC-MAIN-2013-48/warc.paths.gz', raw_data_dir)
 
 with gzip.open('warc.paths.gz', 'rt') as f:
