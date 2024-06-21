@@ -113,10 +113,10 @@ def extract_html(filename, raw_regexes, regexes, shared_regex_counts, shared_fil
                     if check_eligible(raw_regexes, regexes, shared_regex_counts, curr_content):
                         with open(os.path.join(processed_data_dir, f'{filename}_{idx}.txt'), 'wb') as file:
                             file.write(curr_content)
-                        shared_file_count.Value += 1
-                        if shared_file_count.Value % 1000 == 0:
-                            print(f'Writing {shared_file_count.Value}-th file')
-                        if shared_file_count.Value >= FILE_UPPER_LIMIT:
+                        shared_file_count.value += 1
+                        if shared_file_count.value % 1000 == 0:
+                            print(f'Writing {shared_file_count.value}-th file')
+                        if shared_file_count.value >= FILE_UPPER_LIMIT:
                             break
                     idx += 1
 
@@ -162,6 +162,6 @@ for i in range(0, len(paths), NUM_CONCURRENT):
             filename = p.split('/')[-1]
             if os.path.isfile(filename):
                 os.remove(os.path.join(temp_file_fd, filename))
-    if file_count.Value >= FILE_UPPER_LIMIT:
+    if file_count.value >= FILE_UPPER_LIMIT:
         break
 
