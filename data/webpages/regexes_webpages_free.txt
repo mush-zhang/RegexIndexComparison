@@ -1,7 +1,7 @@
 <a(\s)+href(\s*)=(\s*)("|')?([^>]*)\.mp3("\')?>
 (\a+\s+)*(\a+\s*),(\s*\a\a\s)_(\d\d\d\d\d)(-\d\d\d\d)?
 <([^>]*)<
-william(\s+[a-z]+\s+)clinton
+William(\s+[a-z]+\s+)Clinton
 motorola(.*)(xpc|mpc)([0-9]+[0-9a-z]*)
 <script>(.*)</script>
 (\d\d\d|\d\d\d-)(\d\d\d)-(\d\d\d)
