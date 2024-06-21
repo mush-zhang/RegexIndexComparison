@@ -9,7 +9,7 @@ import sys
 import gzip
 import random
 
-import re2
+import re
 import wget
 from warcio.archiveiterator import ArchiveIterator
 
@@ -57,7 +57,7 @@ with open('') as f:
     raw_regexes = f.readlines()
 for raw_reg in raw_regexes:
     print(raw_reg)
-    regexp = re2.compile(raw_reg)
+    regexp = re.compile(raw_reg)
     regexes.append(regexp) 
     counts.append(0)
 
@@ -84,7 +84,7 @@ def check_eligible(curr_content):
                 del regexes[idx]
             break
 
-    if !result:
+    if not result:
         result = random.random() < RAND_PROB
     return result
 
