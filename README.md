@@ -24,12 +24,19 @@ sudo make install
 
 #### Webpage
 
-<!-- Use python packages `warcio` `cdx-toolkit` to read the packets
-`pip install warcio cdx-toolkit`  -->
+<!-- Use python packages `warcio` to read the packets
+`pip install warcio google-re2 wget`  -->
 
 ```
 pushd data/webpages
 ./download_warc.sh
 python3 extract_html.py
 popd
+```
+
+#### DBLP
+
+```
+wget https://lfs.aminer.cn/lab-datasets/citation/DBLP-citation-network-Oct-19.tar.gz
+
 ```

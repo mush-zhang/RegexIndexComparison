@@ -111,7 +111,6 @@ make_unique_ngrams(const std::string& s) {
 }
 
 // Randomly select sampleSize number of items from 0 to rangeUpperBound
-// 
 // code from here: https://stackoverflow.com/a/28287837
 std::unordered_set<int> BobFloydAlgo(int sampleSize, int rangeUpperBound)
 {
