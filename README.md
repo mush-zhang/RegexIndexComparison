@@ -29,14 +29,20 @@ sudo make install
 
 ```
 pushd data/webpages
-./download_warc.sh
+<!-- ./download_warc.sh -->
 python3 extract_html.py
 popd
 ```
 
 #### DBLP
 
-```
-wget https://lfs.aminer.cn/lab-datasets/citation/DBLP-citation-network-Oct-19.tar.gz
+Get from here: https://www.aminer.org/citation
 
+```
+pushd data/dblp
+wget https://lfs.aminer.cn/lab-datasets/citation/DBLP-citation-network-Oct-19.tar.gz
+tar -xjvf DBLP-citation-network-Oct-19.tar.gz
+rm DBLP-citation-network-Oct-19.tar.gz
+python3 preprocess_dblp.py
+popd
 ```
