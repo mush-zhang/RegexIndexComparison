@@ -154,9 +154,9 @@ for i in range(0, len(paths), NUM_CONCURRENT):
     
     for process in processes:
         if process.is_alive():
-            print(f'Try terminate pid={process.pid()}')
+            print(f'Try terminate pid={process.pid}')
             process.terminate()
-            print(f'Finish terminate pid={process.pid()}')
+            print(f'Finish terminate pid={process.pid}')
             process.join()
             # clean up un deleted file
             filename = p.split('/')[-1]
