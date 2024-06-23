@@ -40,6 +40,11 @@ for line in lines:
         else:
             authors.append(line[2:])
 
+# random select 305,798 tuples?
+keep_idxs = np.random.choice(len(titles), size=305798, replace=False)
+titles = np.array(titles)[keep_idxs]
+authors = np.array(titles)[authors]
+
 
 # In[5]:
 
