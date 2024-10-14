@@ -13,7 +13,7 @@ elif [ "$1" == "webpages" ]; then
     wl_num=3
 else
     wl_num=0
-    extra=$1 # argument expected in form "-r [regex_file] -d [data_file]" with quotations
+    extra=$2 # argument expected in form "-r [regex_file] -d [data_file]" with quotations
 fi
 
 timeout_prefix="timeout --foreground 1h"
@@ -46,8 +46,8 @@ for n in 2 4 6 8 10 12 14 16; do
 done
 # Fast
 for t in ${thread_list[*]}; do
-    echo benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname}  --relax DETERM -e ${num_repeat}
-    ${timeout_prefix} ./benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat}
-    echo benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname}  --relax RANDOM -e ${num_repeat}
-    ${timeout_prefix} ./benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat}
+    echo benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname}  --relax DETERM -e ${num_repeat} ${extra}
+    ${timeout_prefix} ./benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra}
+    echo benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname}  --relax RANDOM -e ${num_repeat} ${extra}
+    ${timeout_prefix} ./benchmark.out FAST -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra}
 done
