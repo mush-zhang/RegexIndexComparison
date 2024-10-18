@@ -40,6 +40,10 @@
 # Gurobi log
 *gurobi.log
 
+# Temporary pickle files
+*.pkl
+
+
 # Sensitive data files
 data/**/*txt
 data/**/*csv
@@ -57,7 +61,8 @@ data/**/*.xml
 result/*
 
 # notbook checkpoint
-.ipynb_checkpoint*
+*.ipynb_checkpoint*
+*notebook*.txt
 
 # re2 added file
 *re2/python/LICENSE*
