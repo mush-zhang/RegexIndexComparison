@@ -111,7 +111,7 @@ def get_family_full_list(start_url, upper_limit=21979):
 
     attempts = 0
     while not last_page and len(id_result) < upper_limit:
-        last_page, next_url, payload = try_get_payload(next_url)
+        last_page, next_url, payload = try_get_payload(next_url, context)
         if payload is None:
             continue
         for i, item in enumerate(payload["results"]):
