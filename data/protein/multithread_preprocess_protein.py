@@ -68,32 +68,31 @@ def try_get_payload(curr_url, context, data_type='json'):
                 time.sleep(21)
                 # then continue this loop with the same URL
                 attemps += 1
-                continue
             elif res.status == 204:
                 #no data so leave loop
                 return True, None, None
-            if data_type == 'json':
-                payload = json.loads(res.read().decode())
-                next_url = payload.get('next')
-                if not next_url:
-                    last_page = True
-                return last_page, next_url, payload
-            elif data_type == 'txt':
-                return True, None, res.read().decode('utf-8')
             else:
-                sys.stderr.write("Unknown data type: " + data_type)
-                return last_page, None, None
-        
+                if data_type == 'json':
+                    payload = json.loads(res.read().decode())
+                    next_url = payload.get('next')
+                    if not next_url:
+                        last_page = True
+                    return last_page, next_url, payload
+                elif data_type == 'txt':
+                    return True, None, res.read().decode('utf-8')
+                else:
+                    sys.stderr.write("Unknown data type: " + data_type)
+                    return last_page, None, None
+            
         except HTTPError as e:
             sys.stderr.write(f"HTTP error: {e.code}" )
             attempts += 1
             time.sleep(21)
-            continue
         except:
             attempts += 1
             time.sleep(21)
-            print(attempts, curr_url)
-            # print(traceback.format_exc())
+            print(f'{attempts} {curr_url}')
+
     return last_page, next_url, None
 
 
