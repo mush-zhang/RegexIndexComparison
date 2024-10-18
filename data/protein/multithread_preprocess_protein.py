@@ -323,6 +323,22 @@ if not os.path.isdir(os.path.join(DATA_DIR, seq_dirname)):
         p.join()
     mp.active_children()
 
+def read_local_sequences_num():
+    seq_num = 0
+    directory_path = 'sequences'
+    if os.path.isdir(directory_path):
+        for filename in os.listdir(directory_path):
+            curr_file = os.path.join(directory_path, filename)
+            if os.path.isfile(curr_file) and 'seq_' in curr_file:
+                with open(curr_file, 'r') as f:
+                    curr_seq_list = f.readlines()
+                    seq_num += len(curr_seq_list)
+    else:
+        os.makedirs(directory_path)
+    return seq_num
+
+print(f'{read_local_sequences_num()} sequences locally')
+
 
 # In[ ]:
 
