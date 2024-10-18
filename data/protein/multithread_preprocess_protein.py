@@ -338,7 +338,7 @@ def get_pattern(url_addr):
     # get raw pattern
     curr_pattern = ''
     start_patt = 'PA   '
-    lines = txt_text.split('\n')
+    lines = payload.split('\n')
     for line in lines:
         if line.startswith(start_patt):
             curr_pattern += line[len(start_patt):]
