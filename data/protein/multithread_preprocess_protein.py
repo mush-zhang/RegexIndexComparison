@@ -187,7 +187,7 @@ def get_entry_ids(pfam_id, counter, fn_fmt):
         time.sleep(1)
     if local_counter % FLUSH_INTERVAL > 0:
         curr_fn = fn_fmt.format(PROTEIN_LIST_FN, pfam_id, 
-                                math.ceil(local_counter/FLUSH_INTERVAL+1))
+                                math.ceil(local_counter/FLUSH_INTERVAL))
         # flush current to file
         with open(curr_fn, 'wb') as f:
             pickle.dump(entry_set, f)
@@ -214,6 +214,7 @@ def get_protein_ids_task(pidx, counter, interval, id_result):
         if not os.path.exists(fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')):
             print(f"writing file to {fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')}")
             get_entry_ids(pfam_id, counter, fn_fmt)
+        curr += 1
 
 
 # In[11]:
