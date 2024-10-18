@@ -336,7 +336,7 @@ def get_pattern(url_addr):
     start_patt = 'PA   '
     lines = txt_text.split('\n')
     for line in lines:
-        if line.startswith(start_patt)
+        if line.startswith(start_patt):
             curr_pattern += line[len(start_patt):]
     if len(curr_pattern) == 0:
         # contains no pattern; only matrix
