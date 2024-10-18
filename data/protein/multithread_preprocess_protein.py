@@ -210,7 +210,7 @@ def get_protein_ids_task(pidx, counter, interval, id_result):
     while curr < end and counter.value < PFAM_UPPER_LIMIT:
         pfam_id = id_result[curr]
         fn_fmt = '{}_{}_{}.pkl'
-        if not os.path.exists(fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1.0')):
+        if not os.path.exists(fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')):
             get_entry_ids(pfam_id, counter, fn_fmt)
 
 
@@ -237,6 +237,8 @@ def read_local_protein_ids():
 
 protein_list = read_local_protein_ids()
 # if not reached 100k, read more
+print(f' Intially, {len(protein_list)} proteins read')
+
 if len(protein_list) < PFAM_UPPER_LIMIT:
     manager = mp.Manager()
     counter = manager.Value('i', len(protein_list))
@@ -367,7 +369,7 @@ if os.path.exists(raw_prosite_fname):
         raw_prosite = pickle.load(f)
 else:
     raw_prosite = []
-    for prosite_id in prosite_list:
+    for prosite_id in prosite_id_result:
         start_url = PROSITE_URL_FORMAT.format(prosite_id)
         pat = get_pattern(start_url)
         raw_prosite.append(pat)
