@@ -212,7 +212,7 @@ def get_protein_ids_task(pidx, counter, interval, id_result):
         pfam_id = id_result[curr]
         fn_fmt = '{}_{}_{}.pkl'
         if not os.path.exists(fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')):
-            print(f'writing file to {fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')}')
+            print(f"writing file to {fn_fmt.format(PROTEIN_LIST_FN, pfam_id, '1')}")
             get_entry_ids(pfam_id, counter, fn_fmt)
 
 
