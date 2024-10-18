@@ -301,7 +301,7 @@ def get_sequence_task(sidx, interval, protein_list):
                     f.write(seq + '\n')
                     local_seq_counter += 1
                 curr += 1
-        sys.stdout.write(f'Process {sidx} read {local_seq_counter}-th protein\n')
+        sys.stdout.write(f'Process {sidx} read {local_seq_counter}-th sequences\n')
 
 
 # In[ ]:
