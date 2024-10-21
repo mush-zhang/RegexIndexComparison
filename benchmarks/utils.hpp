@@ -19,6 +19,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t                        \t 1 for US-Accident workload; \n\
     \t                        \t 2 for DB-X workload; \n\
     \t                        \t 3 for Webpage workload; \n\
+    \t                        \t 4 for Prosite workload; \n\
     \t                        \t 0 for customized workload (path to regex and data files required). \n\
     \t -r [path] \t Path to the list of regex queries. \n\
     \t           \t Each line of the file is considered a regex query. \n\

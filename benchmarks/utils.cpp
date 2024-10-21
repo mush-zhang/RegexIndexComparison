@@ -24,6 +24,7 @@ inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 inline constexpr const char * kWebRegex = "data/webpages/regexes_webpages.txt";
 inline constexpr const char * kWebRegexFree = "data/webpages/regexes_webpages_free.txt";
+inline constexpr const char * kPrositeRegex = "data/protein/prosites.txt";
 
 inline constexpr const std::string_view kSummaryHeader = 
     "name,num_threads,gram_size,selectivity,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
@@ -98,7 +99,7 @@ int parseArgs(int argc, char ** argv,
         return error_return("Missing type of workload used.");
     } else {
         expr_info.wl = std::stoi(wl_string);
-        if (expr_info.wl < 0 || expr_info.wl > 3) {
+        if (expr_info.wl < 0 || expr_info.wl > 4) {
             return error_return("Invalid workload type.");
         } else if (expr_info.wl == 0) {
             expr_info.reg_file = getCmdOption(argv, argv + argc, "-r");
@@ -242,33 +243,33 @@ std::vector<std::string> read_traffic(int max_lines=-1) {
     return lines;
 }
 
-std::vector<std::string> read_dbx(int max_lines=-1) {
-    std::string line;
+// std::vector<std::string> read_dbx(int max_lines=-1) {
+//     std::string line;
 
-    std::vector<std::string> lines;
-    std::string path = "data/extracted";
-    for (const auto & entry : std::filesystem::directory_iterator(path)) {
-        std::string data_file = entry.path();
-        std::ifstream data_in(data_file);
-        if (!data_in.is_open()) {
-            std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
-            return lines;
-        }
-        //  101876733 
-        while (getline(data_in, line)){
-            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-            if (line.size() > 2) {
-                lines.push_back(line);
-                if (max_lines > 0 && lines.size() > max_lines) {
-                    data_in.close();
-                    return lines;
-                }
-            }
-        }
-        data_in.close();
-    }
-    return lines;
-}
+//     std::vector<std::string> lines;
+//     std::string path = "data/extracted";
+//     for (const auto & entry : std::filesystem::directory_iterator(path)) {
+//         std::string data_file = entry.path();
+//         std::ifstream data_in(data_file);
+//         if (!data_in.is_open()) {
+//             std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
+//             return lines;
+//         }
+//         //  101876733 
+//         while (getline(data_in, line)){
+//             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+//             if (line.size() > 2) {
+//                 lines.push_back(line);
+//                 if (max_lines > 0 && lines.size() > max_lines) {
+//                     data_in.close();
+//                     return lines;
+//                 }
+//             }
+//         }
+//         data_in.close();
+//     }
+//     return lines;
+// }
 
 auto read_file_to_string(const std::string & path) -> std::string {
     constexpr auto read_size = std::size_t(4096);
@@ -305,9 +306,28 @@ std::vector<std::string> read_webpages(int max_lines=-1) {
     return lines;
 }
 
+void read_file(const std::string & file_type, const std::string & infile_name,
+               std::vector<std::string> & in_strings, int max_lines=-1) {
+    std::ifstream data_in(infile_name);
+    if (!data_in.is_open()) {
+        std::cerr << "Could not open " << file_type << " file '";
+        std::cerr << infile_name << "'" << std::endl;
+    } else {
+        std::string line;
+        while (getline(data_in, line)){
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            in_strings.push_back(line);
+            if (max_lines > 0 && in_strings.size() > max_lines) {
+                break;
+            }
+        }
+        data_in.close();
+    }
+}
+
 std::vector<std::string> read_file(const std::string & file_type, 
-                                    const std::string & infile_name,
-                                    int max_lines=-1) {
+                                   const std::string & infile_name,
+                                   int max_lines=-1) {
     std::vector<std::string> in_strings;
     std::ifstream data_in(infile_name);
     if (!data_in.is_open()) {
@@ -327,6 +347,18 @@ std::vector<std::string> read_file(const std::string & file_type,
     return in_strings;
 }
 
+std::vector<std::string> read_directory(const std::string & file_type, 
+                                        const std::string & path, int max_lines=-1) {
+    std::string line;
+
+    std::vector<std::string> lines;
+    for (const auto & entry : std::filesystem::directory_iterator(path)) {
+        std::string data_file = entry.path();
+        read_file(file_type, data_file, lines, max_lines);
+    }
+    return lines;
+}
+
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
                  std::vector<std::string> & lines,
@@ -338,11 +370,10 @@ int readWorkload(const expr_info & expr_info,
             break;
         case 2:
             regexes = read_file("regex", kDbxRegex);
-            lines = read_dbx(max_lines);
+            // lines = read_dbx(max_lines);
+            lines = read_directory("data", "data/extracted", max_lines);
             break;
         case 3:
-            // regexes = read_file("regex", kSysyRegex);
-            // lines = read_sysy(max_lines);
             if (expr_info.stype == selection_type::kFree) {
                 regexes = read_file("regex", kWebRegexFree);
             } else {
@@ -350,6 +381,9 @@ int readWorkload(const expr_info & expr_info,
             }
             lines = read_webpages(std::min(max_lines, 7000000));
             break;
+        case 4:
+            regexes = read_file("regex", kPrositeRegex);
+            lines = read_directory("data", "data/protein/sequences", max_lines);
         default:
             regexes = read_file("regex", expr_info.reg_file);
             lines = read_file("data", expr_info.data_file, max_lines);

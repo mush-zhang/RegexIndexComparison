@@ -46,3 +46,13 @@ rm DBLP-citation-network-Oct-19.tar.gz
 python3 preprocess_dblp.py
 popd
 ```
+
+#### Prosite
+
+```
+pushd data/protein
+python3 multithread_preprocess_protein.py
+rm -r pfam_temp
+rm *.pkl
+popd
+```
