@@ -25,125 +25,127 @@ result_dir_small = os.path.join(dir_name, 'small')
 # In[ ]:
 
 
-DATA_NUM = 400000
-QUERY_NUM = 230
-MEAN = [800, 1300, 1900, 200]
-SD = [500, 300, 200, 100]
+def generate_query_key():
+    """Generate a random query key with length between 3 and 8."""
+    key_length = random.randint(3, 8)
+    return ''.join(random.choices(string.ascii_uppercase, k=key_length))
 
+def generate_query():
+    """Generate a query with 3 query keys and 2 regex gap constraints."""
+    # Generate 3 query keys
+    key1 = generate_query_key()
+    key2 = generate_query_key()
+    key3 = generate_query_key()
 
-# ## Get all prefix-free multi-grams
+    # Generate 2 random gap constraints
+    gap1 = random.randint(0, 50)
+    gap2 = random.randint(0, 50)
 
-# In[ ]:
+    # Format the query with regex gaps
+    query = f"{key1}(.{{0,{gap1}}}){key2}(.{{0,{gap2}}}){key3}"
+    return query
 
+def generate_query_workload(query_count):
+    """Generate a workload of queries."""
+    return [generate_query() for _ in range(query_count)]
 
-# Parameters
-global MIN_LENGTH
-MIN_LENGTH = 3
-global MAX_LENGTH
-MAX_LENGTH = 3
-global ALPHABET
-ALPHABET = string.ascii_uppercase
+def generate_trigrams():
+    """Generate all unique trigrams from A-Z."""
+    alphabet = string.ascii_uppercase  # A-Z
+    trigrams = [f"{a}{b}{c}" for a in alphabet for b in alphabet for c in alphabet]
+    return trigrams  # Use the unique trigrams
 
+def generate_frequencies(trigrams, mean, std_dev):
+    """Generate target frequencies for the trigrams using a Normal distribution."""
+    frequencies = np.random.normal(loc=mean, scale=std_dev, size=len(trigrams))
+    frequencies = np.abs(frequencies).astype(int)  # Ensure positive integer frequencies
+    return dict(zip(trigrams, frequencies))
 
-# In[6]:
+def generate_dataset(trigrams, trigram_frequencies, dataset_size, lock, shared_dataset, index):
+    """Generate a dataset dynamically based on trigram frequencies."""
+    dataset = []
+    trigram_counter = Counter()  # Track the appearance of each trigram
 
+    # Generate strings until the dataset reaches the desired size
+    while len(dataset) < dataset_size:
+        current_string = []
 
-class TrieNode:
-    """A node in the Trie."""
-    def __init__(self):
-        self.children = defaultdict(TrieNode)
-        self.is_end_of_string = False
+        # Randomly select trigrams until the dataset is complete
+        while True:
+            # Select available trigrams based on remaining frequency
+            available_trigrams = [
+                t for t in trigrams if trigram_counter[t] < trigram_frequencies[t]
+            ]
+            if not available_trigrams:
+                break  # No more trigrams can be selected
 
-class Trie:
-    """Trie data structure to store strings and check for prefixes."""
-    def __init__(self):
-        self.root = TrieNode()
+            # Randomly select a trigram to add to the current string
+            next_trigram = random.choice(available_trigrams)
+            current_string.append(next_trigram)
+            trigram_counter[next_trigram] += 1
 
-    def insert(self, s):
-        """Insert a string into the Trie."""
-        node = self.root
-        for char in s:
-            node = node.children[char]
-        node.is_end_of_string = True
+            # End string generation with some probability to avoid infinite strings
+            if random.random() < 0.3:
+                break
 
-    def is_prefix(self, s):
-        """Check if 's' or any of its prefixes exist in the Trie."""
-        node = self.root
-        for char in s:
-            if node.is_end_of_string:
-                return True  # 's' is a prefix of an existing string
-            if char not in node.children:
-                return False  # No conflict
-            node = node.children[char]
-        return node.is_end_of_string  # Exact match check
+        # Ensure the string contains at least one trigram
+        if current_string:
+            dataset.append(''.join(current_string))
 
-# def generate_prefix_free_set(start_letter, MIN_LENGTH, MAX_LENGTH, shared_set, lock):
-def generate_prefix_free_set(start_letter, shared_set, lock):
-    """Generate a prefix-free set starting with a specific letter."""
-    trie = Trie()
+    # Save dataset to the shared manager list
+    with lock:
+        shared_dataset[index] = (dataset, trigram_counter)
 
-    def backtrack(current_string):
-        """Recursively generate prefix-free strings."""
-        if MIN_LENGTH <= len(current_string) <= MAX_LENGTH:
-            if not trie.is_prefix(current_string):
-                # Add to shared set in a thread-safe way
-                with lock:
-                    shared_set.append(current_string)
-                trie.insert(current_string)
+def generate_frequencies(trigrams, mean, std_dev):
+    """Generate target frequencies for the trigrams using a Normal distribution."""
+    frequencies = np.random.normal(loc=mean, scale=std_dev, size=len(trigrams))
+    # Ensure positive integer frequencies and avoid frequencies of 0
+    frequencies = np.clip(np.abs(frequencies).astype(int), 1, None)
+    return dict(zip(trigrams, frequencies))
 
-        if len(current_string) >= MAX_LENGTH:
-            return
+directory_path = 'synthetic1'
+if not os.path.isdir(directory_path):
+    os.makedirs(directory_path)
+    # Parameters
+    dataset_size = 400_000  # Expected size of the dataset
+    means = [100, 100, 100, 100]  # Mean frequency for all datasets
+    std_devs = [100, 200, 300, 500]  # Four different standard deviations
+    query_counts = [random.randint(227, 248) for _ in range(4)]
+    # Generate all trigrams
+    trigrams = generate_trigrams()
 
-        for char in ALPHABET:
-            backtrack(current_string + char)
-
-    # Start the generation with the provided start letter
-    backtrack(start_letter)
-
-
-# In[ ]:
-
-
-gram_fn = f'multigrams_{MIN_LENGTH}-{MAX_LENGTH}.pkl'
-
-if os.path.exists(gram_fn):
-    with open(gram_fn, 'rb') as f:
-        prefix_free_strings = pickle.load(f)
-    print(f"Loaded {len(prefix_free_strings)} prefix-free strings.")
-else:
-    # Shared set and lock for thread-safe access
+    # Shared manager object to store datasets
     manager = Manager()
-    shared_set = manager.list()  # Use a shared list to store results
-    lock = manager.Lock()
+    shared_dataset = manager.list([None] * 4)  # Store 4 datasets
+    lock = Lock()
 
-    # Create processes for parallel generation
+    # Create and start processes to generate multiple datasets in parallel
     processes = []
-    for i in range(13):  # 13 threads
-        start_letter = ALPHABET[i]
-        p = Process(target=generate_prefix_free_set,
-                    args=(start_letter, shared_set, lock))
+    for i in range(4):
+        frequencies = generate_frequencies(trigrams, means[i], std_devs[i])
+        p = Process(target=generate_dataset, args=(
+            trigrams, frequencies, dataset_size, lock, shared_dataset, i))
         processes.append(p)
-
-    # Start all processes
-    for p in processes:
         p.start()
+
+    # Generate query workloads
+    for query_count in query_counts:
+        queries = generate_query_workload(query_count)
+        shared_queries[i] = queries
 
     # Wait for all processes to complete
     for p in processes:
         p.join()
 
-    # Convert the shared list to a set and print the results
-    prefix_free_strings = set(shared_set)
 
-    with open(gram_fn, 'wb') as f:
-        pickle.dump(prefix_free_strings, f)
-    print(f"Generated {len(prefix_free_strings)} prefix-free strings.")
-
-
-# ## Assign frequencies to each multigrams
-
-# In[ ]:
-
-
-
+    # Print summary of datasets and query workloads
+    for i, (dataset, trigram_counter) in enumerate(shared_dataset):
+        print(f"Dataset {i + 1} with std_dev {std_devs[i]}: {len(dataset)} strings")
+        print(f"Top 10 Trigrams (by frequency): {trigram_counter.most_common(10)}")
+        print(f"Query Workload {i + 1}: {len(shared_queries[i])} queries")
+        print(f"Sample Query: {shared_queries[i][0]}")
+        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'wb') as f:
+            pickle.dump(dataset, f)
+        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'wb') as f:
+            pickle.dump(shared_queries[i], f)
 
