@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import string
 import pickle
-
+import random
 from collections import defaultdict
 from multiprocessing import Process, Manager, cpu_count
 
@@ -105,9 +105,10 @@ def generate_frequencies(trigrams, mean, std_dev):
 
 directory_path = 'synthetic1'
 if not os.path.isdir(directory_path):
+    print(f"Creating directory {directory_path}")
     os.makedirs(directory_path)
     # Parameters
-    dataset_size = 400_000  # Expected size of the dataset
+    dataset_size = 400000  # Expected size of the dataset
     means = [100, 100, 100, 100]  # Mean frequency for all datasets
     std_devs = [100, 200, 300, 500]  # Four different standard deviations
     query_counts = [random.randint(227, 248) for _ in range(4)]
