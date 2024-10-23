@@ -11,7 +11,7 @@ import string
 import pickle
 import random
 from collections import defaultdict
-from multiprocessing import Process, Manager, cpu_count
+from multiprocessing import Process, Manager, Lock
 
 
 # In[2]:
@@ -27,7 +27,7 @@ result_dir_small = os.path.join(dir_name, 'small')
 
 def generate_query_key():
     """Generate a random query key with length between 3 and 8."""
-    key_length = random.randint(3, 8)
+    key_length = random.randint(3, 9)
     return ''.join(random.choices(string.ascii_uppercase, k=key_length))
 
 def generate_query():
@@ -38,11 +38,13 @@ def generate_query():
     key3 = generate_query_key()
 
     # Generate 2 random gap constraints
-    gap1 = random.randint(0, 50)
-    gap2 = random.randint(0, 50)
+    gap1_lower = int(bool(random.getrandbits(1)))
+    gap1_upper = random.randint(1, 50)
+    gap2_lower = int(bool(random.getrandbits(1)))
+    gap2_upper = random.randint(1, 50)
 
     # Format the query with regex gaps
-    query = f"{key1}(.{{0,{gap1}}}){key2}(.{{0,{gap2}}}){key3}"
+    query = f"{key1}(.{{{gap1_lower},{gap1_upper}}}){key2}(.{{{gap2_lower},{gap2_upper}}}){key3}"
     return query
 
 def generate_query_workload(query_count):
@@ -105,10 +107,9 @@ def generate_frequencies(trigrams, mean, std_dev):
 
 directory_path = 'synthetic1'
 if not os.path.isdir(directory_path):
-    print(f"Creating directory {directory_path}")
     os.makedirs(directory_path)
     # Parameters
-    dataset_size = 400000  # Expected size of the dataset
+    dataset_size = 400_000  # Expected size of the dataset
     means = [100, 100, 100, 100]  # Mean frequency for all datasets
     std_devs = [100, 200, 300, 500]  # Four different standard deviations
     query_counts = [random.randint(227, 248) for _ in range(4)]
