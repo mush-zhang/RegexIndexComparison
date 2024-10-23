@@ -10,7 +10,7 @@ import numpy as np
 import string
 import pickle
 import random
-from collections import defaultdict
+from collections import defaultdict, Counter
 from multiprocessing import Process, Manager, Lock
 
 
@@ -129,7 +129,8 @@ if not os.path.isdir(directory_path):
             trigrams, frequencies, dataset_size, lock, shared_dataset, i))
         processes.append(p)
         p.start()
-
+    
+    shared_queries = [None] * 4
     # Generate query workloads
     for query_count in query_counts:
         queries = generate_query_workload(query_count)
