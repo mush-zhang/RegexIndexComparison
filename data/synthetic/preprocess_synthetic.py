@@ -8,6 +8,8 @@ import os
 import sys
 import numpy as np
 import string
+import pickle
+
 from collections import defaultdict
 from multiprocessing import Process, Manager, cpu_count
 
@@ -35,9 +37,12 @@ SD = [500, 300, 200, 100]
 
 
 # Parameters
-min_length = 3
-max_length = 3
-alphabet = string.ascii_uppercase
+global MIN_LENGTH
+MIN_LENGTH = 3
+global MAX_LENGTH
+MAX_LENGTH = 3
+global ALPHABET
+ALPHABET = string.ascii_uppercase
 
 
 # In[6]:
@@ -72,24 +77,24 @@ class Trie:
             node = node.children[char]
         return node.is_end_of_string  # Exact match check
 
-def generate_prefix_free_set(start_letter, min_length, max_length, shared_set, lock):
+# def generate_prefix_free_set(start_letter, MIN_LENGTH, MAX_LENGTH, shared_set, lock):
+def generate_prefix_free_set(start_letter, shared_set, lock):
     """Generate a prefix-free set starting with a specific letter."""
-    alphabet = string.ascii_uppercase
     trie = Trie()
 
     def backtrack(current_string):
         """Recursively generate prefix-free strings."""
-        if min_length <= len(current_string) <= max_length:
+        if MIN_LENGTH <= len(current_string) <= MAX_LENGTH:
             if not trie.is_prefix(current_string):
                 # Add to shared set in a thread-safe way
                 with lock:
                     shared_set.append(current_string)
                 trie.insert(current_string)
 
-        if len(current_string) >= max_length:
+        if len(current_string) >= MAX_LENGTH:
             return
 
-        for char in alphabet:
+        for char in ALPHABET:
             backtrack(current_string + char)
 
     # Start the generation with the provided start letter
@@ -99,32 +104,40 @@ def generate_prefix_free_set(start_letter, min_length, max_length, shared_set, l
 # In[ ]:
 
 
-# Shared set and lock for thread-safe access
-manager = Manager()
-shared_set = manager.list()  # Use a shared list to store results
-lock = manager.Lock()
+gram_fn = f'multigrams_{MIN_LENGTH}-{MAX_LENGTH}.pkl'
 
-# Create processes for parallel generation
-processes = []
-for i in range(13):  # 13 threads
-    start_letter = alphabet[i]
-    p = Process(target=generate_prefix_free_set,
-                args=(start_letter, min_length, max_length, shared_set, lock))
-    processes.append(p)
+if os.path.exists(gram_fn):
+    with open(gram_fn, 'rb') as f:
+        prefix_free_strings = pickle.load(f)
+    print(f"Loaded {len(prefix_free_strings)} prefix-free strings.")
+else:
+    # Shared set and lock for thread-safe access
+    manager = Manager()
+    shared_set = manager.list()  # Use a shared list to store results
+    lock = manager.Lock()
 
-# Start all processes
-for p in processes:
-    p.start()
+    # Create processes for parallel generation
+    processes = []
+    for i in range(13):  # 13 threads
+        start_letter = ALPHABET[i]
+        p = Process(target=generate_prefix_free_set,
+                    args=(start_letter, shared_set, lock))
+        processes.append(p)
 
-# Wait for all processes to complete
-for p in processes:
-    p.join()
+    # Start all processes
+    for p in processes:
+        p.start()
 
-# Convert the shared list to a set and print the results
-prefix_free_strings = set(shared_set)
-print(f"Generated {len(prefix_free_strings)} prefix-free strings.")
-for s in sorted(prefix_free_strings):
-    print(s)
+    # Wait for all processes to complete
+    for p in processes:
+        p.join()
+
+    # Convert the shared list to a set and print the results
+    prefix_free_strings = set(shared_set)
+
+    with open(gram_fn, 'wb') as f:
+        pickle.dump(prefix_free_strings, f)
+    print(f"Generated {len(prefix_free_strings)} prefix-free strings.")
 
 
 # ## Assign frequencies to each multigrams
