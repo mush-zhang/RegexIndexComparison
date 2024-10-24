@@ -110,7 +110,7 @@ def generate_frequencies(trigrams, mean1, mean2, std_dev):
     frequencies2 = np.clip(np.abs(frequencies2).astype(int), 1, None)
         
     frequencies = np.append(frequencies1, frequencies2)
-    np.random.shuffle(freuqnecies)
+    np.random.shuffle(frequencies)
     return dict(zip(trigrams, frequencies))
 
 directory_path = 'synthetic1'
