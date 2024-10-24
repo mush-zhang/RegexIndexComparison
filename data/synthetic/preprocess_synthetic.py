@@ -12,6 +12,7 @@ import pickle
 import random
 from collections import defaultdict, Counter
 from multiprocessing import Process, Manager, Lock
+import matplotlib.pyplot as plt
 
 
 # In[2]:
@@ -25,8 +26,14 @@ result_dir_small = os.path.join(dir_name, 'small')
 # In[ ]:
 
 
+random.seed(53711)
+
+
+# In[ ]:
+
+
 def generate_query_key():
-    """Generate a random query key with length between 3 and 8."""
+    """Generate a random query key with length between 3 and 8 inclusively."""
     key_length = random.randint(3, 9)
     return ''.join(random.choices(string.ascii_uppercase, k=key_length))
 
@@ -56,12 +63,6 @@ def generate_trigrams():
     alphabet = string.ascii_uppercase  # A-Z
     trigrams = [f"{a}{b}{c}" for a in alphabet for b in alphabet for c in alphabet]
     return trigrams  # Use the unique trigrams
-
-def generate_frequencies(trigrams, mean, std_dev):
-    """Generate target frequencies for the trigrams using a Normal distribution."""
-    frequencies = np.random.normal(loc=mean, scale=std_dev, size=len(trigrams))
-    frequencies = np.abs(frequencies).astype(int)  # Ensure positive integer frequencies
-    return dict(zip(trigrams, frequencies))
 
 def generate_dataset(trigrams, trigram_frequencies, dataset_size, lock, shared_dataset, index):
     """Generate a dataset dynamically based on trigram frequencies."""
@@ -130,25 +131,84 @@ if not os.path.isdir(directory_path):
         processes.append(p)
         p.start()
     
-    shared_queries = [None] * 4
+    shared_queries = []
     # Generate query workloads
     for query_count in query_counts:
         queries = generate_query_workload(query_count)
-        shared_queries[i] = queries
+        shared_queries.append(queries)
+        print(len(shared_queries[-1]))
 
     # Wait for all processes to complete
     for p in processes:
         p.join()
 
-
     # Print summary of datasets and query workloads
     for i, (dataset, trigram_counter) in enumerate(shared_dataset):
         print(f"Dataset {i + 1} with std_dev {std_devs[i]}: {len(dataset)} strings")
         print(f"Top 10 Trigrams (by frequency): {trigram_counter.most_common(10)}")
+        print(f"Bottom 10 Trigrams (by frequency): {trigram_counter.least_common()[:-10-1:-1]}")
         print(f"Query Workload {i + 1}: {len(shared_queries[i])} queries")
         print(f"Sample Query: {shared_queries[i][0]}")
         with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'wb') as f:
             pickle.dump(dataset, f)
         with open(os.path.join(directory_path, f'query_{i}.pkl'), 'wb') as f:
             pickle.dump(shared_queries[i], f)
+
+
+# In[ ]:
+
+
+def analyze_dataset(dataset, trigrams):
+    """
+    Analyze the dataset to count how many strings each trigram appears in.
+    """
+    trigram_in_line = Counter()  # Track which trigrams appear in each string
+
+    # Iterate over each string in the dataset and count trigram occurrences per string
+    for line in dataset:
+        unique_trigrams = set(
+            line[i:i + 3] for i in range(len(line) - 2) if line[i:i + 3] in trigrams
+        )
+        for trigram in unique_trigrams:
+            trigram_in_line[trigram] += 1
+
+    return trigram_in_line
+
+def plot_histogram(trigram_counter, dataset_index, output_dir):
+    """
+    Plot a histogram for the distribution of trigrams across strings.
+    """
+    # Extract the frequency of each trigram (i.e., how many strings contain it)
+    frequencies = list(trigram_counter.values())
+
+    # Define bins for the histogram
+    bins = np.arange(0, max(frequencies) + 5, 5)  # Binning every 5 occurrences
+
+    # Plot the histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist(frequencies, bins=bins, edgecolor='black', alpha=0.7)
+    plt.xlabel('Number of strings a trigram appears in')
+    plt.ylabel('Number of trigrams')
+    plt.title(f'Trigram Distribution in Dataset {dataset_index + 1}')
+
+    # Save the plot as a PDF
+    output_file = os.path.join(output_dir, f'dataset_{dataset_index + 1}_histogram.pdf')
+    plt.savefig(output_file)
+    plt.close()
+
+def main_analysis(datasets, trigrams):
+    """
+    Analyze all datasets and generate histogram plots.
+    """
+    output_dir = 'histogram_plots'
+    os.makedirs(output_dir, exist_ok=True)  # Create output directory if it doesn't exist
+
+    # Analyze each dataset and generate corresponding histograms
+    for i, (dataset, _) in enumerate(datasets):
+        trigram_counter = analyze_dataset(dataset, trigrams)
+        plot_histogram(trigram_counter, i, output_dir)
+
+    print(f'All histograms saved to: {output_dir}')
+
+main_analysis(shared_dataset, trigrams)
 
