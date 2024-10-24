@@ -146,7 +146,7 @@ if not os.path.isdir(directory_path):
     for i, (dataset, trigram_counter) in enumerate(shared_dataset):
         print(f"Dataset {i + 1} with std_dev {std_devs[i]}: {len(dataset)} strings")
         print(f"Top 10 Trigrams (by frequency): {trigram_counter.most_common(10)}")
-        print(f"Bottom 10 Trigrams (by frequency): {trigram_counter.least_common()[:-10-1:-1]}")
+        print(f"Bottom 10 Trigrams (by frequency): {trigram_counter.most_common()[:-10-1:-1]}")
         print(f"Query Workload {i + 1}: {len(shared_queries[i])} queries")
         print(f"Sample Query: {shared_queries[i][0]}")
         with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'wb') as f:
