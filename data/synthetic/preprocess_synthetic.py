@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # In[2]:
 
 
-DATA_DIR = '../data/synthetic/'
+DATA_DIR = '.' #'../data/synthetic/'
 
 
 # In[ ]:
