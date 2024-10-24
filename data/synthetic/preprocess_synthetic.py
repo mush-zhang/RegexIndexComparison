@@ -18,13 +18,14 @@ import matplotlib.pyplot as plt
 # In[2]:
 
 
-DATA_DIR = '.' #'../data/synthetic/'
+DATA_DIR = '.' # '../data/synthetic/'
 
 
 # In[ ]:
 
 
 random.seed(53711)
+np.random.seed(15213)
 
 
 # In[ ]:
@@ -108,8 +109,8 @@ def generate_frequencies(trigrams, mean1, mean2, std_dev):
     frequencies1 = np.clip(np.abs(frequencies1).astype(int), 1, None)
     frequencies2 = np.clip(np.abs(frequencies2).astype(int), 1, None)
         
-    frequencies = frequencies1 + frequencies2
-    random.shuffle(freuqnecies)
+    frequencies = np.append(frequencies1, frequencies2)
+    np.random.shuffle(freuqnecies)
     return dict(zip(trigrams, frequencies))
 
 directory_path = 'synthetic1'
