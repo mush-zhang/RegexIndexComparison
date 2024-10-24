@@ -18,9 +18,7 @@ import matplotlib.pyplot as plt
 # In[2]:
 
 
-dir_name = '../data/synthetic/'
-result_dir_large = os.path.join(dir_name, 'large')
-result_dir_small = os.path.join(dir_name, 'small')
+DATA_DIR = '../data/synthetic/'
 
 
 # In[ ]:
@@ -99,21 +97,32 @@ def generate_dataset(trigrams, trigram_frequencies, dataset_size, lock, shared_d
     with lock:
         shared_dataset[index] = (dataset, trigram_counter)
 
-def generate_frequencies(trigrams, mean, std_dev):
+def generate_frequencies(trigrams, mean1, mean2, std_dev):
     """Generate target frequencies for the trigrams using a Normal distribution."""
-    frequencies = np.random.normal(loc=mean, scale=std_dev, size=len(trigrams))
+    size1 = int(len(trigrams)*random.uniform(0.9, 0.6)) # larger
+    size2 = len(trigrams) - size1 # smaller
+    frequencies1 = np.random.normal(loc=mean1, scale=std_dev, size=size1)
+    frequencies2 = np.random.normal(loc=mean2, scale=std_dev, size=size2)
+    
     # Ensure positive integer frequencies and avoid frequencies of 0
-    frequencies = np.clip(np.abs(frequencies).astype(int), 1, None)
+    frequencies1 = np.clip(np.abs(frequencies1).astype(int), 1, None)
+    frequencies2 = np.clip(np.abs(frequencies2).astype(int), 1, None)
+        
+    frequencies = frequencies1 + frequencies2
+    random.shuffle(freuqnecies)
     return dict(zip(trigrams, frequencies))
 
 directory_path = 'synthetic1'
+
+# Parameters
+dataset_size = 400_000  # Expected size of the dataset
+means = [(800, 600), (1200, 400) , (100, 1900), (0, 3700)]  # Mean frequency for all datasets
+std_devs = [100, 200, 300, 400]  # Four different standard deviations
+query_counts = [random.randint(227, 248) for _ in range(4)]
+
 if not os.path.isdir(directory_path):
     os.makedirs(directory_path)
-    # Parameters
-    dataset_size = 400_000  # Expected size of the dataset
-    means = [100, 100, 100, 100]  # Mean frequency for all datasets
-    std_devs = [100, 200, 300, 500]  # Four different standard deviations
-    query_counts = [random.randint(227, 248) for _ in range(4)]
+
     # Generate all trigrams
     trigrams = generate_trigrams()
 
@@ -125,7 +134,7 @@ if not os.path.isdir(directory_path):
     # Create and start processes to generate multiple datasets in parallel
     processes = []
     for i in range(4):
-        frequencies = generate_frequencies(trigrams, means[i], std_devs[i])
+        frequencies = generate_frequencies(trigrams, means[i][0], means[i][1], std_devs[i])
         p = Process(target=generate_dataset, args=(
             trigrams, frequencies, dataset_size, lock, shared_dataset, i))
         processes.append(p)
@@ -153,6 +162,16 @@ if not os.path.isdir(directory_path):
             pickle.dump(dataset, f)
         with open(os.path.join(directory_path, f'query_{i}.pkl'), 'wb') as f:
             pickle.dump(shared_queries[i], f)
+            
+    datasets = [ dataset for dataset, trigram_counter in shared_dataset ]
+else:
+    datasets = []
+    shared_queries = []
+    for i in range(4):
+        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'wb') as f:
+            datasets.append(pickle.load(f))
+        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'wb') as f:
+            shared_queries.append(pickle.load(f))
 
 
 # In[ ]:
@@ -174,7 +193,7 @@ def analyze_dataset(dataset, trigrams):
 
     return trigram_in_line
 
-def plot_histogram(trigram_counter, dataset_index, output_dir):
+def plot_histogram(trigram_counter, dataset_index, std_dev_val, output_dir):
     """
     Plot a histogram for the distribution of trigrams across strings.
     """
@@ -187,9 +206,9 @@ def plot_histogram(trigram_counter, dataset_index, output_dir):
     # Plot the histogram
     plt.figure(figsize=(10, 6))
     plt.hist(frequencies, bins=bins, edgecolor='black', alpha=0.7)
-    plt.xlabel('Number of strings a trigram appears in')
-    plt.ylabel('Number of trigrams')
-    plt.title(f'Trigram Distribution in Dataset {dataset_index + 1}')
+    plt.xlabel('Number of Lines Appears')
+    plt.ylabel('Number of Trigrams')
+    plt.title(f'Trigram Distribution std_dev={std_dev_val}')
 
     # Save the plot as a PDF
     output_file = os.path.join(output_dir, f'dataset_{dataset_index + 1}_histogram.pdf')
@@ -204,11 +223,144 @@ def main_analysis(datasets, trigrams):
     os.makedirs(output_dir, exist_ok=True)  # Create output directory if it doesn't exist
 
     # Analyze each dataset and generate corresponding histograms
-    for i, (dataset, _) in enumerate(datasets):
+    for i, dataset in enumerate(datasets):
         trigram_counter = analyze_dataset(dataset, trigrams)
-        plot_histogram(trigram_counter, i, output_dir)
+        plot_histogram(trigram_counter, i,std_devs[i], output_dir)
 
     print(f'All histograms saved to: {output_dir}')
 
-main_analysis(shared_dataset, trigrams)
+main_analysis(datasets, trigrams)
+
+
+# In[ ]:
+
+
+os.makedirs(os.path.join(DATA_DIR, 'expr1'), exist_ok=True)
+
+for i in range(4):
+    query_fn = os.path.join(DATA_DIR, 'expr1', f'query_{i}.txt')
+    if not os.path.exists(query_fn):
+        with open(query_fn, 'w') as f:
+            for line in shared_queries[i]:
+                f.write(line + '\n')
+    data_fn = os.path.join(DATA_DIR, 'expr1', f'data_{i}_std{std_devs[i]}.txt')
+    if not os.path.exists(data_fn):
+        with open(data_fn, 'w') as f:
+            for line in datasets[i]:
+                f.write(line + '\n')
+
+
+# ## Expr 2
+
+# In[ ]:
+
+
+query_dir = os.path.join(DATA_DIR, 'expr2', 'queries')
+os.makedirs(query_dir, exist_ok=True)
+data_dir = os.path.join(DATA_DIR, 'expr2', 'datasets')
+os.makedirs(data_dir, exist_ok=True)
+
+def generate_dataset_expr2(num_strings, string_length=450):
+    """Generate a dataset with specified number of strings, each of fixed length."""
+    alphabet = string.ascii_uppercase  # English uppercase alphabet
+    dataset = [
+        ''.join(random.choices(alphabet, k=string_length))
+        for _ in range(num_strings)
+    ]
+    return dataset
+
+def sample_dataset(dataset, sample_size):
+    """Take a 10% random sample from the given dataset."""
+    sample_size = int(len(dataset) * sample_size)
+    return random.sample(dataset, sample_size)
+
+def generate_query_workload(sample, query_count):
+    """Generate query workload from the given sample."""
+    queries = []
+
+    for _ in range(query_count):
+        # Select a random string from the sample
+        random_string = random.choice(sample)
+
+        # Choose a random slice of 3-8 characters from the string
+        slice1_start = random.randint(0, len(random_string) - 9)
+        slice1_length = random.randint(3, 8)
+        slice1 = random_string[slice1_start:slice1_start + slice1_length]
+
+        # Decide on a random gap size
+        gap_size = random.randint(0, 50)
+
+        # Choose another slice of 3-8 characters after the gap
+        slice2_start = slice1_start + slice1_length + gap_size
+        if slice2_start + 8 < len(random_string):  # Ensure valid slice range
+            slice2_length = random.randint(3, 8)
+            slice2 = random_string[slice2_start:slice2_start + slice2_length]
+        else:
+            slice2 = ''  # Handle edge case where slice2 is out of range
+
+        # Create the query string with a regex-style gap
+        query = f"{slice1}(.{{0,{gap_size}}}){slice2}"
+        queries.append(query)
+
+    return queries
+
+def save_dataset(dataset, filename):
+    """Save the dataset to a file."""
+    with open(filename, 'w') as f:
+        for line in dataset:
+            f.write(line + '\n')
+
+def save_queries(queries, filename):
+    """Save the query workload to a file."""
+    with open(filename, 'w') as f:
+        for query in queries:
+            f.write(query + '\n')
+
+def generate_and_save_datasets():
+    """Generate datasets and save them to files."""
+    dataset_sizes = [20_000, 40_000, 60_000, 80_000, 100_000]
+
+    for size in dataset_sizes:
+        dataset = generate_dataset_expr2(size)
+        save_dataset(dataset, os.path.join(data_dir, f'dataset_{size}.txt'))
+
+def generate_and_save_query_workloads():
+    """Generate query workloads from datasets and save them."""
+    query_sizes = [100, 500, 2_000, 2_500, 5_000]
+
+    # Load the 20K dataset to generate workloads
+    with open(os.path.join(data_dir, 'dataset_20000.txt'), 'r') as f:
+        dataset_20k = [line.strip() for line in f.readlines()]
+
+    for query_size in query_sizes:
+        sample = sample_dataset(dataset_20k, 0.1)  # Take 10% sample
+        queries = generate_query_workload(sample, query_size)
+        save_queries(queries, os.path.join(query_dir, f'query_workload_{query_size}.txt'))
+
+def generate_and_save_fixed_workload():
+    """Generate a fixed 1000-query workload for all datasets."""
+    # Generate workloads for the original datasets
+    dataset_sizes = [20_000, 40_000, 60_000, 80_000, 100_000]
+
+    for size in dataset_sizes:
+        with open(os.path.join(data_dir, f'dataset_{size}.txt'), 'r') as f:
+            dataset = [line.strip() for line in f.readlines()]
+
+        sample = sample_dataset(dataset, 0.1)  # Take 10% sample
+        queries = generate_query_workload(sample, 1000)  # Fixed 1000 queries
+        save_queries(queries, os.path.join(query_dir, f'query_workload_1000_for_{size}.txt'))
+
+# Generate datasets
+print("Generating datasets...")
+generate_and_save_datasets()
+
+# Generate query workloads with fixed 20K dataset
+print("Generating query workloads with fixed 20K dataset...")
+generate_and_save_query_workloads()
+
+# Generate fixed 1000-query workloads for all datasets
+print("Generating fixed 1000-query workloads...")
+generate_and_save_fixed_workload()
+
+print("All datasets and query workloads generated successfully!")
 
