@@ -33,7 +33,7 @@ np.random.seed(15213)
 
 def generate_query_key():
     """Generate a random query key with length between 3 and 8 inclusively."""
-    key_length = random.randint(3, 9)
+    key_length = random.randint(3, 8)
     return ''.join(random.choices(string.ascii_uppercase, k=key_length))
 
 def generate_query():
@@ -110,7 +110,7 @@ def generate_frequencies(trigrams, mean1, mean2, std_dev):
     frequencies2 = np.clip(np.abs(frequencies2).astype(int), 1, None)
         
     frequencies = np.append(frequencies1, frequencies2)
-    np.random.shuffle(freuqnecies)
+    np.random.shuffle(frequencies)
     return dict(zip(trigrams, frequencies))
 
 directory_path = 'synthetic1'
@@ -122,7 +122,7 @@ std_devs = [100, 200, 300, 400]  # Four different standard deviations
 query_counts = [random.randint(227, 248) for _ in range(4)]
 
 if not os.path.isdir(directory_path):
-    os.makedirs(directory_path)
+    os.makedirs(directory_path, exist_ok=True)
 
     # Generate all trigrams
     trigrams = generate_trigrams()
@@ -256,11 +256,6 @@ for i in range(4):
 # In[ ]:
 
 
-query_dir = os.path.join(DATA_DIR, 'expr2', 'queries')
-os.makedirs(query_dir, exist_ok=True)
-data_dir = os.path.join(DATA_DIR, 'expr2', 'datasets')
-os.makedirs(data_dir, exist_ok=True)
-
 def generate_dataset_expr2(num_strings, string_length=450):
     """Generate a dataset with specified number of strings, each of fixed length."""
     alphabet = string.ascii_uppercase  # English uppercase alphabet
@@ -270,12 +265,12 @@ def generate_dataset_expr2(num_strings, string_length=450):
     ]
     return dataset
 
-def sample_dataset(dataset, sample_size):
-    """Take a 10% random sample from the given dataset."""
-    sample_size = int(len(dataset) * sample_size)
+def sample_dataset(dataset, sample_percentage):
+    """Take a sample of the dataset with the specified percentage."""
+    sample_size = int(len(dataset) * sample_percentage)
     return random.sample(dataset, sample_size)
 
-def generate_query_workload(sample, query_count):
+def generate_query_workload(sample, query_count, lower_char_count, upper_char_count):
     """Generate query workload from the given sample."""
     queries = []
 
@@ -283,22 +278,26 @@ def generate_query_workload(sample, query_count):
         # Select a random string from the sample
         random_string = random.choice(sample)
 
-        # Choose a random slice of 3-8 characters from the string
-        slice1_start = random.randint(0, len(random_string) - 9)
-        slice1_length = random.randint(3, 8)
-        slice1 = random_string[slice1_start:slice1_start + slice1_length]
+        # Ensure the string has at least lower characters for meaningful slicing
+        while len(random_string) < lower_char_count+1:
+            random_string = random.choice(sample)
+
+        # Choose a random slice of characters from the string
+        slice1_start = random.randint(0, len(random_string) - lower_char_count)
+        slice1_length = random.randint(lower_char_count, upper_char_count)
+        slice1 = random_string[slice1_start:slice1_start + min(slice1_length, len(random_string)-1)]
 
         # Decide on a random gap size
-        gap_size = random.randint(0, 50)
-
+        gap_size = random.randint(1, min(50, len(random_string) - len(slice1) - 1))
+        
         # Choose another slice of 3-8 characters after the gap
         slice2_start = slice1_start + slice1_length + gap_size
-        if slice2_start + 8 < len(random_string):  # Ensure valid slice range
-            slice2_length = random.randint(3, 8)
+        if slice2_start + upper_char_count < len(random_string):  # Ensure valid slice range
+            slice2_length = random.randint(lower_char_count, upper_char_count)
             slice2 = random_string[slice2_start:slice2_start + slice2_length]
         else:
-            slice2 = ''  # Handle edge case where slice2 is out of range
-
+            slice2 = random_string[slice2_start:]  # Handle edge case where slice2 is out of range
+        
         # Create the query string with a regex-style gap
         query = f"{slice1}(.{{0,{gap_size}}}){slice2}"
         queries.append(query)
@@ -317,7 +316,7 @@ def save_queries(queries, filename):
         for query in queries:
             f.write(query + '\n')
 
-def generate_and_save_datasets():
+def generate_and_save_datasets(data_dir):
     """Generate datasets and save them to files."""
     dataset_sizes = [20_000, 40_000, 60_000, 80_000, 100_000]
 
@@ -325,7 +324,7 @@ def generate_and_save_datasets():
         dataset = generate_dataset_expr2(size)
         save_dataset(dataset, os.path.join(data_dir, f'dataset_{size}.txt'))
 
-def generate_and_save_query_workloads():
+def generate_and_save_query_workloads(query_dir, data_dir):
     """Generate query workloads from datasets and save them."""
     query_sizes = [100, 500, 2_000, 2_500, 5_000]
 
@@ -335,10 +334,10 @@ def generate_and_save_query_workloads():
 
     for query_size in query_sizes:
         sample = sample_dataset(dataset_20k, 0.1)  # Take 10% sample
-        queries = generate_query_workload(sample, query_size)
+        queries = generate_query_workload(sample, query_size, 3, 8)
         save_queries(queries, os.path.join(query_dir, f'query_workload_{query_size}.txt'))
 
-def generate_and_save_fixed_workload():
+def generate_and_save_fixed_workload(query_dir, data_dir):
     """Generate a fixed 1000-query workload for all datasets."""
     # Generate workloads for the original datasets
     dataset_sizes = [20_000, 40_000, 60_000, 80_000, 100_000]
@@ -348,20 +347,93 @@ def generate_and_save_fixed_workload():
             dataset = [line.strip() for line in f.readlines()]
 
         sample = sample_dataset(dataset, 0.1)  # Take 10% sample
-        queries = generate_query_workload(sample, 1000)  # Fixed 1000 queries
+        queries = generate_query_workload(sample, 1000, 3, 8)  # Fixed 1000 queries
         save_queries(queries, os.path.join(query_dir, f'query_workload_1000_for_{size}.txt'))
 
-# Generate datasets
-print("Generating datasets...")
-generate_and_save_datasets()
+def generate_expr2():
+    query_dir = os.path.join(DATA_DIR, 'expr2', 'queries')
+    os.makedirs(query_dir, exist_ok=True)
+    data_dir = os.path.join(DATA_DIR, 'expr2', 'datasets')
+    os.makedirs(data_dir, exist_ok=True)
+    # Generate datasets
+    print("Generating datasets...")
+    generate_and_save_datasets(data_dir)
 
-# Generate query workloads with fixed 20K dataset
-print("Generating query workloads with fixed 20K dataset...")
-generate_and_save_query_workloads()
+    # Generate query workloads with fixed 20K dataset
+    print("Generating query workloads with fixed 20K dataset...")
+    generate_and_save_query_workloads(query_dir, data_dir)
 
-# Generate fixed 1000-query workloads for all datasets
-print("Generating fixed 1000-query workloads...")
-generate_and_save_fixed_workload()
+    # Generate fixed 1000-query workloads for all datasets
+    print("Generating fixed 1000-query workloads...")
+    generate_and_save_fixed_workload(query_dir, data_dir)
 
-print("All datasets and query workloads generated successfully!")
+    print("All datasets and query workloads generated successfully!")
+
+
+# In[ ]:
+
+
+generate_expr2()
+
+
+# ## Expr 3
+
+# In[ ]:
+
+
+def generate_dataset_expr4(alphabet, num_records=5000):
+    """Generate a dataset of strings using the given alphabet."""
+    dataset = []
+
+    for _ in range(num_records):
+        current_string = []
+        s = len(alphabet)  # Alphabet size
+
+        # Generate the string character-by-character with 1/(2*s) chance of stopping
+        while True:
+            char = random.choice(alphabet)
+            current_string.append(char)
+
+            # End generation with a 1/(2*s) probability after adding a character
+            if random.random() < 1 / (2 * s):
+                break
+
+        dataset.append(''.join(current_string))
+    
+    return dataset
+
+def generate_expr4():
+    # Define alphabets for Rob datasets
+    rob_alphabets = {
+        'Rob01': string.ascii_uppercase[:4],  # A-D
+        'Rob02': string.ascii_uppercase[:8],  # A-H
+        'Rob03': string.ascii_uppercase[:12],  # A-L
+        'Rob04': string.ascii_uppercase[:16],  # A-P
+    }
+
+    data_dir = os.path.join('expr4', 'datasets')
+    query_dir = os.path.join('expr4', 'queries')
+    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(query_dir, exist_ok=True)
+
+    # Generate datasets for Rob01 to Rob04
+    for rob_name, alphabet in rob_alphabets.items():
+        dataset = generate_dataset_expr4(alphabet)
+        save_dataset(dataset, os.path.join(data_dir, f'{rob_name}.txt'))
+
+        # Generate 10%, 30%, and 50% samples and their query workloads
+        for sample_pct in [0.1, 0.3, 0.5]:
+            sample = sample_dataset(dataset, sample_pct)
+            queries = generate_query_workload(sample, int(len(dataset) * sample_pct), 1, 5)
+            save_queries(queries, os.path.join(query_dir, f'{rob_name}_queries_{int(sample_pct*100)}pct.txt'))
+        # Generate 2% test query set
+        test_sample = sample_dataset(dataset, 0.02)
+        test_queries = generate_query_workload(sample, int(len(dataset) * 0.02), 1, 5)
+        save_queries(test_queries, os.path.join(query_dir, f'{rob_name}_test_queries_2pct.txt'))
+
+
+# In[ ]:
+
+
+generate_expr4()
 
