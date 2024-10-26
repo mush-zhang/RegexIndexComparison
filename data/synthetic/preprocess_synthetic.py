@@ -169,9 +169,9 @@ else:
     datasets = []
     shared_queries = []
     for i in range(4):
-        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'wb') as f:
+        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'rb') as f:
             datasets.append(pickle.load(f))
-        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'wb') as f:
+        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'rb') as f:
             shared_queries.append(pickle.load(f))
 
 
