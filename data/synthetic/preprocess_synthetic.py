@@ -28,6 +28,20 @@ random.seed(53711)
 np.random.seed(15213)
 
 
+# ## Expr 1
+
+# In[ ]:
+
+
+directory_path = 'synthetic1'
+
+# Parameters
+dataset_size = 400_000  # Expected size of the dataset
+means = [(800, 600), (1200, 400) , (100, 1900), (0, 3700)]  # Mean frequency for all datasets
+std_devs = [100, 200, 300, 400]  # Four different standard deviations
+query_counts = [random.randint(227, 248) for _ in range(4)]
+
+
 # In[ ]:
 
 
@@ -113,15 +127,7 @@ def generate_frequencies(trigrams, mean1, mean2, std_dev):
     np.random.shuffle(frequencies)
     return dict(zip(trigrams, frequencies))
 
-directory_path = 'synthetic1'
-
-# Parameters
-dataset_size = 400_000  # Expected size of the dataset
-means = [(800, 600), (1200, 400) , (100, 1900), (0, 3700)]  # Mean frequency for all datasets
-std_devs = [100, 200, 300, 400]  # Four different standard deviations
-query_counts = [random.randint(227, 248) for _ in range(4)]
-
-if not os.path.isdir(directory_path):
+def generate_expr1():
     os.makedirs(directory_path, exist_ok=True)
 
     # Generate all trigrams
@@ -165,14 +171,20 @@ if not os.path.isdir(directory_path):
             pickle.dump(shared_queries[i], f)
             
     datasets = [ dataset for dataset, trigram_counter in shared_dataset ]
-else:
-    datasets = []
-    shared_queries = []
+    
+    os.makedirs(os.path.join(DATA_DIR, 'expr1'), exist_ok=True)
     for i in range(4):
-        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'rb') as f:
-            datasets.append(pickle.load(f))
-        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'rb') as f:
-            shared_queries.append(pickle.load(f))
+        query_fn = os.path.join(DATA_DIR, 'expr1', f'query_{i}.txt')
+        if not os.path.exists(query_fn):
+            with open(query_fn, 'w') as f:
+                for line in shared_queries[i]:
+                    f.write(line + '\n')
+        data_fn = os.path.join(DATA_DIR, 'expr1', f'data_{i}_std{std_devs[i]}.txt')
+        if not os.path.exists(data_fn):
+            with open(data_fn, 'w') as f:
+                for line in datasets[i]:
+                    f.write(line + '\n')
+    return datasets, shared_queries
 
 
 # In[ ]:
@@ -216,7 +228,7 @@ def plot_histogram(trigram_counter, dataset_index, std_dev_val, output_dir):
     plt.savefig(output_file)
     plt.close()
 
-def main_analysis(datasets, trigrams):
+def analysis_expr1(datasets, trigrams):
     """
     Analyze all datasets and generate histogram plots.
     """
@@ -230,25 +242,27 @@ def main_analysis(datasets, trigrams):
 
     print(f'All histograms saved to: {output_dir}')
 
-main_analysis(datasets, trigrams)
+
+# In[ ]:
+
+
+# datasets, shared_queries = generate_expr1()
 
 
 # In[ ]:
 
 
-os.makedirs(os.path.join(DATA_DIR, 'expr1'), exist_ok=True)
-
-for i in range(4):
-    query_fn = os.path.join(DATA_DIR, 'expr1', f'query_{i}.txt')
-    if not os.path.exists(query_fn):
-        with open(query_fn, 'w') as f:
-            for line in shared_queries[i]:
-                f.write(line + '\n')
-    data_fn = os.path.join(DATA_DIR, 'expr1', f'data_{i}_std{std_devs[i]}.txt')
-    if not os.path.exists(data_fn):
-        with open(data_fn, 'w') as f:
-            for line in datasets[i]:
-                f.write(line + '\n')
+# if not os.path.isdir(directory_path):
+#     datasets, shared_queries = generate_expr1()
+# else:
+#     datasets = []
+#     shared_queries = []
+#     for i in range(4):
+#         with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'rb') as f:
+#             datasets.append(pickle.load(f))
+#         with open(os.path.join(directory_path, f'query_{i}.pkl'), 'rb') as f:
+#             shared_queries.append(pickle.load(f))
+# analysis_expr1(datasets, trigrams)
 
 
 # ## Expr 2
