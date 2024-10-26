@@ -288,7 +288,7 @@ def generate_query_workload(sample, query_count, lower_char_count, upper_char_co
         slice1 = random_string[slice1_start:slice1_start + min(slice1_length, len(random_string)-1)]
 
         # Decide on a random gap size
-        gap_size = random.randint(1, min(50, len(random_string) - len(slice1) - 1))
+        gap_size = random.randint(1, max(1, min(50, len(random_string) - len(slice1) - 1)))
         
         # Choose another slice of 3-8 characters after the gap
         slice2_start = slice1_start + slice1_length + gap_size
@@ -373,7 +373,7 @@ def generate_expr2():
 # In[ ]:
 
 
-generate_expr2()
+# generate_expr2()
 
 
 # ## Expr 3
