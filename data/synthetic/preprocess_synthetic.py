@@ -246,23 +246,23 @@ def analysis_expr1(datasets, trigrams):
 # In[ ]:
 
 
-# datasets, shared_queries = generate_expr1()
+datasets, shared_queries = generate_expr1()
 
 
 # In[ ]:
 
 
-# if not os.path.isdir(directory_path):
-#     datasets, shared_queries = generate_expr1()
-# else:
-#     datasets = []
-#     shared_queries = []
-#     for i in range(4):
-#         with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'rb') as f:
-#             datasets.append(pickle.load(f))
-#         with open(os.path.join(directory_path, f'query_{i}.pkl'), 'rb') as f:
-#             shared_queries.append(pickle.load(f))
-# analysis_expr1(datasets, trigrams)
+if not os.path.isdir(directory_path):
+    datasets, shared_queries = generate_expr1()
+else:
+    datasets = []
+    shared_queries = []
+    for i in range(4):
+        with open(os.path.join(directory_path, f'data_{i}_std{std_devs[i]}.pkl'), 'rb') as f:
+            datasets.append(pickle.load(f))
+        with open(os.path.join(directory_path, f'query_{i}.pkl'), 'rb') as f:
+            shared_queries.append(pickle.load(f))
+analysis_expr1(datasets, trigrams)
 
 
 # ## Expr 2
@@ -387,7 +387,7 @@ def generate_expr2():
 # In[ ]:
 
 
-# generate_expr2()
+generate_expr2()
 
 
 # ## Expr 3
