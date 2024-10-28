@@ -8,7 +8,7 @@
 #define assert(x) (void(0))
 #endif
 
-static const double k_deterministic_threshold_ = 0.99;
+// static const double k_deterministic_threshold_ = 0.99;
 
 using gram_set = std::unordered_set<std::string>;
 
@@ -162,6 +162,8 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         //    c length num_gram
         // Note: Definition of c in Section 3.1, formulae (5)
         x = model.addVars(num_grams, GRB_CONTINUOUS);
+        double smax = 0;
+        double smin = k_dataset_size_;
         for (const auto & [g_idx, curr_r_count] : r_count) {
             long double curr_q_count = 0;
             if (q_count.contains(g_idx)) {
@@ -170,8 +172,11 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             double c_g = (curr_r_count / k) * curr_q_count;
             x[g_idx].set(GRB_DoubleAttr_Obj, c_g);
             x[g_idx].set(GRB_StringAttr_VarName, "x_" + std::to_string(g_idx));
+            if (curr_r_count > smax) smax = curr_r_count;
+            if (curr_r_count < smin) smin = curr_r_count;
         }
 
+        double mstar = 0;
         // qg_map : key: q; value: set of g in q
         for (size_t q_idx = 0; q_idx < num_queries; ++q_idx) {
             auto curr_grams_in_q = qg_map[q_idx];
@@ -179,6 +184,7 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
             if (curr_grams_in_q.empty()) {
                 b_q = 0;
             } else {
+                if (curr_grams_in_q.size() > mstar) mstar = curr_grams_in_q.size();
                 // 4. populate vector b, where b_q denote the smallest
                 //    r_count among all grams in query q; b length num_query
                 // Note: Definition of b in Section 3.1, formulae (3)
@@ -220,13 +226,15 @@ std::vector<bool> fast_index::LpmsIndex::build_model(size_t k,
         // 6. use lp solver with deterministic relaxation 
         //    or random rounding to find x
         switch (k_relaxation_type_) {
-            case kDeterministic:
+            case kDeterministic: {
+                double threshold = (smax*mstar > 0) ? smin/(smax*mstar) : 1;
                 for (size_t g_idx = 0; g_idx < num_grams; ++g_idx) {
-                    if (x[g_idx].get(GRB_DoubleAttr_X) > k_deterministic_threshold_) {
+                    if (x[g_idx].get(GRB_DoubleAttr_X) > threshold) {
                         x_result[g_idx] = true;
                     }
                 }
                 break;
+            }
             case kRandomized:
                 for (size_t g_idx = 0; g_idx < num_grams; ++g_idx) {
                     x_result[g_idx] = (std::rand() / double(RAND_MAX)) < (x[g_idx].get(GRB_DoubleAttr_X));
