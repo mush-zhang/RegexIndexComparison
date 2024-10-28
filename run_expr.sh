@@ -2,7 +2,8 @@
 
 thread_list=( 16 )
 extra=""
-wl_num=0
+
+unset -v wl_num
 
 while getopts "d:r:t:w" opt; do
     case ${opt} in
@@ -25,12 +26,14 @@ while getopts "d:r:t:w" opt; do
                 wl_num=3
             else
                 extra="-r ${regex_file} -d ${data_file}"
+                wl_num = 0
             fi
             ;;
         \?)echo "Invalid argument $OPTARG" >&2
             ;;
     esac
 done
+: ${wl_num:?Missing -h}
 
 # if [ "$2" == "comp_thread" ]; then
 #     thread_list=( 1 2 4 6 8 10 12 16 )
