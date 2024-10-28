@@ -8,17 +8,18 @@ unset -v dirname
 
 while getopts "d:r:t:w" opt; do
     case "${opt}" in
-        d) echo "Option -d is triggered."
+        d) echo "Option -d is triggered  with value $OPTARG"
             data_file=$OPTARG
             ;;
-        r) echo "Option -r is triggered."
+        r) echo "Option -r is triggered with value $OPTARG"
             regex_file=$OPTARG
             ;;
         t) echo "Option -t is triggered."
             thread_list=( 1 2 4 6 8 10 12 16 )
             ;;
-        w) echo "Option -w is triggered."
+        w) echo "Option -w is triggered with value $OPTARG"
             dirname=result/${OPTARG}_result
+            echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
             elif [ "$OPTARG" == "db_x" ]; then
@@ -26,7 +27,6 @@ while getopts "d:r:t:w" opt; do
             elif [ "$OPTARG" == "webpages" ]; then
                 wl_num=3
             else
-                extra="-r ${regex_file} -d ${data_file}"
                 wl_name=0
             fi
             ;;
@@ -35,6 +35,10 @@ while getopts "d:r:t:w" opt; do
     esac
 done
 : ${wl_num:?Missing -h}
+
+if [ $wl_name == 0 ]; then
+    extra="-r ${regex_file} -d ${data_file}"
+fi
 
 # if [ "$2" == "comp_thread" ]; then
 #     thread_list=( 1 2 4 6 8 10 12 16 )
