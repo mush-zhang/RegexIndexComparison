@@ -2,19 +2,20 @@
 
 thread_list=( 16 )
 extra=""
+wl_num=0
 
 while getopts "d:r:t:w" opt; do
-    case $opt in
-        d)
+    case ${opt} in
+        d) echo "Option -d is triggered."
             data_file=$OPTARG
             ;;
-        r)
+        r) echo "Option -r is triggered."
             regex_file=$OPTARG
             ;;
-        t)
+        t) echo "Option -t is triggered."
             thread_list=( 1 2 4 6 8 10 12 16 )
             ;;
-        w)
+        w) echo "Option -w is triggered."
             dirname=result/${OPTARG}_result
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
@@ -24,11 +25,9 @@ while getopts "d:r:t:w" opt; do
                 wl_num=3
             else
                 extra="-r ${regex_file} -d ${data_file}"
-                wl_num=0
             fi
             ;;
-        \?)
-            echo "Invalid argument $OPTARG" >&2
+        \?)echo "Invalid argument $OPTARG" >&2
             ;;
     esac
 done
