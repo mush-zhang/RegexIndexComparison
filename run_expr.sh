@@ -36,7 +36,7 @@ while getopts ":d:r:t:w:" opt; do
 done
 : ${wl_num:?Missing -h}
 
-if [ "$wl_name" == "0" ]; then
+if [ "$wl_num" == "0" ]; then
     extra="-r ${regex_file} -d ${data_file}"
 fi
 
