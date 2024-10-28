@@ -6,7 +6,7 @@ extra=""
 unset -v wl_num
 
 while getopts "d:r:t:w" opt; do
-    case ${opt} in
+    case "${opt}" in
         d) echo "Option -d is triggered."
             data_file=$OPTARG
             ;;
