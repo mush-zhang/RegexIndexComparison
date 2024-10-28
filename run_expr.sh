@@ -4,6 +4,7 @@ thread_list=( 16 )
 extra=""
 
 unset -v wl_num
+unset -v dirname
 
 while getopts "d:r:t:w" opt; do
     case "${opt}" in
@@ -26,10 +27,10 @@ while getopts "d:r:t:w" opt; do
                 wl_num=3
             else
                 extra="-r ${regex_file} -d ${data_file}"
-                wl_num = 0
+                wl_name=0
             fi
             ;;
-        \?)echo "Invalid argument $OPTARG" >&2
+        \?) echo "Invalid argument $OPTARG" >&2
             ;;
     esac
 done
