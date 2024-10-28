@@ -11,7 +11,7 @@ FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
 FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
 FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR) $(FREE_MCH_DIR)
 FREE_MCH=$(FREE_MCH_DIR)/free_parser.o
-FREE_IDX=inverted_index.o utils/hash_pair.o utils/utils.o $\
+FREE_IDX=inverted_index.o utils/hash_pair.o $\
 		 $(FREE_IDX_DIR)/free_multigram.o $\
 		 $(FREE_IDX_DIR)/free_presuf.o $\
 		 $(FREE_IDX_DIR)/free_multi_parallel.o
@@ -19,14 +19,14 @@ FREE_IDX=inverted_index.o utils/hash_pair.o utils/utils.o $\
 BEST_BASE_DIR=BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR)
-BEST_IDX=simple_query_matcher.o btree_index.o utils/utils.o $\
+BEST_IDX=simple_query_matcher.o btree_index.o $\
 		 utils/rax/rax.o utils/rax/rc4rand.o $\
 		 $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
 FAST_BASE_DIR=FAST
 FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
 FAST_DIRS=$(FAST_BASE_DIR) $(FAST_IDX_DIR)
-FAST_IDX=simple_query_matcher.o inverted_index.o utils/utils.o $(FAST_IDX_DIR)/lpms.o
+FAST_IDX=simple_query_matcher.o inverted_index.o $(FAST_IDX_DIR)/lpms.o
 
 DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
 
@@ -75,7 +75,7 @@ $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-simple_query_matcher.o: simple_query_matcher.cpp utils/utils.o
+simple_query_matcher.o: simple_query_matcher.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
 inverted_index.o: ngram_inverted_index.cpp
@@ -86,9 +86,6 @@ btree_index.o: ngram_btree_index.cpp
 
 # btree.o: utils/btree.cpp
 # 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
-
-utils/utils.o: utils/utils.cpp utils/hash_pair.o
-	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 utils/hash_pair.o: utils/hash_pair.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
