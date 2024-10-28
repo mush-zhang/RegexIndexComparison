@@ -48,22 +48,22 @@ debug:  $(BEST_BASE_DIR)/test_best.out $\
 $(FAST_BASE_DIR)/test_fast.out: $(FAST_IDX) $(FAST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-$(FAST_IDX_DIR)/lpms.o: $(FAST_IDX_DIR)/lpms.cpp
+$(FAST_IDX_DIR)/lpms.o: $(FAST_IDX_DIR)/lpms.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(LDFLAGS) -o  $@
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-$(BEST_IDX_DIR)/best_parallel.o: $(BEST_IDX_DIR)/parallelizable.cpp
+$(BEST_IDX_DIR)/best_parallel.o: $(BEST_IDX_DIR)/parallelizable.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-$(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp
+$(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 $(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_MCH) $(FREE_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-$(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp
+$(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 $(FREE_IDX_DIR)/free_multi_parallel.o: $(FREE_IDX_DIR)/parallel_multigram_index.cpp 
@@ -75,10 +75,10 @@ $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-simple_query_matcher.o: simple_query_matcher.cpp
+simple_query_matcher.o: simple_query_matcher.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-inverted_index.o: ngram_inverted_index.cpp
+inverted_index.o: ngram_inverted_index.cpp utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 btree_index.o: ngram_btree_index.cpp
@@ -87,7 +87,7 @@ btree_index.o: ngram_btree_index.cpp
 # btree.o: utils/btree.cpp
 # 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-utils/utils.o: utils/utils.cpp
+utils/utils.o: utils/utils.cpp utils/hash_pair.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 utils/hash_pair.o: utils/hash_pair.cpp
