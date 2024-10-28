@@ -2,7 +2,6 @@
 #include <random>
 
 #include "utils.hpp"
-#include "hash_pair.hpp"
 
 template <typename T>
 size_t calculate_vector_size(const std::vector<T> & vec) {

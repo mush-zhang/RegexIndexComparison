@@ -7,6 +7,8 @@
 #include <array>
 #include <cassert>
 
+#include "hash_pair.hpp"
+
 #ifdef NDEBUG
 #define assert(x) (void(0))
 #endif
