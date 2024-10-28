@@ -75,7 +75,7 @@ $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-simple_query_matcher.o: simple_query_matcher.cpp utils/utils.o
+simple_query_matcher.o: simple_query_matcher.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
 inverted_index.o: ngram_inverted_index.cpp
@@ -87,7 +87,7 @@ btree_index.o: ngram_btree_index.cpp
 # btree.o: utils/btree.cpp
 # 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-utils/utils.o: utils/utils.cpp utils/hash_pair.o
+utils/utils.o: utils/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 utils/hash_pair.o: utils/hash_pair.cpp
