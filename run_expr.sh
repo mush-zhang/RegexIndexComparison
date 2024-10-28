@@ -27,8 +27,7 @@ while getopts ":d:r:t:w:" opt; do
             elif [ "$OPTARG" == "webpages" ]; then
                 wl_num=3
             else
-                wl_name=0
-                echo "Wl name is $wl_name"
+                wl_num=0
             fi
             ;;
         \?) echo "Invalid argument $OPTARG" >&2
@@ -37,7 +36,7 @@ while getopts ":d:r:t:w:" opt; do
 done
 : ${wl_num:?Missing -h}
 
-if [ "$wl_name" = "0" ]; then
+if [ "$wl_name" == "0" ]; then
     extra="-r ${regex_file} -d ${data_file}"
 fi
 
