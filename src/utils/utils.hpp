@@ -37,22 +37,6 @@ make_unique_ngrams(const std::string& s);
 
 // Randomly select sampleSize number of items from 0 to rangeUpperBound
 // code from here: https://stackoverflow.com/a/28287837
-static std::unordered_set<int> BobFloydAlgo(int sampleSize, int rangeUpperBound)
-{
-    std::unordered_set<int> sample;
-    // std::random_device rd;
-    // std::mt19937 generator(rd());
-    std::default_random_engine generator;
-
-    for(int d = rangeUpperBound - sampleSize; d < rangeUpperBound; d++)
-    {
-        int t = uniform_int_distribution<>(0, d)(generator);
-        if (sample.find(t) == sample.end())
-            sample.insert(t);
-        else
-            sample.insert(d);
-    }
-    return sample;
-}
+std::unordered_set<int> BobFloydAlgo(int sampleSize, int rangeUpperBound);
 
 #endif // UTILS_UTILS_HPP_
