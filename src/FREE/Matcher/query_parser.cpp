@@ -261,7 +261,8 @@ void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNod
 
 void free_index::QueryParser::rewrite_by_index() {
     if (k_index_.empty()) {
-        std::cerr << "No index provided; plan stays untouched." << std::endl;
+        return;
+        // std::cerr << "No index provided; plan stays untouched." << std::endl;
     }
     rewrite_node_by_index(query_plan_);
     rewrote_by_index_ = true;
