@@ -71,8 +71,8 @@ num_repeat=5
 if [ ${wl_num} != 1 ]; then
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
-            echo benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}
-            ${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}
+            echo benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra}
+            ${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra}
         done
     done
 fi
