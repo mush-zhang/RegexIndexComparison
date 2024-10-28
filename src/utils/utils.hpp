@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <random>
 
 #include "hash_pair.hpp"
 
@@ -121,7 +122,7 @@ std::unordered_set<int> BobFloydAlgo(int sampleSize, int rangeUpperBound)
 
     for(int d = rangeUpperBound - sampleSize; d < rangeUpperBound; d++)
     {
-        int t = uniform_int_distribution<>(0, d)(generator);
+        int t = std::uniform_int_distribution<>(0, d)(generator);
         if (sample.find(t) == sample.end())
             sample.insert(t);
         else
