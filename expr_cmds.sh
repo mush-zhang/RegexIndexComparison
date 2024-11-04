@@ -25,6 +25,6 @@ done
 for expr in 0 1 2 3; do
     std_val=$(( ($expr + 1) * 100 ))
     ./run_expr.sh -w synthetic_expr1_${expr} \
-    -r data/synthetic/expr1/queries/query_workload_1000_for_${dcount}.txt \
+    -r data/synthetic/expr1/query_${expr}.txt \
     -d data/synthetic/expr1/data_${expr}_std${std_val}.txt
 done
