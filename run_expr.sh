@@ -40,28 +40,8 @@ if [ "$wl_num" == "0" ]; then
     extra="-r ${regex_file} -d ${data_file}"
 fi
 
-# if [ "$2" == "comp_thread" ]; then
-#     thread_list=( 1 2 4 6 8 10 12 16 )
-# else 
-#     thread_list=( 16 )
-
-# extra=""
-# if [ "$1" == "traffic" ]; then
-#     wl_num=1
-# elif [ "$1" == "db_x" ]; then
-#     thread_list=( 16 )
-#     wl_num=2
-# elif [ "$1" == "webpages" ]; then
-#     thread_list=( 16 )
-#     wl_num=3
-# else
-#     wl_num=0
-#     extra=$3 # argument expected in form "-r [regex_file] -d [data_file]" with quotations
-# fi
-
 timeout_prefix="timeout --foreground 1h"
 
-# dirname=result/${1}_result_new
 echo ${dirname}
 mkdir -p ${dirname} 
 sel_list=( 0.01 0.02 0.03 0.05 0.07 0.1 0.12 0.15 0.2 0.3 0.5 0.7)
