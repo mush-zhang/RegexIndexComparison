@@ -24,7 +24,7 @@ dataset_dir = os.path.join(DATA_ROOT, 'webpages/processed')
 # In[ ]:
 
 
-char_set = {}
+char_set = set()
 line_count = 0
 ave_line_len = 0
 for fn in os.listdir(dataset_dir):
@@ -58,7 +58,7 @@ dataset_fn = os.path.join(DATA_DIR, 'dblp/small/authors.txt')
 with open(dataset_fn, 'r') as file:
     dataset = file.readlines()
 
-char_set = {}
+char_set = set()
 line_count = 0
 ave_line_len = 0
 for line in dataset:
@@ -89,7 +89,7 @@ query_fn = os.path.join(DATA_ROOT, 'protein/prosites.txt')
 # In[ ]:
 
 
-char_set = {}
+char_set = set()
 line_count = 0
 ave_line_len = 0
 for fn in os.listdir(dataset_dir):
@@ -133,7 +133,7 @@ dataset_fn = os.path.join(DATA_ROOT, 'US_Accidents_Dec21_updated.csv')
 with open(dataset_fn, 'r') as file:
     dataset = file.readlines()
 
-char_set = {}
+char_set = set()
 line_count = 0
 ave_line_len = 0
 for line in dataset:
@@ -163,7 +163,7 @@ dataset_dir = os.path.join(DATA_ROOT, 'extraced')
 # In[ ]:
 
 
-char_set = {}
+char_set = set()
 line_count = 0
 ave_line_len = 0
 for fn in os.listdir(dataset_dir):
