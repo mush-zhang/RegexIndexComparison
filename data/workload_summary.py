@@ -77,87 +77,87 @@ DATA_ROOT = '.'
 # print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
 
 
-# ## Prosite
+# # ## Prosite
 
-# In[ ]:
-
-
-dataset_dir = os.path.join(DATA_ROOT, 'protein/sequences')
-query_fn = os.path.join(DATA_ROOT, 'protein/prosites.txt')
+# # In[ ]:
 
 
-# In[ ]:
+# dataset_dir = os.path.join(DATA_ROOT, 'protein/sequences')
+# query_fn = os.path.join(DATA_ROOT, 'protein/prosites.txt')
 
 
-char_set = set()
-line_count = 0
-ave_line_len = 0
-for fn in os.listdir(dataset_dir):
-    with open(os.path.join(dataset_dir, fn), 'r') as file:
-        curr_dataset = file.readlines()
-    for line in curr_dataset:
-        line = line.rstrip()
-        ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-        char_set = char_set.union(set(line))
-        line_count += 1
+# # In[ ]:
 
 
-# In[ ]:
+# char_set = set()
+# line_count = 0
+# ave_line_len = 0
+# for fn in os.listdir(dataset_dir):
+#     with open(os.path.join(dataset_dir, fn), 'r') as file:
+#         curr_dataset = file.readlines()
+#     for line in curr_dataset:
+#         line = line.rstrip()
+#         ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
+#         char_set = char_set.union(set(line))
+#         line_count += 1
 
 
-with open(query_fn, 'r') as file:
-    query_set = file.readlines()
+# # In[ ]:
 
 
-# In[ ]:
+# with open(query_fn, 'r') as file:
+#     query_set = file.readlines()
 
 
-print('Protein')
-print(f'\t\tAlphabet Size: {len(char_set)}')
-print(f'\t\tDataset Size: {line_count}')
-print(f'\t\tQuery Set Size: {len(query_set)}')
-print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
+# # In[ ]:
 
 
-# ## US-Accident
-
-# In[ ]:
-
-
-dataset_fn = os.path.join(DATA_ROOT, 'US_Accidents_Dec21_updated.csv')
-
-
-# In[ ]:
+# print('Protein')
+# print(f'\t\tAlphabet Size: {len(char_set)}')
+# print(f'\t\tDataset Size: {line_count}')
+# print(f'\t\tQuery Set Size: {len(query_set)}')
+# print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
 
 
-with open(dataset_fn, 'r') as file:
-    dataset = file.readlines()
+# # ## US-Accident
 
-char_set = set()
-line_count = 0
-ave_line_len = 0
-for line in dataset:
-    line = line.rstrip()
-    ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-    char_set = char_set.union(set(line))
-    line_count += 1
+# # In[ ]:
 
 
-# In[ ]:
+# dataset_fn = os.path.join(DATA_ROOT, 'US_Accidents_Dec21_updated.csv')
 
 
-print('US-Accident')
-print(f'\t\tAlphabet Size: {len(char_set)}')
-print(f'\t\tDataset Size: {line_count}')
-print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
+# # In[ ]:
 
 
-# ## Sql-Server
+# with open(dataset_fn, 'r') as file:
+#     dataset = file.readlines()
 
-# In[ ]:
+# char_set = set()
+# line_count = 0
+# ave_line_len = 0
+# for line in dataset:
+#     line = line.rstrip()
+#     ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
+#     char_set = char_set.union(set(line))
+#     line_count += 1
 
 
-dataset_dir = os.path.join(DATA_ROOT, 'extraced')
+# # In[ ]:
+
+
+# print('US-Accident')
+# print(f'\t\tAlphabet Size: {len(char_set)}')
+# print(f'\t\tDataset Size: {line_count}')
+# print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
+
+
+# # ## Sql-Server
+
+# # In[ ]:
+
+
+dataset_dir = os.path.join(DATA_ROOT, 'extracted')
 
 
 # In[ ]:
