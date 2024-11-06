@@ -449,7 +449,6 @@ void benchmarkFree(const std::filesystem::path dir_path,
                  free_info.sel_threshold, free_info.num_threads);
         }
     }
-    // pi->set_thread_count(free_info.num_threads); // currently not effective
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_n);
 
