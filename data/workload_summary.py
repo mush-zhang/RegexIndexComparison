@@ -13,68 +13,68 @@ import os
 DATA_ROOT = '.'
 
 
-# ## Webpages
+# # ## Webpages
 
-# In[ ]:
-
-
-dataset_dir = os.path.join(DATA_ROOT, 'webpages/processed')
+# # In[ ]:
 
 
-# In[ ]:
+# dataset_dir = os.path.join(DATA_ROOT, 'webpages/processed')
 
 
-char_set = set()
-line_count = 0
-ave_line_len = 0
-for fn in os.listdir(dataset_dir):
-    with open(os.path.join(dataset_dir, fn), 'r', encoding='latin') as file:
-        curr_line = file.read()
-        ave_line_len = (line_count * ave_line_len + len(curr_line)) / (line_count + 1)
-        char_set = char_set.union(set(curr_line))
-        line_count += 1
+# # In[ ]:
 
 
-# In[ ]:
+# char_set = set()
+# line_count = 0
+# ave_line_len = 0
+# for fn in os.listdir(dataset_dir):
+#     with open(os.path.join(dataset_dir, fn), 'r', encoding='latin') as file:
+#         curr_line = file.read()
+#         ave_line_len = (line_count * ave_line_len + len(curr_line)) / (line_count + 1)
+#         char_set = char_set.union(set(curr_line))
+#         line_count += 1
 
 
-print('Webpages')
-print(f'\t\tAlphabet Size: {len(char_set)}')
-print(f'\t\tDataset Size: {line_count}')
-print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
+# # In[ ]:
 
 
-# ## DBLP
-
-# In[ ]:
-
-
-dataset_fn = os.path.join(DATA_ROOT, 'dblp/small/authors.txt')
+# print('Webpages')
+# print(f'\t\tAlphabet Size: {len(char_set)}')
+# print(f'\t\tDataset Size: {line_count}')
+# print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
 
 
-# In[ ]:
+# # ## DBLP
+
+# # In[ ]:
 
 
-with open(dataset_fn, 'r') as file:
-    dataset = file.readlines()
-
-char_set = set()
-line_count = 0
-ave_line_len = 0
-for line in dataset:
-    line = line.rstrip()
-    ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-    char_set = char_set.union(set(line))
-    line_count += 1
+# dataset_fn = os.path.join(DATA_ROOT, 'dblp/small/authors.txt')
 
 
-# In[ ]:
+# # In[ ]:
 
 
-print('DBLP')
-print(f'\t\tAlphabet Size: {len(char_set)}')
-print(f'\t\tDataset Size: {line_count}')
-print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
+# with open(dataset_fn, 'r') as file:
+#     dataset = file.readlines()
+
+# char_set = set()
+# line_count = 0
+# ave_line_len = 0
+# for line in dataset:
+#     line = line.rstrip()
+#     ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
+#     char_set = char_set.union(set(line))
+#     line_count += 1
+
+
+# # In[ ]:
+
+
+# print('DBLP')
+# print(f'\t\tAlphabet Size: {len(char_set)}')
+# print(f'\t\tDataset Size: {line_count}')
+# print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
 
 
 # ## Prosite
@@ -105,7 +105,7 @@ for fn in os.listdir(dataset_dir):
 # In[ ]:
 
 
-with open(os.path.join(query_fn, fn), 'r') as file:
+with open(query_fn, 'r') as file:
     query_set = file.readlines()
 
 
