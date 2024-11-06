@@ -31,7 +31,7 @@ for fn in os.listdir(dataset_dir):
     with open(os.path.join(dataset_dir, fn), 'r') as file:
         curr_line = file.read()
         ave_line_len = (line_count * ave_line_len + len(curr_line)) / (line_count + 1)
-        char_set.union(set(curr_line))
+        char_set = char_set.union(set(curr_line))
         line_count += 1
 
 
@@ -64,7 +64,7 @@ ave_line_len = 0
 for line in dataset:
     line = line.rstrip()
     ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-    char_set.union(set(line))
+    char_set = char_set.union(set(line))
     line_count += 1
 
 
@@ -98,7 +98,7 @@ for fn in os.listdir(dataset_dir):
     for line in curr_dataset:
         line = line.rstrip()
         ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-        char_set.union(set(line))
+        char_set = char_set.union(set(line))
         line_count += 1
 
 
@@ -139,7 +139,7 @@ ave_line_len = 0
 for line in dataset:
     line = line.rstrip()
     ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-    char_set.union(set(line))
+    char_set = char_set.union(set(line))
     line_count += 1
 
 
@@ -172,6 +172,6 @@ for fn in os.listdir(dataset_dir):
     for line in curr_dataset:
         line = line.rstrip()
         ave_line_len = (line_count * ave_line_len + len(line)) / (line_count + 1)
-        char_set.union(set(line))
+        char_set = char_set.union(set(line))
         line_count += 1
 
