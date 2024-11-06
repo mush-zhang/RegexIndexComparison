@@ -30,7 +30,7 @@ ave_line_len = 0
 for fn in os.listdir(dataset_dir):
     with open(os.path.join(dataset_dir, fn), 'r', encoding='latin') as file:
         curr_line = file.read()
-        if len(line) < 3:
+        if len(curr_line) < 3:
             continue
         ave_line_len = (line_count * ave_line_len + len(curr_line)) / (line_count + 1)
         char_set = char_set.union(set(curr_line))
