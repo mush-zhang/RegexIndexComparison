@@ -175,3 +175,7 @@ for fn in os.listdir(dataset_dir):
         char_set = char_set.union(set(line))
         line_count += 1
 
+print('SQL-Server')
+print(f'\t\tAlphabet Size: {len(char_set)}')
+print(f'\t\tDataset Size: {line_count}')
+print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
