@@ -49,7 +49,7 @@ print(f'\t\tAverage Num Chars in Dataset: {ave_line_len}')
 # In[ ]:
 
 
-dataset_fn = os.path.join(DATA_DIR, 'dblp/small/authors.txt')
+dataset_fn = os.path.join(DATA_ROOT, 'dblp/small/authors.txt')
 
 
 # In[ ]:
