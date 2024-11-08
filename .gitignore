@@ -55,7 +55,6 @@ data/**/*.xml
 !data/webpages/regexes_webpages.txt
 !data/webpages/regexes_webpages_free.txt
 
-
 # my test result files
 *Test/*
 result/*
@@ -63,6 +62,11 @@ result/*
 # notbook checkpoint
 *.ipynb_checkpoint*
 *notebook*.txt
+
+# exploration notebooks
+notebooks/*
+# except those that are final for presentation
+!notebooks/final_*
 
 # re2 added file
 *re2/python/LICENSE*
