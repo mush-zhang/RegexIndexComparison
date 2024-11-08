@@ -348,7 +348,13 @@ void fast_index::LpmsIndex::build_index(int upper_n) {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams and Index Building End in " << elapsed << " s" << std::endl;
     std::ostringstream log;    
-    log << "FAST," << thread_count_ << "," << upper_n << ",";
+    std::string method_suffix;
+    if (k_relaxation_type_ == kDeterministic) {
+        method_suffix = 'DETER';
+    } else if (k_relaxation_type_ == kRandomized) {
+        method_suffix == 'RANDOM';
+    }
+    log << "FAST-" << method_suffix << "," << thread_count_ << "," << upper_n << ",";
     log << "-1," << elapsed << ",";  // selectivity threshold, select time
     log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
     log << get_num_keys() << "," << get_bytes_used() << ",";
