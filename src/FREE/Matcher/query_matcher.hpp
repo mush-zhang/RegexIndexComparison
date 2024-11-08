@@ -47,7 +47,7 @@ class QueryMatcher {
         long count = match_one_helper(parser, regex);
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-        std::cout << "[" << reg << "] : " << count << std::endl;
+        // std::cout << "[" << reg << "] : " << count << std::endl;
 
         std::ostringstream log;
         log << elapsed << "\t" << count << "\t";
