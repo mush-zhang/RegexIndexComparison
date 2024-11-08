@@ -1,11 +1,11 @@
-#ifndef FAST_INDEX_LPMS_INDEX_HPP_
-#define FAST_INDEX_LPMS_INDEX_HPP_
+#ifndef LPSM_INDEX_LPMS_INDEX_HPP_
+#define LPSM_INDEX_LPMS_INDEX_HPP_
 
 #include "gurobi_c++.h"
 
 #include "../../ngram_inverted_index.hpp"
 
-namespace fast_index {
+namespace lpsm_index {
 
 enum relaxation_type { kDeterministic, kRandomized, kInvalid };
 
@@ -61,6 +61,6 @@ class LpmsIndex : public NGramInvertedIndex {
 
 };
 
-} // namespace fast_index
+} // namespace lpsm_index
 
-#endif // FAST_INDEX_LPMS_INDEX_HPP_
+#endif // LPSM_INDEX_LPMS_INDEX_HPP_

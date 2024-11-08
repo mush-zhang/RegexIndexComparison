@@ -38,7 +38,7 @@ selection_type get_method(const std::string gs) {
     if (gs == "BEST") {
         return selection_type::kBest;
     }
-    if (gs == "FAST") {
+    if (gs == "LPSM") {
         return selection_type::kFast;
     }
     return selection_type::kInvalid;
@@ -81,7 +81,7 @@ std::pair<T, T> getStats(std::vector<T> & arr) {
 int parseArgs(int argc, char ** argv, 
              expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
-             fast_info & fast_info) {
+             lpsm_info & lpsm_info) {
 
     if (argc < 8) {
         return error_return("Missing required arguments.");
@@ -190,15 +190,15 @@ int parseArgs(int argc, char ** argv,
             break;
         }
         case selection_type::kFast: {
-            fast_info.num_repeat = rep;
-            fast_info.num_threads = thread_count;
+            lpsm_info.num_repeat = rep;
+            lpsm_info.num_threads = thread_count;
             auto relax_string = getCmdOption(argv, argv + argc, "--relax");
             if (relax_string.empty()) {
                 return error_return("Missing type of relaxation.");
             } else if (relax_string == "DETERM") {
-                fast_info.rtype = fast_index::relaxation_type::kDeterministic;
+                lpsm_info.rtype = lpsm_index::relaxation_type::kDeterministic;
             } else if (relax_string == "RANDOM") {
-                fast_info.rtype = fast_index::relaxation_type::kRandomized;
+                lpsm_info.rtype = lpsm_index::relaxation_type::kRandomized;
             } else {
                 return error_return("Invalid relaxation type.");
             }
@@ -573,18 +573,18 @@ void benchmarkBest(const std::filesystem::path dir_path,
 void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const fast_info & fast_info) {
+                   const lpsm_info & lpsm_info) {
 
     std::ofstream outfile = open_summary(dir_path);
 
     std::ostringstream stats_name;
     // index building
-    auto * pi = new fast_index::LpmsIndex(lines, regexes, fast_info.num_threads, fast_info.rtype);
-    pi->set_thread_count(fast_info.num_threads);
+    auto * pi = new lpsm_index::LpmsIndex(lines, regexes, lpsm_info.num_threads, lpsm_info.rtype);
+    pi->set_thread_count(lpsm_info.num_threads);
     pi->set_outfile(outfile);
     pi->build_index();
 
-    for (size_t i = 0; i < fast_info.num_repeat; i++) {
+    for (size_t i = 0; i < lpsm_info.num_repeat; i++) {
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
             // filling the empty slots
@@ -598,7 +598,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     outfile.close();
 
     // open stats file
-    stats_name << "FAST_" << fast_info.num_threads << "_" << "-1";
+    stats_name << "LPSM_" << lpsm_info.num_threads << "_" << "-1";
     stats_name << "_" << "-1" << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;

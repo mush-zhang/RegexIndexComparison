@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 
-CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto=auto -Wno-format -Wno-unused-result
+CPPFLAGS=-O3 -std=c++20 -Olpsm -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=lpsm -fPIC -flto=auto -Wno-format -Wno-unused-result
 LDFLAGS=-pthread -lstdc++fs
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2

@@ -49,7 +49,7 @@ void simple_index() {
         "kane",
     });;
 
-    auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+    auto pi = lpsm_index::LpmsIndex(test_dataset, test_query);
 
     pi.build_index();
     pi.print_index();
@@ -69,8 +69,8 @@ void simple_index_radonmized() {
         "kane",
     });;
 
-    auto pi2 = fast_index::LpmsIndex(test_dataset, test_query, 
-        fast_index::relaxation_type::kRandomized);
+    auto pi2 = lpsm_index::LpmsIndex(test_dataset, test_query, 
+        lpsm_index::relaxation_type::kRandomized);
     pi2.build_index();
     pi2.print_index();
     std::cout << "***********" << std::endl;
@@ -97,7 +97,7 @@ void simple_matcher() {
         "ka" //12
     });;
 
-    auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+    auto pi = lpsm_index::LpmsIndex(test_dataset, test_query);
     pi.build_index();
     pi.print_index();
     auto matcher = SimpleQueryMatcher(pi);
@@ -118,7 +118,7 @@ void longer_matcher() {
     double threshold;
     make_dataset_with_keys(test_query, test_dataset, threshold);
 
-    auto pi = fast_index::LpmsIndex(test_dataset, test_query);
+    auto pi = lpsm_index::LpmsIndex(test_dataset, test_query);
 
     pi.build_index();
     pi.print_index();
