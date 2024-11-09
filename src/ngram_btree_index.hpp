@@ -26,9 +26,7 @@ class NGramBtreeIndex : public NGramIndex {
 
     size_t get_num_keys() const override { return k_index_keys_.size(); }
 
-    size_t get_bytes_used() const override { 
-        return k_index_.bytes_used() + k_index_keys_.bytes_used(); 
-    };
+    size_t get_bytes_used() const override;
 
     bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
         std::cerr << "should not be called" << std::endl;

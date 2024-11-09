@@ -7,11 +7,7 @@ size_t NGramInvertedIndex::get_bytes_used() const {
     auto bucketSize = sizeof(void*);
     auto adminSize = 3 * sizeof(void*) + sizeof(size_t);
     size_t totalSize = 0;
-    // if (max) {
-    //     totalSize += adminSize + inv_idx.max_bucket_count() * bucketSize;
-    // } else {
-    //     totalSize += adminSize + inv_idx.bucket_count() * bucketSize;
-    // } 
+
     totalSize += adminSize + k_index_.bucket_count() * bucketSize;
 
     auto contentSize = 0;

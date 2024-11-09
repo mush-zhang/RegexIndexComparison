@@ -2,6 +2,15 @@
 
 static const std::vector<size_t> k_empty_pos_list_;
 
+size_t NGramBtreeIndex::get_bytes_used() const override { 
+    auto contentSize = k_index_.bytes_used() + k_index_keys_.bytes_used(); 
+    for (const auto & [key, val] : k_index_) {
+        // value size
+        contentSize += calculate_vector_size(val);
+    }
+    return contentSize;
+};
+
 void NGramBtreeIndex::print_index(bool size_only) const {
     std::cout << "size of dataset: " << k_dataset_size_;
     std::cout << ", size of keys: " << k_index_keys_.size();
