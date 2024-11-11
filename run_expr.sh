@@ -64,9 +64,10 @@ fi
 # for n in 2 4 6 8 10 12 14 16; do
 for n in 2 4 6; do
     for c in ${sel_list[*]}; do
-        curr_cmd="${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra}"
-        echo ${curr_cmd}
-        eval "${curr_cmd}"
+        # curr_cmd="${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} echo ${curr_cmd}
+        #     eval "${curr_cmd}""
+        # echo ${curr_cmd}
+        # eval "${curr_cmd}"
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}.txt"
             curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
