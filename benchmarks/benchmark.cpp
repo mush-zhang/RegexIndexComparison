@@ -14,10 +14,10 @@ int main(int argc, char** argv) {
     expr_info expr_info;
     free_info free_info;
     best_info best_info;
-    lpsm_info lpsm_info;
+    lpms_info lpms_info;
 
     int status = parseArgs(argc, argv, expr_info, 
-                           free_info, best_info, lpsm_info);
+                           free_info, best_info, lpms_info);
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
             benchmarkBest(dir_path, regexes, lines, best_info);
             break;
         case selection_type::kFast:
-            benchmarkFast(dir_path, regexes, lines, lpsm_info);
+            benchmarkFast(dir_path, regexes, lines, lpms_info);
             break;
         default:
             // should not have reached here.

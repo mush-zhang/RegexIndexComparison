@@ -5,14 +5,14 @@
 #include <string>
 
 #include "../src/BEST/Index/single_threaded.hpp"
-#include "../src/LPSM/Index/lpms.hpp"
+#include "../src/LPMS/Index/lpms.hpp"
 
 inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'LPSM', 'BEST', 'FREE'. \n\
+    \t                 \t Options available are 'LPMS', 'BEST', 'FREE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0|1|2|3], required \t Workload used. \n\
@@ -28,7 +28,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
-    \t             \t The default is 0.1 for FREE and for BEST, and not applicable to LPSM.\n\
+    \t             \t The default is 0.1 for FREE and for BEST, and not applicable to LPMS.\n\
       FREE specific options:\n\
     \t -n [int], required \t Upper bound of multi-gram size.\n\
     \t --presuf \t Use presuf shell to generate a gram set that is also suffix-free; default not used.\n\
@@ -37,7 +37,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t                          \t The value can be a fraction of the whole dataset, or an exact number.\n\
     \t --dist [1|2|3] \t Type of distance measurement used in workload reduction and clustering. \n\
     \t                \t Default to 2. \n\
-      LPSM specific options:\n\
+      LPMS specific options:\n\
     \t --relax [DETERM|RANDOM], required \t Type of relaxation method.";
 /*-------------------------------------------------------------------------------------------------------------------*/
 
@@ -68,10 +68,10 @@ struct best_info {
     best_index::dist_type dtype = best_index::dist_type::kMaxDevDist2;
 };
 
-struct lpsm_info {
+struct lpms_info {
     int num_repeat = 10;
     int num_threads;
-    lpsm_index::relaxation_type rtype;
+    lpms_index::relaxation_type rtype;
 };
 
 std::string getCmdOption(char ** begin, char ** end, const std::string & option);
@@ -84,7 +84,7 @@ std::pair<T, T> getStats(std::vector<T> & arr);
 int parseArgs(int argc, char ** argv, 
              expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
-             lpsm_info & lpsm_info);
+             lpms_info & lpms_info);
 
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
@@ -104,6 +104,6 @@ void benchmarkBest(const std::filesystem::path dir_path,
 void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> regexes, 
                    const std::vector<std::string> lines,
-                   const lpsm_info & lpsm_info);
+                   const lpms_info & lpms_info);
 
 #endif // BENCHMARKS_UTILS

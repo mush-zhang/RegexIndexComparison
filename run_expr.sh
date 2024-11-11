@@ -72,11 +72,11 @@ for n in 2 4 6 8 10 12 14 16; do
 done
 # Fast
 for t in ${thread_list[*]}; do
-    curr_suffix="${timeout_suffix}_lpsm_t${t}_determ.txt"
-    echo benchmark.out LPSM -t ${t} -w ${wl_num} -o ${dirname}  --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
-    ${timeout_prefix} ./benchmark.out LPSM -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
+    curr_suffix="${timeout_suffix}_lpms_t${t}_determ.txt"
+    echo benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname}  --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
+    ${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
 
-    curr_suffix2="${timeout_suffix}_lpsm_t${t}_random.txt"
-    echo benchmark.out LPSM -t ${t} -w ${wl_num} -o ${dirname}  --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
-    ${timeout_prefix} ./benchmark.out LPSM -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
+    curr_suffix2="${timeout_suffix}_lpms_t${t}_random.txt"
+    echo benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname}  --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
+    ${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
 done

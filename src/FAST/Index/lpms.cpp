@@ -38,7 +38,7 @@ static void insert_or_increment(std::unordered_map<size_t, long double> & kgrams
     visited_kgrams.insert(key);
 }
 
-void lpsm_index::LpmsIndex::get_unigram_r(
+void lpms_index::LpmsIndex::get_unigram_r(
         std::unordered_map<size_t, long double> & uni_count,
         std::unordered_map<char, size_t> & unigrams,
         std::vector<std::vector<size_t>> & uni_gr_map) {
@@ -79,7 +79,7 @@ void get_unigram_q(const std::vector<std::vector<std::string>> & q_lits,
     }
 }
 
-void lpsm_index::LpmsIndex::get_kgrams_r(
+void lpms_index::LpmsIndex::get_kgrams_r(
         std::unordered_map<size_t, long double> & r_count,
         std::unordered_map<std::string, size_t> & kgrams,
         std::vector<std::vector<size_t>> & gr_map,
@@ -136,7 +136,7 @@ void get_kgrams_q(const std::vector<std::vector<std::string>> & q_lits,
  * @param qg_map Key is query_idx, value is the set of all gram_idxs in the query
  * @return std::vector<bool> vector of bool for if the gram is kept
  */
-std::vector<bool> lpsm_index::LpmsIndex::build_model(size_t k,
+std::vector<bool> lpms_index::LpmsIndex::build_model(size_t k,
         const std::unordered_map<size_t, long double> & r_count, 
         const std::unordered_map<size_t, long double> & q_count, 
         const std::vector<std::set<size_t>> & qg_map,
@@ -252,7 +252,7 @@ std::vector<bool> lpsm_index::LpmsIndex::build_model(size_t k,
     return x_result;
 }
 
-void lpsm_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand, 
+void lpms_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand, 
         const std::vector<std::vector<std::string>> & query_literals, GRBEnv * env) {
     std::unordered_map<size_t, long double> unigrams_r_count;
     std::unordered_map<char, size_t> unigrams; 
@@ -283,7 +283,7 @@ void lpsm_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
 }
 
 // Algorithm 1: LPMS multigram selection algorithm
-void lpsm_index::LpmsIndex::select_grams(int upper_n) {
+void lpms_index::LpmsIndex::select_grams(int upper_n) {
     GRBEnv* env = new GRBEnv();
     // env->set("OutputFlag", 0);
 
@@ -341,7 +341,7 @@ void lpsm_index::LpmsIndex::select_grams(int upper_n) {
     delete env;
 }
 
-void lpsm_index::LpmsIndex::build_index(int upper_n) {
+void lpms_index::LpmsIndex::build_index(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
     select_grams(upper_n);
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -354,7 +354,7 @@ void lpsm_index::LpmsIndex::build_index(int upper_n) {
     } else if (k_relaxation_type_ == kRandomized) {
         method_suffix == 'RANDOM';
     }
-    log << "LPSM-" << method_suffix << "," << thread_count_ << "," << upper_n << ",";
+    log << "LPMS-" << method_suffix << "," << thread_count_ << "," << upper_n << ",";
     log << "-1," << elapsed << ",";  // selectivity threshold, select time
     log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
     log << get_num_keys() << "," << get_bytes_used() << ",";

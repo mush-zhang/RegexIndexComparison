@@ -23,12 +23,12 @@ BEST_IDX=simple_query_matcher.o btree_index.o $\
 		 utils/rax/rax.o utils/rax/rc4rand.o $\
 		 $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
 
-LPSM_BASE_DIR=LPSM
-LPSM_IDX_DIR=$(LPSM_BASE_DIR)/Index
-LPSM_DIRS=$(LPSM_BASE_DIR) $(LPSM_IDX_DIR)
-LPSM_IDX=simple_query_matcher.o inverted_index.o $(LPSM_IDX_DIR)/lpms.o
+LPMS_BASE_DIR=LPMS
+LPMS_IDX_DIR=$(LPMS_BASE_DIR)/Index
+LPMS_DIRS=$(LPMS_BASE_DIR) $(LPMS_IDX_DIR)
+LPMS_IDX=simple_query_matcher.o inverted_index.o $(LPMS_IDX_DIR)/lpms.o
 
-DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(LPSM_DIRS)
+DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS)
 
 GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
@@ -37,18 +37,18 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
-	 $(LPSM_BASE_DIR)/test_lpsm.out 
+	 $(LPMS_BASE_DIR)/test_lpms.out 
 
 .PHONY: debug
 debug: CPPFLAGS+= -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
-		$(LPSM_BASE_DIR)/test_lpsm.out 
+		$(LPMS_BASE_DIR)/test_lpms.out 
 
-$(LPSM_BASE_DIR)/test_lpsm.out: $(LPSM_IDX) $(LPSM_BASE_DIR)/test_main.cpp
+$(LPMS_BASE_DIR)/test_lpms.out: $(LPMS_IDX) $(LPMS_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-$(LPSM_IDX_DIR)/lpms.o: $(LPSM_IDX_DIR)/lpms.cpp
+$(LPMS_IDX_DIR)/lpms.o: $(LPMS_IDX_DIR)/lpms.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(LDFLAGS) -o  $@
 
 $(BEST_BASE_DIR)/test_best.out: $(BEST_IDX) $(BEST_BASE_DIR)/test_main.cpp
