@@ -13,15 +13,15 @@ FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
 FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
 FREE_DIRS=$(FREE_IDX_DIR) $(FREE_MCH_DIR)
 
-FAST_BASE_DIR=$(SRC_DIR)/FAST
-FAST_IDX_DIR=$(FAST_BASE_DIR)/Index
-FAST_DIRS=$(FAST_IDX_DIR)
+LPMS_BASE_DIR=$(SRC_DIR)/LPMS
+LPMS_IDX_DIR=$(LPMS_BASE_DIR)/Index
+LPMS_DIRS=$(LPMS_IDX_DIR)
 
 BEST_BASE_DIR=$(SRC_DIR)/BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_IDX_DIR)
 
-DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(FAST_DIRS)
+DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS)
 OBJECT_PATTERNS=*.o
 OBJECTS := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(OBJECT_PATTERNS)))
 
@@ -42,7 +42,7 @@ benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
 			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $\
 			    $(FREE_IDX_DIR)/free_multi_parallel.o $(FREE_MCH_DIR)/free_parser.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
-			   $(FAST_IDX_DIR)/lpms.o $\
+			   $(LPMS_IDX_DIR)/lpms.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 
