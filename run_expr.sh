@@ -40,8 +40,8 @@ if [ "$wl_num" == "0" ]; then
     extra="-r ${regex_file} -d ${data_file}"
 fi
 
-timeout_prefix="{timeout 3h time -v "
-timeout_suffix=";} 2> ${dirname}/time_report"
+timeout_prefix="timeout 3h { time -v "
+timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
