@@ -80,6 +80,13 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
             } else {
                 curr_char = c;
             }
+        } else if (k_special_chars.contains(c)) {
+            if (escaped) {
+                escaped = false;
+                continue;
+            } else {
+                curr_char = c;
+            }
         } else if (k_parath_l_chars.contains(c)) {
             if (escaped) {
                 curr_char = c;
