@@ -243,34 +243,6 @@ std::vector<std::string> read_traffic(int max_lines=-1) {
     return lines;
 }
 
-// std::vector<std::string> read_dbx(int max_lines=-1) {
-//     std::string line;
-
-//     std::vector<std::string> lines;
-//     std::string path = "data/extracted";
-//     for (const auto & entry : std::filesystem::directory_iterator(path)) {
-//         std::string data_file = entry.path();
-//         std::ifstream data_in(data_file);
-//         if (!data_in.is_open()) {
-//             std::cerr << "Could not open the file - '" << data_file << "'" << std::endl;
-//             return lines;
-//         }
-//         //  101876733 
-//         while (getline(data_in, line)){
-//             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
-//             if (line.size() > 2) {
-//                 lines.push_back(line);
-//                 if (max_lines > 0 && lines.size() > max_lines) {
-//                     data_in.close();
-//                     return lines;
-//                 }
-//             }
-//         }
-//         data_in.close();
-//     }
-//     return lines;
-// }
-
 auto read_file_to_string(const std::string & path) -> std::string {
     constexpr auto read_size = std::size_t(4096);
     auto stream = std::ifstream(path);

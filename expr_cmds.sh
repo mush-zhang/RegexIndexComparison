@@ -1,5 +1,14 @@
 #! /bin/bash
 
+# Protein
+
+# dblp
+for qcount in 1000 2000 3000 4000; do
+    ./run_expr.sh -w dblp_small_${qcount} \
+    -r data/dblp/small/query${qcount}.txt \
+    -d data/dblp/small/authors.txt
+done
+
 # Expr 2
 for qcount in 100 500 2000 2500 5000; do
     ./run_expr.sh -w synthetic_expr2_q${qcount}_d20000 \
@@ -10,15 +19,6 @@ for dcount in 20000 40000 60000 80000 100000; do
     ./run_expr.sh -w synthetic_expr2_q1000_d${dcount} \
     -r data/synthetic/expr2/queries/query_workload_1000_for_${dcount}.txt \
     -d data/synthetic/expr2/datasets/dataset_${dcount}.txt
-done
-
-# Protein
-
-# dblp
-for qcount in 1000 2000 3000 4000; do
-    ./run_expr.sh -w dblp_small_${qcount} \
-    -r data/dblp/small/query${qcount}.txt \
-    -d data/dblp/small/authors.txt
 done
 
 # # Expr 4
