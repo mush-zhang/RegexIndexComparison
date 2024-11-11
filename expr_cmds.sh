@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # Protein
-./run_expr.sh -w 4
+./run_expr.sh -w protein
 
 # dblp
 for qcount in 1000 2000 3000 4000; do
