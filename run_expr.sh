@@ -54,8 +54,9 @@ if [ ${wl_num} != 1 ]; then
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_best_t${t}_c${c}.txt"
-            echo benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}
-            ${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}
+            curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+            echo ${curr_cmd}
+            eval "${curr_cmd}"
         done
     done
 fi
@@ -63,12 +64,14 @@ fi
 # for n in 2 4 6 8 10 12 14 16; do
 for n in 2 4 6; do
     for c in ${sel_list[*]}; do
-        # echo benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra}
-        # ${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra}
+        curr_cmd="${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra}"
+        echo ${curr_cmd}
+        eval "${curr_cmd}"
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}.txt"
-            echo benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}
-            ${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}
+            curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+            echo ${curr_cmd}
+            eval "${curr_cmd}"
         done
     done
 done
@@ -76,10 +79,12 @@ done
 # Fast
 for t in ${thread_list[*]}; do
     curr_suffix="${timeout_suffix}_lpms_t${t}_determ.txt"
-    echo benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname}  --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
-    ${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}
+    curr_cmd="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}"
+    echo ${curr_cmd}
+    eval "${curr_cmd}"
 
     curr_suffix2="${timeout_suffix}_lpms_t${t}_random.txt"
-    echo benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname}  --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
-    ${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}
+    curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
+    echo ${curr_cmd2}
+    eval "${curr_cmd2}"
 done
