@@ -84,9 +84,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
             if (escaped) {
                 curr_char = c;
                 escaped = false;
-            } else {
-                continue;
-            }
+            } 
         } else if (k_parath_l_chars.contains(c)) {
             if (escaped) {
                 curr_char = c;
