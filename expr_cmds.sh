@@ -3,24 +3,24 @@
 # Protein
 ./run_expr.sh -w 4
 
-# # dblp
-# for qcount in 1000 2000 3000 4000; do
-#     ./run_expr.sh -w dblp_small_${qcount} \
-#     -r data/dblp/small/query${qcount}.txt \
-#     -d data/dblp/small/authors.txt
-# done
+# dblp
+for qcount in 1000 2000 3000 4000; do
+    ./run_expr.sh -w dblp_small_${qcount} \
+    -r data/dblp/small/query${qcount}.txt \
+    -d data/dblp/small/authors.txt
+done
 
-# # Expr 2
-# for qcount in 100 500 2000 2500 5000; do
-#     ./run_expr.sh -w synthetic_expr2_q${qcount}_d20000 \
-#     -r data/synthetic/expr2/queries/query_workload_${qcount}.txt \
-#     -d data/synthetic/expr2/datasets/dataset_20000.txt
-# done
-# for dcount in 20000 40000 60000 80000 100000; do
-#     ./run_expr.sh -w synthetic_expr2_q1000_d${dcount} \
-#     -r data/synthetic/expr2/queries/query_workload_1000_for_${dcount}.txt \
-#     -d data/synthetic/expr2/datasets/dataset_${dcount}.txt
-# done
+# Expr 2
+for qcount in 100 500 2000 2500 5000; do
+    ./run_expr.sh -w synthetic_expr2_q${qcount}_d20000 \
+    -r data/synthetic/expr2/queries/query_workload_${qcount}.txt \
+    -d data/synthetic/expr2/datasets/dataset_20000.txt
+done
+for dcount in 20000 40000 60000 80000 100000; do
+    ./run_expr.sh -w synthetic_expr2_q1000_d${dcount} \
+    -r data/synthetic/expr2/queries/query_workload_1000_for_${dcount}.txt \
+    -d data/synthetic/expr2/datasets/dataset_${dcount}.txt
+done
 
 # # Expr 4
 # for rob_wl in 1 2 3 4; do
