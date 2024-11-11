@@ -75,17 +75,16 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
             }
         } else if (k_special_classes.contains(c)) {
             if (escaped) {
-                escaped = false;
-                continue;
-            } else {
                 curr_char = c;
+                escaped = false;
+            } else {
+                continue;
             }
         } else if (k_special_chars.contains(c)) {
             if (escaped) {
-                escaped = false;
+                curr_char = c;
                 continue;
             } else {
-                curr_char = c;
             }
         } else if (k_parath_l_chars.contains(c)) {
             if (escaped) {
