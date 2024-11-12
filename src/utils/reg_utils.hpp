@@ -91,6 +91,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 curr_char = c;
                 escaped = false;
             } else {
+                std::cerr << "left para " << c << std::endl;
                 if (para_stack.empty() && curr_result.size() > 0) {
                     result.emplace_back(curr_result);
                     curr_result = "";
@@ -104,7 +105,8 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 escaped = false;
             } else {
                 if (para_stack.empty()) {
-                    std::cerr << "Unmatched parathesis: missing left " << std::endl;
+                    std::cerr << "Unmatched parathesis: missing left for ";
+                    std::cerr << c << " at pos " << i << std::endl;
                     return std::vector<std::string>();
                 } else if ((c == ')' && para_stack.top() == '(') || 
                            (c == ']' && para_stack.top() == '[') || 
