@@ -74,7 +74,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 continue;
             }
         } else if (k_special_classes.contains(c)) {
-            std::cerr << "k_special_classes  " << escaped << " " << c << std::endl;
+            std::cerr << "k_special_classes  " << escaped << " " << c << " " << para_stack.empty() << std::endl;
             if (!escaped) {
                 curr_char = c;
             } else {
@@ -137,6 +137,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
         if (para_stack.empty()) {
             curr_result += curr_char;
         }
+        std::cerr << curr_result << std::endl;
     }
     if (!curr_result.empty()) {
         result.push_back(curr_result);
