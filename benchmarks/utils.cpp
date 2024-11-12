@@ -16,7 +16,7 @@
 #include "../src/simple_query_matcher.hpp"
 
 #include "utils.hpp"
-#include "../src/utils/reg_util.hpp"
+#include "../src/utils/reg_utils.hpp"
 
 inline constexpr const int kNumIndexBuilding = 1;
 
