@@ -87,11 +87,11 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 continue;
             }
         } else if (k_parath_l_chars.contains(c)) {
+            std::cerr << "left para " << c << " " << escaped << std::endl;
             if (escaped) {
                 curr_char = c;
                 escaped = false;
             } else {
-                std::cerr << "left para " << c << std::endl;
                 if (para_stack.empty() && curr_result.size() > 0) {
                     result.emplace_back(curr_result);
                     curr_result = "";
