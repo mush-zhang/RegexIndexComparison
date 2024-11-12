@@ -8,12 +8,12 @@
 #include <algorithm>
 
 //The true special/meta chars: '{', '}', '[', ']', '(', ')', '^', '$', '.', '*', '+', '?', '|'
-static const std::unordered_set<char> k_special_chars{'{', '[', '^', '$', '.', '*', '+', '?', '|'};
+static const std::unordered_set<char> k_special_chars{'^', '$', '.', '|'};
 static const std::unordered_set<char> k_rep_chars{'*', '+', '?'};
 static const std::unordered_set<char> k_parath_l_chars{'{', '[', '('};
 static const std::unordered_set<char> k_parath_r_chars{'}', ']', ')'};
 static const std::unordered_set<char> k_special_classes{'w', 'W', 'a', 'b', 'B', 'd', 'D', 'l', 'p',
-                                                 's', 'S', 'u', 'x'};
+                                                 's', 'S', 'u', 'x', 'z'};
 
 static bool char_escaped(const std::string &line, std::size_t pos) {
     auto temp_pos = pos;
@@ -87,7 +87,6 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 continue;
             }
         } else if (k_parath_l_chars.contains(c)) {
-            std::cerr << "left para " << c << " " << escaped << std::endl;
             if (escaped) {
                 curr_char = c;
                 escaped = false;
