@@ -141,6 +141,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
     }
     if (!curr_result.empty()) {
         result.push_back(curr_result);
+        std::cerr << curr_result << std::endl;
     }
     return result;
 }
