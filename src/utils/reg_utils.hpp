@@ -74,12 +74,14 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 continue;
             }
         } else if (k_special_classes.contains(c)) {
+            std::cerr << "k_special_classes  " << escaped << " " << c << std::endl;
             if (!escaped) {
                 curr_char = c;
             } else {
                 continue;
             }
         } else if (k_special_chars.contains(c)) {
+            std::cerr << "k_special_chars  " << escaped << " " << c << std::endl;
             if (escaped) {
                 curr_char = c;
                 escaped = false;
