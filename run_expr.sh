@@ -52,14 +52,17 @@ sel_list=( 0.05 0.1 0.12 0.15 0.2 0.5 0.7)
 num_repeat=1
 
 # Best
-if [ ${wl_num} != 1 ]; then
-    for c in ${sel_list[*]}; do
-        for t in ${thread_list[*]}; do
-            curr_suffix="${timeout_suffix}_best_t${t}_c${c}.txt"
-            curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-            echo ${curr_cmd}
-            eval "${curr_cmd}"
-        done
+for c in ${sel_list[*]}; do
+    for t in ${thread_list[*]}; do
+        curr_suffix="${timeout_suffix}_best_t${t}_c${c}.txt"
+        curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+        echo ${curr_cmd}
+        eval "${curr_cmd}"
+        retVal=$?
+        if [ $retVal -ne 0 ]; then
+            echo "Timeout"
+            break
+        fi
     done
 fi
 # Free

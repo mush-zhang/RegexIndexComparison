@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# webpage
+./run_expr.sh -w webpages
+
 # Protein
 ./run_expr.sh -w protein
 
