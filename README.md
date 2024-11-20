@@ -37,6 +37,7 @@ popd
 #### DBLP
 
 Get from here: https://www.aminer.org/citation
+We used the DBLP-Citation-network V3.
 
 ```
 pushd data/dblp
