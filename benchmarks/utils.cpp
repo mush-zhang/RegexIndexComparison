@@ -355,7 +355,7 @@ int readWorkload(const expr_info & expr_info,
             lines = read_webpages(std::min(max_lines, 7000000));
             break;
         case 4:
-            regexes = read_file("regex", kPrositeRegex);
+            regexes = read_file("regex", kPrositeRegex, 100);
             lines = read_directory("data", "data/protein/sequences", max_lines);
             break;
         default:
