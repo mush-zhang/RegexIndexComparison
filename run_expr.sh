@@ -64,7 +64,7 @@ for c in ${sel_list[*]}; do
             break
         fi
     done
-fi
+done
 # Free
 # for n in 2 4 6 8 10 12 14 16; do
 for n in 2 4 6; do
@@ -78,6 +78,10 @@ for n in 2 4 6; do
             curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
             eval "${curr_cmd}"
+            retVal=$?
+            if [ $retVal -ne 0 ]; then
+                echo "Timeout"
+            fi
         done
     done
 done
@@ -88,9 +92,16 @@ for t in ${thread_list[*]}; do
     curr_cmd="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}"
     echo ${curr_cmd}
     eval "${curr_cmd}"
-
+    retVal=$?
+    if [ $retVal -ne 0 ]; then
+        echo "Timeout"
+    fi
     curr_suffix2="${timeout_suffix}_lpms_t${t}_random.txt"
     curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
     echo ${curr_cmd2}
     eval "${curr_cmd2}"
+    retVal2=$?
+    if [ $retVal2 -ne 0 ]; then
+        echo "Timeout"
+    fi
 done
