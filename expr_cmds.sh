@@ -6,6 +6,9 @@
 # Protein
 ./run_expr.sh -w protein
 
+# DB_X
+./run_expr.sh -w db_x
+
 # dblp
 for qcount in 1000 2000 3000 4000; do
     ./run_expr.sh -w dblp_small_${qcount} \
