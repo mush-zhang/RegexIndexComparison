@@ -80,7 +80,7 @@ class NGramIndex {
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
-    int k_key_upper_bound_ = -1;
+    int key_upper_bound_ = -1;
 
     int thread_count_ = 1;
 
