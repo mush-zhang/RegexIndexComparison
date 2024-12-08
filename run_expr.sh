@@ -48,12 +48,12 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 echo ${dirname}
 mkdir -p ${dirname} 
 # sel_list=( 0.01 0.02 0.03 0.05 0.07 0.1 0.12 0.15 0.2 0.3 0.5 0.7)
-sel_list=( 0.05 0.1 0.12 0.15 0.2 0.5 0.7)
+sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 )
 num_repeat=1
 
 # Best
-for c in ${sel_list[*]}; do
-    for t in ${thread_list[*]}; do
+for t in ${thread_list[*]}; do
+    for c in ${sel_list[*]}; do
         curr_suffix="${timeout_suffix}_best_t${t}_c${c}.txt"
         curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
         echo ${curr_cmd}

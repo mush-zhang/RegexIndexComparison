@@ -352,8 +352,8 @@ void lpms_index::LpmsIndex::build_index(int upper_n) {
     if (k_relaxation_type_ == kDeterministic) {
         method_suffix = "DETER";
     } else if (k_relaxation_type_ == kRandomized) {
-        method_suffix == "RANDOM";
-    }
+        method_suffix = "RANDOM";
+    } 
     log << "LPMS-" << method_suffix << "," << thread_count_ << "," << upper_n << ",";
     log << "-1," << elapsed << ",";  // selectivity threshold, select time
     log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
