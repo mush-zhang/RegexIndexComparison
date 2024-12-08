@@ -64,6 +64,8 @@ class NGramIndex {
 
     void set_thread_count(int thread_count) { thread_count_ = thread_count; }
 
+    void set_key_upper_bound_(int key_upper_bound) { key_upper_bound_ = key_upper_bound_; }
+
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 
     void write_to_file(const std::string & str) const { *outfile_ << str; }   
@@ -77,6 +79,8 @@ class NGramIndex {
 
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
+
+    int k_key_upper_bound_ = -1;
 
     int thread_count_ = 1;
 
