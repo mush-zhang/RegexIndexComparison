@@ -174,7 +174,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
         std::chrono::high_resolution_clock::now() - start).count();
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     std::ostringstream log;
-    log << "BEST," << thread_count_ << "," << upper_n << ",";
+    log << "BEST-parallel," << thread_count_ << "," << upper_n << ",";
     log << k_threshold_ << "," << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
