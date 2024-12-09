@@ -72,6 +72,7 @@ struct lpms_info {
     int num_repeat = 10;
     int num_threads;
     lpms_index::relaxation_type rtype;
+    std::string rtype_str;
 };
 
 std::string getCmdOption(char ** begin, char ** end, const std::string & option);

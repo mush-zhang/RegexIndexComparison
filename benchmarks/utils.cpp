@@ -194,6 +194,7 @@ int parseArgs(int argc, char ** argv,
             lpms_info.num_repeat = rep;
             lpms_info.num_threads = thread_count;
             auto relax_string = getCmdOption(argv, argv + argc, "--relax");
+            lpms_info.rtype_str = relax_string;
             if (relax_string.empty()) {
                 return error_return("Missing type of relaxation.");
             } else if (relax_string == "DETERM") {
@@ -572,7 +573,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     outfile.close();
 
     // open stats file
-    stats_name << "LPMS_" << lpms_info.num_threads << "_" << "-1";
+    stats_name << "LPMS-" << lpms_info.rtype_str << "_" << lpms_info.num_threads << "_" << "-1";
     stats_name << "_" << "-1" << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
