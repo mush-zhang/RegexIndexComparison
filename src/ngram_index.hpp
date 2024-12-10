@@ -58,7 +58,7 @@ class NGramIndex {
 
     virtual size_t get_num_keys() const = 0;
 
-    virtual long get_bytes_used() const = 0;
+    virtual long long int get_bytes_used() const = 0;
 
     virtual bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const = 0;
 

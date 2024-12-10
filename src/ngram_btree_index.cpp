@@ -3,8 +3,8 @@
 
 static const std::vector<size_t> k_empty_pos_list_;
 
-long NGramBtreeIndex::get_bytes_used() const { 
-    long contentSize = k_index_.bytes_used() + k_index_keys_.bytes_used(); 
+long long int NGramBtreeIndex::get_bytes_used() const { 
+    long long int contentSize = k_index_.bytes_used() + k_index_keys_.bytes_used(); 
     for (const auto & [key, val] : k_index_) {
         // value size
         contentSize += calculate_vector_size(val);

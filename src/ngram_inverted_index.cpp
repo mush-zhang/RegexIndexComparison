@@ -3,14 +3,14 @@
 
 static const std::vector<size_t> k_empty_pos_list_;
 
-long NGramInvertedIndex::get_bytes_used() const {
+long long int NGramInvertedIndex::get_bytes_used() const {
     auto bucketSize = sizeof(void*);
     auto adminSize = 3 * sizeof(void*) + sizeof(size_t);
-    long totalSize = 0;
+    long long int totalSize = 0;
 
     totalSize += adminSize + k_index_.bucket_count() * bucketSize;
 
-    long contentSize = 0;
+    long long int contentSize = 0;
     for (const auto & [key, val] : k_index_) {
         // key size with ptr
         contentSize += key.size() * sizeof(char) + sizeof(void*);
