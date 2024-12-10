@@ -40,7 +40,7 @@ class NGramInvertedIndex : public NGramIndex {
 
     size_t get_num_keys() const override { return k_index_keys_.size(); }
 
-    size_t get_bytes_used() const override;
+    long get_bytes_used() const override;
 
  protected:
     /**Key is multigram, value is a sorted (ascending) list of line indices**/
