@@ -350,7 +350,7 @@ void lpms_index::LpmsIndex::build_index(int upper_n) {
     std::ostringstream log;    
     std::string method_suffix;
     if (k_relaxation_type_ == kDeterministic) {
-        method_suffix = "DETER";
+        method_suffix = "DETERM";
     } else if (k_relaxation_type_ == kRandomized) {
         method_suffix = "RANDOM";
     } 
