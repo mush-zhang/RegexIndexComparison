@@ -127,7 +127,7 @@ int parseArgs(int argc, char ** argv,
     }
 
     auto max_key_string = getCmdOption(argv, argv + argc, "-k");
-    int max_key = std::LLONG_MAX;
+    int max_key = LLONG_MAX;
     if (!max_key_string.empty()) {
         max_key = std::stol(max_key_string);
     }

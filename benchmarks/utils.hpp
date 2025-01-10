@@ -27,7 +27,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t           \t Each line of the file is considered an individual (log) line. \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
-    \t -k [int] \t Max number of n-grams selected. The default is std::LLONG_MAX.\n\
+    \t -k [int] \t Max number of n-grams selected. The default is LLONG_MAX.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
     \t             \t The default is 0.1 for FREE and for BEST, and not applicable to LPMS.\n\
       FREE specific options:\n\

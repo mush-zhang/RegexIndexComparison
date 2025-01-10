@@ -81,8 +81,7 @@ class NGramIndex {
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
-    long long int key_upper_bound_ = std::LLONG_MAX;
-
+    long long int key_upper_bound_ = LLONG_MAX;
     int thread_count_ = 1;
 
     virtual void find_all_keys_helper(
