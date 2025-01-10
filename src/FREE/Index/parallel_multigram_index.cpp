@@ -184,7 +184,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     }
     for (const auto & thread_local_vect : loc_index_keys_char) {
         for (const auto & c : thread_local_vect) {
-            if (k_max_num_keys_ < 0 || k_index_keys_.size() < k_max_num_keys_) {
+            if (k_index_keys_.size() < key_upper_bound_) {
                 std::string curr_str = std::string(1, c);
                 k_index_keys_.insert(curr_str);
                 k_index_.insert({curr_str, std::vector<size_t>()});
@@ -235,7 +235,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
     }
     for (const auto & thread_local_vect : loc_index_keys_pair) {
         for (const auto & p : thread_local_vect) {
-            if (k_max_num_keys_ < 0 || k_index_keys_.size() < k_max_num_keys_) {
+            if (k_index_keys_.size() < key_upper_bound_) {
                 std::string curr_str{p.first, p.second};
                 k_index_keys_.insert(curr_str);
                 k_index_.insert({curr_str, std::vector<size_t>()});
@@ -249,7 +249,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
 
     int k = 3;
     while (!expand.empty() && k <= upper_n && 
-           (k_max_num_keys_ < 0 || k_index_keys_.size() < k_max_num_keys_)) {
+           k_index_keys_.size() < key_upper_bound_) {
         // get all k-grams whose prefix not in index already
         std::map<std::string, atomic_ptr_t> curr_kgrams = {};
 
@@ -300,7 +300,7 @@ void free_index::ParallelMultigramIndex::select_grams(int upper_n) {
         }
         for (const auto & thread_local_vect : loc_index_keys) {
             for (const auto & s : thread_local_vect) {
-                if (k_max_num_keys_ < 0 || k_index_keys_.size() < k_max_num_keys_) {
+                if (k_index_keys_.size() < key_upper_bound_) {
                     k_index_keys_.insert(s);
                     k_index_.insert({s, std::vector<size_t>()});
                 }
