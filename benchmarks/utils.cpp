@@ -530,7 +530,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
             pi->write_to_file(",,,,,,,,,");
         }
         // matching; add match time to the overall file
-        auto matcher = SimpleQueryMatcher(*pi);
+        auto matcher = SimpleQueryMatcher(*pi, regexes);
         matcher.match_all();
     }
 
@@ -538,7 +538,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
 
     // open stats file
     stats_name << "BEST_" << best_info.num_threads << "_" << "-1";
-    stats_name << "_" << best_info.sel_threshold << "_stats.csv";
+    stats_name << "_" << best_info.sel_threshold << "_" << red_size << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
     statsfile.open(stats_path, std::ios::out);
