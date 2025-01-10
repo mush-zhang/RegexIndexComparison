@@ -75,7 +75,8 @@ void free_index::MultigramIndex::select_grams(int upper_n) {
     decltype(bigrams)().swap(bigrams);
 
     int k = 3;
-    while (!expand.empty() && k <= upper_n) {
+    while (!expand.empty() && k <= upper_n && 
+           k_index_keys_.size() < key_upper_bound_) {
         // get all k-grams whose prefix not in index already
         std::unordered_map<std::string, long double> curr_kgrams = {};
         get_kgrams_not_indexed(curr_kgrams, expand, k);
@@ -144,7 +145,8 @@ void free_index::MultigramIndex::insert_uni_bigram_into_index(
     //    else insert to expand
     std::unordered_set<char> uni_expand;
     for (const auto & [c, c_count] : unigrams) {
-        if (c_count/((double)k_dataset_size_) <= k_threshold_) {
+        if (c_count/((double)k_dataset_size_) <= k_threshold_ &&
+            k_index_keys_.size() < key_upper_bound_) {
             index_keys.insert(std::string(1, c));
         } else {
             uni_expand.insert(c);
@@ -154,7 +156,8 @@ void free_index::MultigramIndex::insert_uni_bigram_into_index(
         // check if it is expand
         if (uni_expand.find(p.first) != uni_expand.end()) {
             std::string curr_str{p.first, p.second};
-            if (p_count/((double)k_dataset_size_) <= k_threshold_) {
+            if (p_count/((double)k_dataset_size_) <= k_threshold_ && 
+                k_index_keys_.size() < key_upper_bound_) {
                 index_keys.insert(curr_str);
             } else {
                 expand.insert(curr_str);
@@ -169,7 +172,8 @@ void free_index::MultigramIndex::insert_kgram_into_index(
     // for each gram, if selectivity <= threshold, insert to index
     //    else insert to expand
     for (const auto & [s, s_count] : kgrams) {
-        if (s_count/((double)k_dataset_size_) <= k_threshold_) {
+        if (s_count/((double)k_dataset_size_) <= k_threshold_ &&
+            k_index_keys_.size() < key_upper_bound_) {
             k_index_keys_.insert(s);
         } else {
             expand.insert(s);

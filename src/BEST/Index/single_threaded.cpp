@@ -531,7 +531,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_n) {
     std::set<size_t> index;
     std::vector<long double> benefit(candidates_size);
     // While some (q,r) uncovered AND space available
-    while (!all_covered(index, job, num_queries) && 
+    while (index.size() < key_upper_bound_ && !all_covered(index, job, num_queries) && 
             (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
 
         compute_benefit(benefit, index, job, num_queries);

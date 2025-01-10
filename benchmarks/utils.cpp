@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string.h>
 #include <filesystem>
+#include <climits>
 
 #include "../src/BEST/Index/parallelizable.hpp"
 
@@ -125,6 +126,12 @@ int parseArgs(int argc, char ** argv,
         rep = std::stoi(repeat_string);
     }
 
+    auto max_key_string = getCmdOption(argv, argv + argc, "-k");
+    int max_key = std::LLONG_MAX;
+    if (!max_key_string.empty()) {
+        max_key = std::stol(max_key_string);
+    }
+
     auto thread_string = getCmdOption(argv, argv + argc, "-t");
     int thread_count = 0;
     if (thread_string.empty()) {
@@ -145,6 +152,7 @@ int parseArgs(int argc, char ** argv,
     switch (expr_info.stype) {
         case selection_type::kFree: {
             free_info.num_repeat = rep;
+            free_info.key_upper_bound = max_key;
             free_info.num_threads = thread_count;
             if (n == 0) {
                 return error_return("Missing/Invalid upper bound on n of n-gram.");
@@ -158,6 +166,7 @@ int parseArgs(int argc, char ** argv,
         }
         case selection_type::kBest: {
             best_info.num_repeat = rep;
+            best_info.key_upper_bound = max_key;
             best_info.num_threads = thread_count;
             if (selec > 0 && selec <= 1) {
                 best_info.sel_threshold = selec;
@@ -192,6 +201,7 @@ int parseArgs(int argc, char ** argv,
         }
         case selection_type::kFast: {
             lpms_info.num_repeat = rep;
+            lpms_info.key_upper_bound = max_key;
             lpms_info.num_threads = thread_count;
             auto relax_string = getCmdOption(argv, argv + argc, "--relax");
             lpms_info.rtype_str = relax_string;
@@ -424,6 +434,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
                  free_info.sel_threshold, free_info.num_threads);
         }
     }
+    pi->set_key_upper_bound_(free_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_n);
 
@@ -508,6 +519,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
         }
 
     }
+    pi->set_key_upper_bound_(best_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index();
 
@@ -556,6 +568,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     // index building
     auto * pi = new lpms_index::LpmsIndex(lines, regexes, lpms_info.num_threads, lpms_info.rtype);
     pi->set_thread_count(lpms_info.num_threads);
+    pi->set_key_upper_bound_(lpms_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index();
 

@@ -27,6 +27,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t           \t Each line of the file is considered an individual (log) line. \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
+    \t -k [int] \t Max number of n-grams selected. The default is std::LLONG_MAX.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
     \t             \t The default is 0.1 for FREE and for BEST, and not applicable to LPMS.\n\
       FREE specific options:\n\
@@ -53,6 +54,7 @@ struct expr_info {
 
 struct free_info {
     int num_repeat = 10;
+    long long int key_upper_bound;
     int num_threads;
     double sel_threshold = 0.1;
     int upper_n; // k
@@ -61,6 +63,7 @@ struct free_info {
 
 struct best_info {
     int num_repeat = 10;
+    long long int key_upper_bound;
     int num_threads;
     double sel_threshold = 0.1;
     int wl_reduced_size = -1;
@@ -70,6 +73,7 @@ struct best_info {
 
 struct lpms_info {
     int num_repeat = 10;
+    long long int key_upper_bound;
     int num_threads;
     lpms_index::relaxation_type rtype;
     std::string rtype_str;

@@ -274,6 +274,7 @@ void lpms_index::LpmsIndex::uni_special(std::unordered_set<std::string> & expand
             //    whose associated value in x is 1 to G (the index)
             k_index_keys_.insert(curr_kgram); 
             k_index_.insert({ curr_kgram, uni_gr_map.at(idx) });
+            if (k_index_keys_.size() >= key_upper_bound_) break;
         } else {
             // 8. Those multigrams remainig become the new expand set
             expand.insert(curr_kgram);
@@ -330,6 +331,7 @@ void lpms_index::LpmsIndex::select_grams(int upper_n) {
                 k_index_keys_.insert(curr_kgram); 
                 assert(gr_map.size() > idx && "line 324 gr_map size < idx");
                 k_index_[curr_kgram] = gr_map.at(idx);
+                if (k_index_keys_.size() >= key_upper_bound_) goto END_SELECT;
             } else {
                 // 8. Those multigrams remainig become the new expand set
                 expand.insert(curr_kgram);
@@ -338,6 +340,7 @@ void lpms_index::LpmsIndex::select_grams(int upper_n) {
 
         k++;
     }
+    END_SELECT:;
     delete env;
 }
 

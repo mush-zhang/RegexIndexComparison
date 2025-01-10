@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <chrono>
+#include <climits>
 
 #include "utils/reg_utils.hpp"
 
@@ -64,7 +65,7 @@ class NGramIndex {
 
     void set_thread_count(int thread_count) { thread_count_ = thread_count; }
 
-    void set_key_upper_bound_(int key_upper_bound) { key_upper_bound_ = key_upper_bound_; }
+    void set_key_upper_bound_(long long int key_upper_bound) { key_upper_bound_ = key_upper_bound_; }
 
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 
@@ -80,7 +81,7 @@ class NGramIndex {
 	const long double k_queries_size_;
     const std::vector<std::string> & k_queries_;
 
-    int key_upper_bound_ = -1;
+    long long int key_upper_bound_ = std::LLONG_MAX;
 
     int thread_count_ = 1;
 

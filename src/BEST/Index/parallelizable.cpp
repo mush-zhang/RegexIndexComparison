@@ -120,8 +120,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
     std::vector<std::vector<long double>> benefits_local(
             jobs.size(), std::vector<long double>(candidates_size));
     // While some (q,r) uncovered AND space available
-    while (!multi_all_covered(index, jobs) && 
-            (k_max_num_keys_ < 0 || index.size() < k_max_num_keys_)) {
+    while (index.size() < key_upper_bound_ && !multi_all_covered(index, jobs)) {
         // std::cout << "Iteration: index size " << index.size() << std::endl;
 
         // for every g \in G\I, set benefit_global[g] = 0
