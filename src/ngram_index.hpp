@@ -65,7 +65,7 @@ class NGramIndex {
 
     void set_thread_count(int thread_count) { thread_count_ = thread_count; }
 
-    void set_key_upper_bound_(long long int key_upper_bound) { key_upper_bound_ = key_upper_bound_; }
+    void set_key_upper_bound(long long int key_upper_bound) { key_upper_bound_ = key_upper_bound; }
 
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 

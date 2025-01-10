@@ -434,7 +434,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
                  free_info.sel_threshold, free_info.num_threads);
         }
     }
-    pi->set_key_upper_bound_(free_info.key_upper_bound);
+    pi->set_key_upper_bound(free_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_n);
 
@@ -519,7 +519,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
         }
 
     }
-    pi->set_key_upper_bound_(best_info.key_upper_bound);
+    pi->set_key_upper_bound(best_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index();
 
@@ -568,7 +568,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     // index building
     auto * pi = new lpms_index::LpmsIndex(lines, regexes, lpms_info.num_threads, lpms_info.rtype);
     pi->set_thread_count(lpms_info.num_threads);
-    pi->set_key_upper_bound_(lpms_info.key_upper_bound);
+    pi->set_key_upper_bound(lpms_info.key_upper_bound);
     pi->set_outfile(outfile);
     pi->build_index();
 
