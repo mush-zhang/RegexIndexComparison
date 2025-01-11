@@ -490,7 +490,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
             reduce = false;
         } else {
             red_size = std::min(
-                std::max(best_info.wl_reduced_frac * regexes.size(), 1.0), 
+                std::max(best_info.wl_reduced_frac * regexes.size(), 10.0), 
                 static_cast<double>(regexes.size())
             );
         }
