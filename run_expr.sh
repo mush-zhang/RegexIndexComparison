@@ -16,7 +16,7 @@ while getopts ":d:r:t:w:" opt; do
             regex_file=$OPTARG
             ;;
         t) echo "Option -t is triggered."
-            thread_list=( 1 2 4 6 8 10 12 16 )
+            thread_list=( 16 12 10 8 6 4 2 1 )
             ;;
         k) echo "Option -k is triggered with value $OPTARG"
             extra="-k ${OPTARG} "
@@ -71,18 +71,25 @@ done
 # Free
 for n in 2 4 6 8 10; do
     for c in ${sel_list[*]}; do
-        # curr_cmd="${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} echo ${curr_cmd}
-        #     eval "${curr_cmd}""
-        # echo ${curr_cmd}
-        # eval "${curr_cmd}"
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}.txt"
+
             curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
             eval "${curr_cmd}"
             retVal=$?
             if [ $retVal -ne 0 ]; then
                 echo "Timeout"
+                break
+            fi
+
+            curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+            echo ${curr_cmd}
+            eval "${curr_cmd}"
+            retVal=$?
+            if [ $retVal -ne 0 ]; then
+                echo "Timeout"
+                break
             fi
         done
     done

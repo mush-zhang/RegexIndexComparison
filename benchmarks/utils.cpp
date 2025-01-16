@@ -424,7 +424,8 @@ void benchmarkFree(const std::filesystem::path dir_path,
     free_index::MultigramIndex * pi = nullptr;
     if (free_info.use_presuf) {
         stats_name << "FREE-presuf_";
-        pi = new free_index::PresufShell(lines, free_info.sel_threshold);
+        pi = new free_index::PresufShell(lines, free_info.sel_threshold, 
+                                         std::max(1, free_info.num_threads));
     } else {
         stats_name << "FREE_";
         if (free_info.num_threads <= 1) {
