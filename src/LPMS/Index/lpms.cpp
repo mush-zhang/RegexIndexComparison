@@ -358,7 +358,8 @@ void lpms_index::LpmsIndex::build_index(int upper_n) {
         method_suffix = "RANDOM";
     } 
     log << "LPMS-" << method_suffix << "," << thread_count_ << "," << upper_n << ",";
-    log << "-1," << elapsed << ",";  // selectivity threshold, select time
+    log << "-1,"  << key_upper_bound_ << "," << k_queries_size_ << ",";
+    log << elapsed << ",";  // selectivity threshold, select time
     log << "-1," << elapsed << ",";  // build time (not applicable), overall time (== select time)
     log << get_num_keys() << "," << get_bytes_used() << ",";
     write_to_file(log.str());

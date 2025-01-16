@@ -12,7 +12,8 @@ void free_index::PresufShell::build_index(int upper_n) {
 
     std::ostringstream log;    
     log << "FREE" << k_tag_ << "," << thread_count_ << "," << upper_n << ",";
-    log  << k_threshold_ << "," << selection_time << ",";
+    log << k_threshold_ << ","  << key_upper_bound_ << "," << k_queries_size_ << ",";
+    log << selection_time << ",";
 
     start = std::chrono::high_resolution_clock::now();
     fill_posting(upper_n);

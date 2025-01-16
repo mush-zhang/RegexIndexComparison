@@ -5,6 +5,7 @@ extra=""
 
 unset -v wl_num
 unset -v dirname
+extra=""
 
 while getopts ":d:r:t:w:" opt; do
     case "${opt}" in
@@ -16,6 +17,9 @@ while getopts ":d:r:t:w:" opt; do
             ;;
         t) echo "Option -t is triggered."
             thread_list=( 1 2 4 6 8 10 12 16 )
+            ;;
+        k) echo "Option -k is triggered with value $OPTARG"
+            extra="-k ${OPTARG} "
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
             dirname=result/${OPTARG}_result
@@ -39,7 +43,7 @@ done
 : ${wl_num:?Missing -h}
 
 if [ "$wl_num" == "0" ]; then
-    extra="-r ${regex_file} -d ${data_file}"
+    extra="${extra}-r ${regex_file} -d ${data_file}"
 fi
 
 timeout_prefix="{ timeout 5h time -v "
@@ -47,8 +51,7 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-# sel_list=( 0.01 0.02 0.03 0.05 0.07 0.1 0.12 0.15 0.2 0.3 0.5 0.7)
-sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 )
+sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
 num_repeat=1
 
 # Best
@@ -66,8 +69,7 @@ for t in ${thread_list[*]}; do
     done
 done
 # Free
-# for n in 2 4 6 8 10 12 14 16; do
-for n in 2 4 6; do
+for n in 2 4 6 8 10; do
     for c in ${sel_list[*]}; do
         # curr_cmd="${timeout_prefix} ./benchmark.out FREE -t 1 -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} echo ${curr_cmd}
         #     eval "${curr_cmd}""

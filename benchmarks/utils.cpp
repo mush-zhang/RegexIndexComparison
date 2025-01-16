@@ -29,7 +29,7 @@ inline constexpr const char * kWebRegexFree = "data/webpages/regexes_webpages_fr
 inline constexpr const char * kPrositeRegex = "data/protein/prosites.txt";
 
 inline constexpr const std::string_view kSummaryHeader = 
-    "name,num_threads,gram_size,selectivity,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
+    "name,num_threads,gram_size,selectivity,key_upper_bound,num_queries,selection_time,build_time,overall_index_time,num_keys,index_size,compile_time,match_time";
 
 inline constexpr const std::string_view kExprHeader = "regex\ttime\tcount\tnum_after_filter";
 
@@ -442,7 +442,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
             // filling the empty slots
-            pi->write_to_file(",,,,,,,,,");
+            pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
         auto matcher = free_index::QueryMatcher(*pi, regexes);
@@ -453,7 +453,8 @@ void benchmarkFree(const std::filesystem::path dir_path,
 
     // open stats file
     stats_name << free_info.num_threads << "_" << free_info.upper_n;
-    stats_name << "_" << free_info.sel_threshold << "_stats.csv";
+    stats_name << "_" << free_info.sel_threshold << "_";
+    stats_name << free_info.key_upper_bound << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
     statsfile.open(stats_path, std::ios::out);
@@ -527,7 +528,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
             // filling the empty slots
-            pi->write_to_file(",,,,,,,,,");
+            pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
         auto matcher = SimpleQueryMatcher(*pi, regexes);
@@ -538,7 +539,8 @@ void benchmarkBest(const std::filesystem::path dir_path,
 
     // open stats file
     stats_name << "BEST_" << best_info.num_threads << "_" << "-1";
-    stats_name << "_" << best_info.sel_threshold << "_" << red_size << "_stats.csv";
+    stats_name << "_" << best_info.sel_threshold << "_" << red_size;
+    stats_name << "_" << best_info.key_upper_bound << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
     statsfile.open(stats_path, std::ios::out);
@@ -576,7 +578,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
             // filling the empty slots
-            pi->write_to_file(",,,,,,,,,");
+            pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
         auto matcher = SimpleQueryMatcher(*pi);
@@ -587,7 +589,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
 
     // open stats file
     stats_name << "LPMS-" << lpms_info.rtype_str << "_" << lpms_info.num_threads << "_" << "-1";
-    stats_name << "_" << "-1" << "_stats.csv";
+    stats_name << "_" << "-1" << "_" << lpms_info.key_upper_bound << "_stats.csv";
     std::filesystem::path stats_path = dir_path / stats_name.str();
     std::ofstream statsfile;
     statsfile.open(stats_path, std::ios::out);

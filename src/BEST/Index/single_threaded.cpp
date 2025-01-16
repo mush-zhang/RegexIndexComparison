@@ -564,7 +564,8 @@ void best_index::SingleThreadedIndex::select_grams(int upper_n) {
 
     std::ostringstream log;
     log << "BEST," << thread_count_ << "," << upper_n << ",";
-    log << k_threshold_ << "," << selection_time << ",";
+    log << k_threshold_ << "," << key_upper_bound_ << ",";
+    log << k_reduced_queries_size_ << "," << selection_time << ",";
     
     start = std::chrono::high_resolution_clock::now();
     // std::map<std::string, size_t> gram_to_candidate_idx_map;
