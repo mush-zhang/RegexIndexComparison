@@ -110,13 +110,13 @@ class SingleThreadedIndex  : public NGramBtreeIndex {
         size_t candidates_size,  
         size_t dataset_size,
         const std::vector<std::set<size_t>> & rg_list);
-
- private:
-    long max_iteration_ = 100000;
-
+    
     /** Helpers **/
     void workload_reduction(std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, size_t> & pre_suf_count);
+
+ private:
+    long max_iteration_ = 100000;
 
     bool index_covered(const std::set<size_t> & index, 
         const best_index::SingleThreadedIndex::job & job,
