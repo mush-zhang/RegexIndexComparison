@@ -24,5 +24,5 @@ done
 
 # DB_X
 for k in ${kups[*]}; do
-    ./run_expr_lpms.sh -w db_x
+    ./run_expr_lpms.sh -w db_x -k ${k}
 done

@@ -7,7 +7,7 @@ unset -v wl_num
 unset -v dirname
 extra=""
 
-while getopts ":d:r:t:w:" opt; do
+while getopts ":d:r:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
             data_file=$OPTARG
