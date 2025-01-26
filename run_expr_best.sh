@@ -1,12 +1,11 @@
 #! /bin/bash
 
 thread_list=( 16 )
-extra=""
 
 unset -v wl_num
 unset -v dirname
 extra=""
-
+max_num_ngram=-1
 while getopts ":d:r:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
@@ -20,6 +19,7 @@ while getopts ":d:r:t:w:k:" opt; do
             ;;
         k) echo "Option -k is triggered with value $OPTARG"
             extra="-k ${OPTARG} "
+            max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
             dirname=result/${OPTARG}_best_result
@@ -57,7 +57,7 @@ red_list=( 0.05 0.1 0.2 0.3 0.5 0.7 0.85 )
 # Best
 for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
-        curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}.txt"
+        curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}_${max_num_ngram}.txt"
         for red in ${red_list[*]}; do
             curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
@@ -68,7 +68,7 @@ for t in ${thread_list[*]}; do
                 break
             fi
         done
-        curr_suffix="${timeout_suffix}_best_t${t}_c${c}.txt"
+        curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
         curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
         echo ${curr_cmd}
         eval "${curr_cmd}"

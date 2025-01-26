@@ -1,12 +1,11 @@
 #! /bin/bash
 
 thread_list=( 16 )
-extra=""
 
 unset -v wl_num
 unset -v dirname
 extra=""
-
+max_num_ngram=-1
 while getopts ":d:r:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
@@ -20,6 +19,7 @@ while getopts ":d:r:t:w:k:" opt; do
             ;;
         k) echo "Option -k is triggered with value $OPTARG"
             extra="-k ${OPTARG} "
+            max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
             dirname=result/${OPTARG}_lpms_result
@@ -56,7 +56,7 @@ num_repeat=1
 
 # Fast
 for t in ${thread_list[*]}; do
-    curr_suffix="${timeout_suffix}_lpms_t${t}_determ.txt"
+    curr_suffix="${timeout_suffix}_lpms_t${t}_determ_${max_num_ngram}.txt"
     curr_cmd="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}"
     echo ${curr_cmd}
     eval "${curr_cmd}"
@@ -64,7 +64,7 @@ for t in ${thread_list[*]}; do
     if [ $retVal -ne 0 ]; then
         echo "Timeout"
     fi
-    curr_suffix2="${timeout_suffix}_lpms_t${t}_random.txt"
+    curr_suffix2="${timeout_suffix}_lpms_t${t}_random_${max_num_ngram}.txt"
     curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
     echo ${curr_cmd2}
     eval "${curr_cmd2}"
