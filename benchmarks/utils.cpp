@@ -471,7 +471,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
     // }
 
-    statsfile.close();
+    // statsfile.close();
 }
 
 void benchmarkBest(const std::filesystem::path dir_path, 
@@ -557,7 +557,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
     //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
     // }
 
-    statsfile.close();
+    // statsfile.close();
 }
 
 void benchmarkFast(const std::filesystem::path dir_path,
@@ -606,7 +606,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
     // }
 
-    statsfile.close();
+    // statsfile.close();
 }
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
