@@ -10,11 +10,11 @@ for k in ${kups[*]}; do
     done
 done
 
-# webpage
-kups=( 5 10 15 100 )
-for k in ${kups[*]}; do 
-    ./run_expr_lpms.sh -w webpages -k ${k}
-done
+# # webpage
+# kups=( 5 10 15 100 )
+# for k in ${kups[*]}; do 
+#     ./run_expr_lpms.sh -w webpages -k ${k}
+# done
 
 # Protein
 kups=( 50 100 200 500 1000 )
