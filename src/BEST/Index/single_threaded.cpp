@@ -114,8 +114,6 @@ best_index::SingleThreadedIndex::k_medians(
     centroids.resize(num_clusters);
     std::ranges::sample(std::views::iota(0, num_queries), centroids.begin(), 
                         num_clusters, std::mt19937{std::random_device{}()}); 
-    // std::cout << " num_clusters " << num_clusters << std::endl;
-    // std::cout << " random sample centroids " << centroids.size() << std::endl;
 
     // c_dists: index [idx of centroid in centroids] 
     //          value [distance from current node to the centroid]

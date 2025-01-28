@@ -82,5 +82,5 @@ size_t SimpleQueryMatcher::get_num_after_filter(const std::string & reg) const {
     if (get_indexed(reg, idx_list)) {
         return idx_list.size();
     }
-    return k_index_.get_dataset_size();;
+    return k_index_.get_dataset_size();
 }
