@@ -162,21 +162,23 @@ best_index::SingleThreadedIndex::k_medians(
                 std::vector<double> dist_sums(q_idxs.size(), 0);
                 for (size_t i = 0; i < q_idxs.size(); i++) {
                     for (size_t j = 0; j < q_idxs.size(); j++) {
-                        dist_sums[i] += dist_mtx[i][j];
+                        // dist_sums[i] += dist_mtx[i][j];
+                        dist_sums[i] += dist_mtx[q_idxs[i]][q_idxs[j]];
                     }
                 }
                 auto curr_c = argmin(dist_sums);
                 centroids[c_idx] = q_idxs[curr_c];
             }
-        }        
+        }
         //3.5 empty cluster, choose a random centroid
         std::set<size_t> centroids_set(centroids.begin(), centroids.end());
         for (const auto & c_idx : fillables) {
-            std::uniform_int_distribution<int> uni_rand_int(0, num_queries-1);
-            auto rng = std::mt19937{std::random_device{}()};
-            int curr_rand = uni_rand_int(rng);
-            while(centroids_set.contains(curr_rand)) {
-                curr_rand = uni_rand_int(rng);
+            std::vector<size_t> non_centroids;
+            for (size_t i = 0; i < num_queries; i++) {
+                if (!centroids_set.count(i)) non_centroids.push_back(i);
+            }
+            if (!non_centroids.empty()) {
+                centroids[c_idx] = non_centroids[uni_rand_int(rng) % non_centroids.size()];
             }
             centroids[c_idx] = curr_rand;
         }
