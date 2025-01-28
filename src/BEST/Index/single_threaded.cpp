@@ -154,9 +154,7 @@ best_index::SingleThreadedIndex::k_medians(
         // 3. compute the new median as centroids for each cluster
         for (size_t c_idx = 0; c_idx < num_clusters; c_idx++) {
             auto q_idxs = cmap[centroids[c_idx]];
-            if (q_idxs.empty() || q_idxs.size() == 1) {
-
-                // TODO: maybe keep when q_idxs.size() == 1?
+            if (q_idxs.empty()) {
                 fillables.push_back(c_idx);
             } else {
                 std::vector<double> dist_sums(q_idxs.size(), 0);
@@ -173,15 +171,27 @@ best_index::SingleThreadedIndex::k_medians(
         //3.5 empty cluster, choose a random centroid
         std::set<size_t> centroids_set(centroids.begin(), centroids.end());
         for (const auto & c_idx : fillables) {
-            std::vector<size_t> non_centroids;
-            for (size_t i = 0; i < num_queries; i++) {
-                if (!centroids_set.count(i)) non_centroids.push_back(i);
+            std::uniform_int_distribution<int> uni_rand_int(0, num_queries-1);
+            auto rng = std::mt19937{std::random_device{}()};
+            int curr_rand = uni_rand_int(rng);
+            if (centroids_set.size() * 10 > num_queries) {
+                std::vector<size_t> non_centroids;
+                for (size_t i = 0; i < num_queries; i++) {
+                    if (!centroids_set.count(i)) non_centroids.push_back(i);
+                }
+                if (!non_centroids.empty()) {
+                    centroids[c_idx] = non_centroids[curr_rand % non_centroids.size()];
+                }
+            } else {
+                while(centroids_set.contains(curr_rand)) {
+                    curr_rand = uni_rand_int(rng);
+                }
             }
-            if (!non_centroids.empty()) {
-                centroids[c_idx] = non_centroids[uni_rand_int(rng) % non_centroids.size()];
-            }
+
             centroids[c_idx] = curr_rand;
         }
+
+        
     }
     return cmap;
 }
