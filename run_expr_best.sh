@@ -51,9 +51,10 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
+# sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
+sel_list=( 0.7 0.5 0.2 0.1 0.05 0.02 )
 num_repeat=1
-red_list=( 0.05 0.1 0.2 0.3 0.5 0.7 0.85 )
+red_list=( 0.05 0.2 0.5 0.85 )
 # Best
 for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
