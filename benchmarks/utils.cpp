@@ -452,26 +452,26 @@ void benchmarkFree(const std::filesystem::path dir_path,
 
     outfile.close();
 
-    // // open stats file
-    // stats_name << free_info.num_threads << "_" << free_info.upper_n;
-    // stats_name << "_" << free_info.sel_threshold << "_";
-    // stats_name << free_info.key_upper_bound << "_stats.csv";
-    // std::filesystem::path stats_path = dir_path / stats_name.str();
-    // std::ofstream statsfile;
-    // statsfile.open(stats_path, std::ios::out);
-    // statsfile << kExprHeader << std::endl;
-    // pi->set_outfile(statsfile);
+    // open stats file
+    stats_name << free_info.num_threads << "_" << free_info.upper_n;
+    stats_name << "_" << free_info.sel_threshold << "_";
+    stats_name << free_info.key_upper_bound << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
 
-    // auto matcher = free_index::QueryMatcher(*pi, regexes, false);
+    auto matcher = free_index::QueryMatcher(*pi, regexes, false);
 
-    // // Get individual stats
-    // for (const auto & regex : regexes) {
-    //     statsfile << regex << "\t";
-    //     matcher.match_one(regex);
-    //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    // }
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
 
-    // statsfile.close();
+    statsfile.close();
 }
 
 void benchmarkBest(const std::filesystem::path dir_path, 
@@ -538,26 +538,26 @@ void benchmarkBest(const std::filesystem::path dir_path,
 
     outfile.close();
 
-    // // open stats file
-    // stats_name << "BEST_" << best_info.num_threads << "_" << "-1";
-    // stats_name << "_" << best_info.sel_threshold << "_" << red_size;
-    // stats_name << "_" << best_info.key_upper_bound << "_stats.csv";
-    // std::filesystem::path stats_path = dir_path / stats_name.str();
-    // std::ofstream statsfile;
-    // statsfile.open(stats_path, std::ios::out);
-    // statsfile << kExprHeader << std::endl;
-    // pi->set_outfile(statsfile);
+    // open stats file
+    stats_name << "BEST_" << best_info.num_threads << "_" << "-1";
+    stats_name << "_" << best_info.sel_threshold << "_" << red_size;
+    stats_name << "_" << best_info.key_upper_bound << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
 
-    // auto matcher = SimpleQueryMatcher(*pi, false);
+    auto matcher = SimpleQueryMatcher(*pi, false);
 
-    // // Get individual stats
-    // for (const auto & regex : regexes) {
-    //     statsfile << regex << "\t";
-    //     matcher.match_one(regex);
-    //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    // }
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
 
-    // statsfile.close();
+    statsfile.close();
 }
 
 void benchmarkFast(const std::filesystem::path dir_path,
@@ -588,25 +588,25 @@ void benchmarkFast(const std::filesystem::path dir_path,
 
     outfile.close();
 
-    // // open stats file
-    // stats_name << "LPMS-" << lpms_info.rtype_str << "_" << lpms_info.num_threads << "_" << "-1";
-    // stats_name << "_" << "-1" << "_" << lpms_info.key_upper_bound << "_stats.csv";
-    // std::filesystem::path stats_path = dir_path / stats_name.str();
-    // std::ofstream statsfile;
-    // statsfile.open(stats_path, std::ios::out);
-    // statsfile << kExprHeader << std::endl;
-    // pi->set_outfile(statsfile);
+    // open stats file
+    stats_name << "LPMS-" << lpms_info.rtype_str << "_" << lpms_info.num_threads << "_" << "-1";
+    stats_name << "_" << "-1" << "_" << lpms_info.key_upper_bound << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
 
-    // auto matcher = SimpleQueryMatcher(*pi, false);
+    auto matcher = SimpleQueryMatcher(*pi, false);
 
-    // // Get individual stats
-    // for (const auto & regex : regexes) {
-    //     statsfile << regex << "\t";
-    //     matcher.match_one(regex);
-    //     statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    // }
+    // Get individual stats
+    for (const auto & regex : regexes) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
 
-    // statsfile.close();
+    statsfile.close();
 }
 
 template std::pair<int, int> getStats(std::vector<int> & arr);
