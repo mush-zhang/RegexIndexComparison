@@ -108,7 +108,7 @@ best_index::SingleThreadedIndex::k_medians(
         int num_queries, int num_clusters) {
 
     // 1. randomly pick k queries as centroids
-    std::vector<size_t> centroids;
+    std::vector<int> centroids;
     // Note: random sample function from here: https://stackoverflow.com/a/73133364
     //       does it perform better than pre-buidling the 0-k_query_size_ array?
     centroids.resize(num_clusters);
@@ -156,6 +156,7 @@ best_index::SingleThreadedIndex::k_medians(
             auto q_idxs = cmap[centroids[c_idx]];
             if (q_idxs.empty()) {
                 fillables.push_back(c_idx);
+                centroids[c_idx] = -1;
             } else {
                 std::vector<double> dist_sums(q_idxs.size(), 0);
                 for (size_t i = 0; i < q_idxs.size(); i++) {
