@@ -171,28 +171,37 @@ best_index::SingleThreadedIndex::k_medians(
         }
         //3.5 empty cluster, choose a random centroid
         std::set<size_t> centroids_set(centroids.begin(), centroids.end());
-        for (const auto & c_idx : fillables) {
-            std::uniform_int_distribution<int> uni_rand_int(0, num_queries-1);
-            auto rng = std::mt19937{std::random_device{}()};
-            int curr_rand = uni_rand_int(rng);
-            if (centroids_set.size() * 10 > num_queries) {
-                std::vector<size_t> non_centroids;
-                for (size_t i = 0; i < num_queries; i++) {
-                    if (!centroids_set.count(i)) non_centroids.push_back(i);
-                }
+
+        if (centroids_set.size() * 10 > num_queries) {
+            std::vector<size_t> non_centroids;
+            for (size_t i = 0; i < num_queries; i++) {
+                if (!centroids_set.count(i)) non_centroids.push_back(i);
+            }
+
+            for (const auto & c_idx : fillables) {
+                std::uniform_int_distribution<int> uni_rand_int(0, non_centroids.size()-1);
+                auto rng = std::mt19937{std::random_device{}()};
+                int curr_rand = uni_rand_int(rng);
                 if (!non_centroids.empty()) {
-                    centroids[c_idx] = non_centroids[curr_rand % non_centroids.size()];
+                    curr_rand = non_centroids[curr_rand];
+                    // Remove selected from non_centroids to avoid duplicates
+                    non_centroids.erase(std::remove(non_centroids.begin(), non_centroids.end(), curr_rand), non_centroids.end());
                 }
-            } else {
+                centroids[c_idx] = curr_rand;
+                centroids_set.insert(curr_rand);
+            }
+        } else {
+            for (const auto & c_idx : fillables) {
+                std::uniform_int_distribution<int> uni_rand_int(0, num_queries-1);
+                auto rng = std::mt19937{std::random_device{}()};
+                int curr_rand = uni_rand_int(rng);
                 while(centroids_set.contains(curr_rand)) {
                     curr_rand = uni_rand_int(rng);
                 }
+                centroids[c_idx] = curr_rand;
+                centroids_set.insert(curr_rand);
             }
-
-            centroids[c_idx] = curr_rand;
         }
-
-        
     }
     return cmap;
 }
