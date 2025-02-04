@@ -6,6 +6,7 @@ extra=""
 unset -v wl_num
 unset -v dirname
 extra=""
+max_num_ngram=-1
 
 while getopts ":d:r:t:w:k:" opt; do
     case "${opt}" in
@@ -20,6 +21,7 @@ while getopts ":d:r:t:w:k:" opt; do
             ;;
         k) echo "Option -k is triggered with value $OPTARG"
             extra="-k ${OPTARG} "
+            max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
             dirname=result/${OPTARG}_free_result
@@ -58,7 +60,7 @@ num_repeat=1
 for n in 2 4 6 8 10; do
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
-            curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}.txt"
+            curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
 
             curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
@@ -68,6 +70,7 @@ for n in 2 4 6 8 10; do
                 echo "Timeout"
                 break
             fi
+            curr_suffix="${timeout_suffix}_free-presuf_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
 
             curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
             echo ${curr_cmd}

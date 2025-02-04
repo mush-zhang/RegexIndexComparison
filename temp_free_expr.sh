@@ -4,30 +4,30 @@
 # kups=( 20 50 100 150 200 500 1000 2000 )
 # for k in ${kups[*]}; do
 #     for qcount in 1000 2000; do
-#         ./run_expr_lpms.sh -w dblp_small_${qcount} \
+#         ./run_expr_free.sh -w dblp_small_${qcount} \
 #         -r data/dblp/small/query${qcount}.txt \
 #         -d data/dblp/small/authors.txt -k ${k}
 #     done
 # done
 
-# # webpage
-# kups=( 5 10 15 100 )
-# for k in ${kups[*]}; do 
-#     ./run_expr_lpms.sh -w webpages -k ${k}
-# done
-
-# Protein
-kups=( 50 100 200 500 1000 )
-for k in ${kups[*]}; do
-    ./run_expr_lpms.sh -w protein -k ${k}
+# webpage
+kups=( 5 10 15 100 )
+for k in ${kups[*]}; do 
+    ./run_expr_free.sh -w webpages -k ${k}
 done
+
+# # Protein
+kups=( 50 100 200 500 1000 )
+# for k in ${kups[*]}; do
+#     ./run_expr_free.sh -w protein -k ${k}
+# done
 
 # DB_X
 for k in ${kups[*]}; do
-    ./run_expr_lpms.sh -w db_x -k ${k}
+    ./run_expr_free.sh -w db_x -k ${k}
 done
 
 # traffic
 for k in 5 10 15; do
-    ./run_expr_lpmssh -w traffic  -k ${k}
+    ./run_expr_free.sh -w traffic  -k ${k}
 done

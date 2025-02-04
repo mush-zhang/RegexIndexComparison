@@ -26,3 +26,9 @@ done
 # for k in ${kups[*]}; do
 #     ./run_expr_best.sh -w db_x  -k ${k}
 # done
+
+
+# traffic
+for k in 5 10 15; do
+    ./run_expr_best.sh -w traffic  -k ${k}
+done
