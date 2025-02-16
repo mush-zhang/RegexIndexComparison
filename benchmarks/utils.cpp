@@ -131,7 +131,7 @@ int parseArgs(int argc, char ** argv,
     if (!max_key_string.empty()) {
         max_key = std::stol(max_key_string);
     }
-    auto expr_info.test_reg_file = getCmdOption(argv, argv + argc, "--test");
+    expr_info.test_reg_file = getCmdOption(argv, argv + argc, "--test");
 
     auto thread_string = getCmdOption(argv, argv + argc, "-t");
     int thread_count = 0;
