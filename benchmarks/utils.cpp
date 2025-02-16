@@ -419,9 +419,9 @@ std::ofstream open_summary(const std::filesystem::path & dir_path) {
 }
 
 void benchmarkFree(const std::filesystem::path dir_path, 
-                   const std::vector<std::string> regexes, 
-                   const std::vector<std::string> test_regexes, 
-                   const std::vector<std::string> lines,
+                   const std::vector<std::string> & regexes, 
+                   const std::vector<std::string> & test_regexes, 
+                   const std::vector<std::string> & lines,
                    const free_info & free_info) {
     std::ofstream outfile = open_summary(dir_path);
 
@@ -486,9 +486,9 @@ void benchmarkFree(const std::filesystem::path dir_path,
 }
 
 void benchmarkBest(const std::filesystem::path dir_path, 
-                   const std::vector<std::string> regexes, 
-                   const std::vector<std::string> test_regexes, 
-                   const std::vector<std::string> lines,
+                   const std::vector<std::string> & regexes, 
+                   const std::vector<std::string> & test_regexes, 
+                   const std::vector<std::string> & lines,
                    const best_info & best_info) {
     if (best_info.wl_reduced_size > int(regexes.size())) {
         std::cerr << best_info.wl_reduced_size << " " << regexes.size() << std::endl;
@@ -578,9 +578,9 @@ void benchmarkBest(const std::filesystem::path dir_path,
 }
 
 void benchmarkFast(const std::filesystem::path dir_path,
-                   const std::vector<std::string> regexes, 
-                   const std::vector<std::string> test_regexes, 
-                   const std::vector<std::string> lines,
+                   const std::vector<std::string> & regexes, 
+                   const std::vector<std::string> & test_regexes, 
+                   const std::vector<std::string> & lines,
                    const lpms_info & lpms_info) {
 
     std::ofstream outfile = open_summary(dir_path);
