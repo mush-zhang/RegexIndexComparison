@@ -29,7 +29,7 @@ done
 
 # traffic
 for k in 5 10 15; do
-    ./run_expr_lpmssh -w traffic  -k ${k}
+    ./run_expr_lpms.sh -w traffic  -k ${k}
 done
 
 # robust
