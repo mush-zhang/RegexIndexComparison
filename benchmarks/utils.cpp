@@ -131,6 +131,7 @@ int parseArgs(int argc, char ** argv,
     if (!max_key_string.empty()) {
         max_key = std::stol(max_key_string);
     }
+    auto expr_info.test_reg_file = getCmdOption(argv, argv + argc, "--test");
 
     auto thread_string = getCmdOption(argv, argv + argc, "-t");
     int thread_count = 0;
@@ -345,6 +346,7 @@ std::vector<std::string> read_directory(const std::string & file_type,
 
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
+                 std::vector<std::string> & test_regexes, 
                  std::vector<std::string> & lines,
                  int max_lines) {
     switch (expr_info.wl) {
@@ -372,6 +374,9 @@ int readWorkload(const expr_info & expr_info,
         default:
             regexes = read_file("regex", expr_info.reg_file);
             lines = read_file("data", expr_info.data_file, max_lines);
+    }
+    if (!expr_info.test_reg_file.empty()) {
+        test_regexes = read_file("regex", expr_info.test_reg_file);
     }
 
     std::cout << "read workload end." << std::endl;
@@ -415,6 +420,7 @@ std::ofstream open_summary(const std::filesystem::path & dir_path) {
 
 void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
+                   const std::vector<std::string> test_regexes, 
                    const std::vector<std::string> lines,
                    const free_info & free_info) {
     std::ofstream outfile = open_summary(dir_path);
@@ -439,6 +445,11 @@ void benchmarkFree(const std::filesystem::path dir_path,
     pi->set_outfile(outfile);
     pi->build_index(free_info.upper_n);
 
+    auto tr = regexes;
+    if (!test_regexes.empty()) {
+        tr = test_regexes;
+    }
+
     for (size_t i = 0; i < free_info.num_repeat; i++) {
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
@@ -446,7 +457,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
             pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
-        auto matcher = free_index::QueryMatcher(*pi, regexes);
+        auto matcher = free_index::QueryMatcher(*pi, tr);
         matcher.match_all();
     }
 
@@ -462,7 +473,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     statsfile << kExprHeader << std::endl;
     pi->set_outfile(statsfile);
 
-    auto matcher = free_index::QueryMatcher(*pi, regexes, false);
+    auto matcher = free_index::QueryMatcher(*pi, tr, false);
 
     // Get individual stats
     for (const auto & regex : regexes) {
@@ -476,6 +487,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
 
 void benchmarkBest(const std::filesystem::path dir_path, 
                    const std::vector<std::string> regexes, 
+                   const std::vector<std::string> test_regexes, 
                    const std::vector<std::string> lines,
                    const best_info & best_info) {
     if (best_info.wl_reduced_size > int(regexes.size())) {
@@ -525,6 +537,11 @@ void benchmarkBest(const std::filesystem::path dir_path,
     pi->set_outfile(outfile);
     pi->build_index();
 
+    auto tr = regexes;
+    if (!test_regexes.empty()) {
+        tr = test_regexes;
+    }
+
     for (size_t i = 0; i < best_info.num_repeat; i++) {
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
@@ -532,7 +549,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
             pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
-        auto matcher = SimpleQueryMatcher(*pi, regexes);
+        auto matcher = SimpleQueryMatcher(*pi, tr);
         matcher.match_all();
     }
 
@@ -548,7 +565,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
     statsfile << kExprHeader << std::endl;
     pi->set_outfile(statsfile);
 
-    auto matcher = SimpleQueryMatcher(*pi, false);
+    auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
     // Get individual stats
     for (const auto & regex : regexes) {
@@ -562,6 +579,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
 
 void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> regexes, 
+                   const std::vector<std::string> test_regexes, 
                    const std::vector<std::string> lines,
                    const lpms_info & lpms_info) {
 
@@ -575,6 +593,11 @@ void benchmarkFast(const std::filesystem::path dir_path,
     pi->set_outfile(outfile);
     pi->build_index();
 
+    auto tr = regexes;
+    if (!test_regexes.empty()) {
+        tr = test_regexes;
+    }
+
     for (size_t i = 0; i < lpms_info.num_repeat; i++) {
         if (i >= kNumIndexBuilding) {
             // not re-running the time consuming index afterwards,
@@ -582,7 +605,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
             pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
-        auto matcher = SimpleQueryMatcher(*pi);
+        auto matcher = SimpleQueryMatcher(*pi, tr);
         matcher.match_all();
     }
 
@@ -597,7 +620,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     statsfile << kExprHeader << std::endl;
     pi->set_outfile(statsfile);
 
-    auto matcher = SimpleQueryMatcher(*pi, false);
+    auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
     // Get individual stats
     for (const auto & regex : regexes) {

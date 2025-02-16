@@ -29,11 +29,12 @@ int main(int argc, char** argv) {
     }
 
     std::vector<std::string> regexes;
+    std::vector<std::string> test_regexes;
     std::vector<std::string> lines;
 #ifdef NDEBUG
-    status = readWorkload(expr_info, regexes, lines);
+    status = readWorkload(expr_info, regexes, test_regexes, lines);
 #else
-    status = readWorkload(expr_info, regexes, lines, 100000);
+    status = readWorkload(expr_info, regexes, test_regexes, lines, 100000);
 #endif
 
     if (status == EXIT_FAILURE) {
@@ -44,20 +45,16 @@ int main(int argc, char** argv) {
 
     switch (expr_info.stype) {
         case selection_type::kFree: 
-            benchmarkFree(dir_path, regexes, lines, free_info);
+            benchmarkFree(dir_path, regexes, test_regexes, lines, free_info);
             break;
         case selection_type::kBest:
-            benchmarkBest(dir_path, regexes, lines, best_info);
+            benchmarkBest(dir_path, regexes, test_regexes, lines, best_info);
             break;
         case selection_type::kFast:
-            benchmarkFast(dir_path, regexes, lines, lpms_info);
+            benchmarkFast(dir_path, regexes, test_regexes, lines, lpms_info);
             break;
         default:
             // should not have reached here.
             return EXIT_FAILURE;
     } 
-
-    // start running! 
-
-    // run_end_to_end(regexes, lines);
 }

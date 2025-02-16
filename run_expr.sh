@@ -7,10 +7,13 @@ unset -v wl_num
 unset -v dirname
 extra=""
 
-while getopts ":d:r:t:w:k:" opt; do
+while getopts ":d:r:q:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
             data_file=$OPTARG
+            ;;
+        q) echo "Option -q is triggered  with value $OPTARG"
+            extra="--test ${OPTARG} "
             ;;
         r) echo "Option -r is triggered with value $OPTARG"
             regex_file=$OPTARG
@@ -59,7 +62,7 @@ for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
         curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}.txt"
         for red in ${red_list[*]}; do
-            curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
+            curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} --wl_reduce ${red} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
             eval "${curr_cmd}"
             retVal=$?

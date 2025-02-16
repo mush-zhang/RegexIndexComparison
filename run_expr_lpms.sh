@@ -6,13 +6,16 @@ unset -v wl_num
 unset -v dirname
 extra=""
 max_num_ngram=-1
-while getopts ":d:r:t:w:k:" opt; do
+while getopts ":d:r:q:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
             data_file=$OPTARG
             ;;
         r) echo "Option -r is triggered with value $OPTARG"
             regex_file=$OPTARG
+            ;;
+        q) echo "Option -q is triggered  with value $OPTARG"
+            extra="--test ${OPTARG} "
             ;;
         t) echo "Option -t is triggered."
             thread_list=( 16 12 10 8 6 4 2 1 )

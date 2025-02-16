@@ -23,6 +23,8 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t                        \t 0 for customized workload (path to regex and data files required). \n\
     \t -r [path] \t Path to the list of regex queries. \n\
     \t           \t Each line of the file is considered a regex query. \n\
+    \t --test [path] \t Path to the list of regex queries for matching only. \n\
+    \t           \t The index will be built with the regex queries specified by -w or -r. \n\    
     \t -d [path] \t Path to the list of data to be queried upon. \n\
     \t           \t Each line of the file is considered an individual (log) line. \n\
     \t -o [path], required \t Path to directory holding all output files.\n\
@@ -48,6 +50,7 @@ struct expr_info {
     selection_type stype;
     int wl;
     std::string reg_file = "";
+    std::string test_reg_file = "";
     std::string data_file = "";
     std::string out_dir;
 };
