@@ -21,13 +21,16 @@
 # # # traffic
 
 # traffic
-./run_expr_free.sh -w traffic
+# ./run_expr_free.sh -w traffic
 
-# trafficdir=result/missing_traffic_result
+trafficdir=result/missing_traffic_result
 # mkdir ${trafficdir}
+
+{ timeout 3h time -v ./benchmark.out FREE -t 16 -w 1 -o ${trafficdir} -n 2 -c 0.7 -e 10 ; } 2> ${trafficdir}/time_report_free_t16_c0.7_n2_-1.txt
 
 # { timeout 3h time -v ./benchmark.out FREE -t 16 -w 1 -o ${trafficdir} -n 2 -c 0.7 -e 1 ; } 2> ${trafficdir}/time_report_free_t16_c0.7_n2_-1.txt
 
-# { timeout 3h time -v ./benchmark.out FREE -t 16 -w 1 -o ${trafficdir} -n 4 -c 0.3 -e 1 ; } 2> ${trafficdir}/time_report_free_t16_c0.3_n4_-1.txt
+{ timeout 3h time -v ./benchmark.out FREE -t 16 -w 1 -o ${trafficdir} -n 4 -c 0.3 -e 10 ; } 2> ${trafficdir}/time_report_free_t16_c0.3_n4_-1.txt
 
+{ timeout 3h time -v ./benchmark.out FREE -t 10 -w 1 -o ${trafficdir} -n 4 -c 0.3 -e 10 ; } 2> ${trafficdir}/time_report_free_t16_c0.3_n4_-1.txt
 # # robust
