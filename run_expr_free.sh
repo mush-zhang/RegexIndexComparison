@@ -60,7 +60,8 @@ sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
 num_repeat=1
 
 # Free
-for n in 2 4 6 8 10; do
+# for n in 2 4 6 8 10; do
+for n in 2 4 6; do
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
