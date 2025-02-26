@@ -13,7 +13,7 @@
 #     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_500.txt
 #kups=( 20 50 100 150 200 500 1000 2000 )
 
-kups=( 150 500 )
+kups=( 500 )
 for k in ${kups[*]}; do
     for qcount in 1000; do
         ./run_expr_free.sh -w dblp_small_${qcount} \
@@ -27,6 +27,7 @@ for kval in 30 20 10; do
     ./run_expr_best.sh -w webpages -k ${kval}
     ./run_expr_lpms.sh -w webpages -k ${kval}
 done
+
 
 # # Protein
 
@@ -51,3 +52,29 @@ done
 
 # { timeout 3h time -v ./benchmark.out FREE -t 10 -w 1 -o ${trafficdir} -n 4 -c 0.3 -e 10 ; } 2> ${trafficdir}/time_report_free_t10_c0.3_n4_-1.txt
 # # # robust
+for rob_wl in 1 2 3 4; do
+    for perc in 10 30 50; do
+        ./run_expr_best.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
+    done
+done
+
+for rob_wl in 1 2 3 4; do
+    for perc in 10 30 50; do
+        ./run_expr_free.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
+    done
+done
+
+for rob_wl in 1 2 3 4; do
+    for perc in 10 30 50; do
+        ./run_expr_lpms.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
+    done
+done
