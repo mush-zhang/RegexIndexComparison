@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # # dblp
-dblpdir=result/missing_dblp_result2
-mkdir ${dblpdir}
-{ timeout 3h time -v ./benchmark.out BEST -t 16 -w 0 -o ${dblpdir} -c 0.5 -e 10 -k 150 \
-    -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report__best_t16_c0.5_150.txt
+# dblpdir=result/missing_dblp_result2
+# mkdir ${dblpdir}
+# { timeout 3h time -v ./benchmark.out BEST -t 16 -w 0 -o ${dblpdir} -c 0.5 -e 10 -k 150 \
+#     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report__best_t16_c0.5_150.txt
 
 # { timeout 3h time -v ./benchmark.out LPMS -t 16 -w 0 -o ${dblpdir} --relax DETERM -e 1 -k 150 \
 #     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_150.txt
@@ -13,7 +13,7 @@ mkdir ${dblpdir}
 #     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_500.txt
 #kups=( 20 50 100 150 200 500 1000 2000 )
 
-kups = ( 150 500 )
+kups=( 150 500 )
 for k in ${kups[*]}; do
     for qcount in 1000; do
         ./run_expr_free.sh -w dblp_small_${qcount} \
