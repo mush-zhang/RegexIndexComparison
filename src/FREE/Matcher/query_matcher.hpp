@@ -26,7 +26,7 @@ class QueryMatcher {
         assert(!k_queries_.empty() &&
             "If the index has no regexes, pass in the regex set as second parameter");
         if (compile) {
-            compile_all_queries(k_index_, false);
+            compile_all_queries(k_queries_, false);
         }
     }
     std::vector<long> match_all() {
