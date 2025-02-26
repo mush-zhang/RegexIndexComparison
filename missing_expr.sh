@@ -4,7 +4,7 @@
 dblpdir=result/missing_dblp_result2
 mkdir ${dblpdir}
 { timeout 3h time -v ./benchmark.out BEST -t 16 -w 0 -o ${dblpdir} -c 0.5 -e 10 -k 150 \
-    -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_150.txt _best_t$16_c0.5_150.txt
+    -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report__best_t16_c0.5_150.txt
 
 # { timeout 3h time -v ./benchmark.out LPMS -t 16 -w 0 -o ${dblpdir} --relax DETERM -e 1 -k 150 \
 #     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_150.txt
