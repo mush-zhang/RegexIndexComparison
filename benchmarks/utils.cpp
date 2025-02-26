@@ -479,7 +479,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     auto matcher = free_index::QueryMatcher(*pi, tr, false);
 
     // Get individual stats
-    for (const auto & regex : regexes) {
+    for (const auto & regex : tr) {
         statsfile << regex << "\t";
         matcher.match_one(regex);
         statsfile << matcher.get_num_after_filter(regex) << std::endl;
@@ -571,7 +571,7 @@ void benchmarkBest(const std::filesystem::path dir_path,
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
     // Get individual stats
-    for (const auto & regex : regexes) {
+    for (const auto & regex : tr) {
         statsfile << regex << "\t";
         matcher.match_one(regex);
         statsfile << matcher.get_num_after_filter(regex) << std::endl;
@@ -626,7 +626,7 @@ void benchmarkFast(const std::filesystem::path dir_path,
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
     // Get individual stats
-    for (const auto & regex : regexes) {
+    for (const auto & regex : tr) {
         statsfile << regex << "\t";
         matcher.match_one(regex);
         statsfile << matcher.get_num_after_filter(regex) << std::endl;

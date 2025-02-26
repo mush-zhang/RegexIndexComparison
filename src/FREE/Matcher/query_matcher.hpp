@@ -20,9 +20,17 @@ class QueryMatcher {
             compile_all_queries(regs);
         }
     }
-
+    QueryMatcher(const MultigramIndex & index, 
+                bool compile=true) 
+                : k_index_(index), k_queries_(k_index_.get_queries()) {
+        assert(!k_queries_.empty() &&
+            "If the index has no regexes, pass in the regex set as second parameter");
+        if (compile) {
+            compile_all_queries(k_index_, false);
+        }
+    }
     std::vector<long> match_all() {
-        if (reg_evals_.size() < k_queries_.size()) {
+        if (reg_evals_.empty()) {
             compile_all_queries(k_queries_, false);
         }
         auto start = std::chrono::high_resolution_clock::now();
@@ -47,7 +55,6 @@ class QueryMatcher {
         long count = match_one_helper(parser, regex);
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-        // std::cout << "[" << reg << "] : " << count << std::endl;
 
         std::ostringstream log;
         log << elapsed << "\t" << count << "\t";

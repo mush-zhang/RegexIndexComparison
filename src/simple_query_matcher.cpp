@@ -42,9 +42,10 @@ long SimpleQueryMatcher::match_one_helper(
 }
 
 std::vector<long> SimpleQueryMatcher::match_all() {
-    if (reg_evals_.size() < k_index_.get_queries().size()) {
+    if (reg_evals_.empty()) {
         compile_all_queries(k_index_.get_queries(), false);
     }
+
     auto start = std::chrono::high_resolution_clock::now();
     std::vector<long> counts;
     counts.reserve(reg_evals_.size());
