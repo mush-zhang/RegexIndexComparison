@@ -27,7 +27,7 @@ for kval in 30 20 10; do
     ./run_expr_best.sh -w webpages -k ${kval}
     ./run_expr_lpms.sh -w webpages -k ${kval}
 done
-
+# all not finished
 
 # # Protein
 
