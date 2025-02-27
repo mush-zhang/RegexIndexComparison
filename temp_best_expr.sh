@@ -22,10 +22,11 @@
 #     ./run_expr_best.sh -w protein -k ${k}
 # done
 
-# # DB_X
-# for k in ${kups[*]}; do
-#     ./run_expr_best.sh -w db_x  -k ${k}
-# done
+# DB_X
+kups=( 50 100 200 500 1000 )
+for k in ${kups[*]}; do
+    ./run_expr_best.sh -w db_x  -k ${k}
+done
 
 
 # # traffic
@@ -33,12 +34,12 @@
 #     ./run_expr_best.sh -w traffic  -k ${k}
 # done
 
-# robust
-for rob_wl in 1 2 3 4; do
-    for perc in 10 30 50; do
-        ./run_expr_best.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
-        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
-        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
-        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
-    done
-done
+# # robust
+# for rob_wl in 1 2 3 4; do
+#     for perc in 10 30 50; do
+#         ./run_expr_best.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+#         -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+#         -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+#         -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
+#     done
+# done

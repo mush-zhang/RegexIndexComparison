@@ -25,7 +25,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
-            dirname=result/${OPTARG}_best_result2
+            dirname=result/${OPTARG}_best_result3
             echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
