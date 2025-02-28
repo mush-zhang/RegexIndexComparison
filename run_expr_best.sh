@@ -59,20 +59,20 @@ sel_list=( 0.7 0.5 0.2 0.1 0.05 0.02 )
 num_repeat=1
 # red_list=( 0.05 0.2 0.5 0.85 )
 red_list=( 0.1 0.2 0.5 0.85 )
-# Best
-# for t in ${thread_list[*]}; do
-#     for c in ${sel_list[*]}; do
-#         curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
-#         curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-#         echo ${curr_cmd}
-#         eval "${curr_cmd}"
-#         retVal=$?
-#         if [ $retVal -ne 0 ]; then
-#             echo "Timeout"
-#             break
-#         fi
-#     done
-# done
+Best
+for t in ${thread_list[*]}; do
+    for c in ${sel_list[*]}; do
+        curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
+        curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+        echo ${curr_cmd}
+        eval "${curr_cmd}"
+        retVal=$?
+        if [ $retVal -ne 0 ]; then
+            echo "Timeout"
+            break
+        fi
+    done
+done
 
 for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
