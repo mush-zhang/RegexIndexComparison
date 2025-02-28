@@ -103,7 +103,7 @@
 # done
 
 rob_wl=4
-prec=10
+perc=10
 ./run_expr_best.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
         -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
         -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
