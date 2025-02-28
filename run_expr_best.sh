@@ -74,18 +74,18 @@ for t in ${thread_list[*]}; do
     done
 done
 
-for t in ${thread_list[*]}; do
-    for c in ${sel_list[*]}; do
-        curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}_${max_num_ngram}.txt"
-        for red in ${red_list[*]}; do
-            curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
-            echo ${curr_cmd}
-            eval "${curr_cmd}"
-            retVal=$?
-            if [ $retVal -ne 0 ]; then
-                echo "Timeout"
-                break
-            fi
-        done
-    done
-done
+# for t in ${thread_list[*]}; do
+#     for c in ${sel_list[*]}; do
+#         curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}_${max_num_ngram}.txt"
+#         for red in ${red_list[*]}; do
+#             curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
+#             echo ${curr_cmd}
+#             eval "${curr_cmd}"
+#             retVal=$?
+#             if [ $retVal -ne 0 ]; then
+#                 echo "Timeout"
+#                 break
+#             fi
+#         done
+#     done
+# done
