@@ -30,8 +30,8 @@
 # all not finished
 
 # # Protein
-./run_expr_best.sh -w protein -k 30
 ./run_expr_lpms.sh -w protein -k 30
+./run_expr_best.sh -w protein -k 30
 
 # # DB_X
 # dbxdir=result/missing_dbx_result
