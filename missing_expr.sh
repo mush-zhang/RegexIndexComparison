@@ -30,8 +30,8 @@
 # all not finished
 
 # # Protein
-./run_expr_lpms.sh -w protein -k 30
-./run_expr_best.sh -w protein -k 30
+# ./run_expr_lpms.sh -w protein -k 30
+# ./run_expr_best.sh -w protein -k 30
 
 # # DB_X
 # dbxdir=result/missing_dbx_result
@@ -80,3 +80,23 @@
 #         -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
 #     done
 # done
+
+for k in 20 50 100 300; do
+    rob_wl=4
+    for perc in 10 30 50; do
+        ./run_expr_lpms.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt -k ${k}
+
+        ./run_expr_free.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt -k ${k}
+
+        ./run_expr_best.sh -w synthetic_expr4_rob0${rob_wl}_${perc} \
+        -r data/synthetic/expr4/queries/Rob0${rob_wl}_queries_${perc}pct.txt \
+        -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
+        -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt -k ${k}
+    done
+done
