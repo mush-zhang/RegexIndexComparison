@@ -59,7 +59,7 @@ sel_list=( 0.7 0.5 0.2 0.1 0.05 0.02 )
 num_repeat=1
 # red_list=( 0.05 0.2 0.5 0.85 )
 red_list=( 0.1 0.2 0.5 0.85 )
-Best
+# Best
 for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
         curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
