@@ -54,7 +54,7 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-num_repeat=1
+num_repeat=10
 
 # Fast
 for t in ${thread_list[*]}; do
