@@ -60,8 +60,8 @@ sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
 num_repeat=10
 
 # Free
-# for n in 2 4 6 8 10; do
-for n in 2 4 6; do
+for n in 2 4 6 8 10; do
+# for n in 2 4 6; do
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
@@ -74,16 +74,16 @@ for n in 2 4 6; do
                 echo "Timeout"
                 break
             fi
-            # curr_suffix="${timeout_suffix}_free-presuf_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
+            curr_suffix="${timeout_suffix}_free-presuf_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
 
-            # curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-            # echo ${curr_cmd}
-            # eval "${curr_cmd}"
-            # retVal=$?
-            # if [ $retVal -ne 0 ]; then
-            #     echo "Timeout"
-            #     break
-            # fi
+            curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+            echo ${curr_cmd}
+            eval "${curr_cmd}"
+            retVal=$?
+            if [ $retVal -ne 0 ]; then
+                echo "Timeout"
+                break
+            fi
         done
     done
 done
