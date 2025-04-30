@@ -34,6 +34,8 @@ class NGramIndex {
 
     virtual void print_index(bool size_only=false) const = 0;
     
+    virtual void wirte_index_keys_to_file(const std::filesystem::path & out_path) const = 0;
+
     virtual const std::vector<size_t> & get_line_pos_at(const std::string & key)  const = 0;
 
     const std::vector<std::string> & get_dataset() const {

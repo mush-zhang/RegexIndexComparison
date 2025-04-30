@@ -44,6 +44,16 @@ void NGramInvertedIndex::print_index(bool size_only) const {
     }
 }
 
+void NGramInvertedIndex::wirte_index_keys_to_file(const std::filesystem::path & out_path) const override {
+    std::ofstream outfile;
+    // write header
+    outfile.open(out_path, std::ios::out);
+    for (const auto & k : k_index_keys_) {
+        outfile << k << std::endl;
+    }
+    outfile.close();
+}
+
 const std::vector<size_t> & NGramInvertedIndex::get_line_pos_at(
         const std::string & key) const { 
     if (auto it = k_index_.find(key); it != k_index_.end()) {
