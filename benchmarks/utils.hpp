@@ -12,7 +12,7 @@ inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'LPMS', 'BEST', 'FREE'. \n\
+    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'NONE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0|1|2|3], required \t Workload used. \n\
@@ -44,7 +44,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t --relax [DETERM|RANDOM], required \t Type of relaxation method.";
 /*-------------------------------------------------------------------------------------------------------------------*/
 
-enum selection_type { kFast, kBest, kFree, kInvalid };
+enum selection_type { kFast, kBest, kFree, kNone, kInvalid };
 
 struct expr_info {
     selection_type stype;
@@ -53,6 +53,7 @@ struct expr_info {
     std::string test_reg_file = "";
     std::string data_file = "";
     std::string out_dir;
+    int num_repeat = 10;
 };
 
 struct free_info {
@@ -118,4 +119,9 @@ void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> & lines,
                    const lpms_info & lpms_info);
 
+void benchmarkBaseline(const std::filesystem::path dir_path,
+                       const std::vector<std::string> & regexes, 
+                       const std::vector<std::string> & test_regexes, 
+                       const std::vector<std::string> & lines,
+                       const expr_info & expr_info);
 #endif // BENCHMARKS_UTILS

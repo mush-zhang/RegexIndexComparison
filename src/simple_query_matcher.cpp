@@ -71,7 +71,6 @@ long SimpleQueryMatcher::match_one(const std::string & reg) {
 
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
-    // std::cout << "[" << reg << "] : " << count << std::endl;
     std::ostringstream log;
     log << elapsed << "\t" << count << "\t";
     k_index_.write_to_file(log.str());

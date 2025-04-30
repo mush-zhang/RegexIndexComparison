@@ -43,6 +43,9 @@ selection_type get_method(const std::string gs) {
     if (gs == "LPMS") {
         return selection_type::kFast;
     }
+    if (gs == "NONE") {
+        return selection_type::kNone;
+    }
     return selection_type::kInvalid;
 }
 
@@ -151,6 +154,9 @@ int parseArgs(int argc, char ** argv,
         selec = std::stod(selec_string);
     }
     switch (expr_info.stype) {
+        case selection_type::kNone:
+            expr_info.num_repeat = rep;
+            break;
         case selection_type::kFree: {
             free_info.num_repeat = rep;
             free_info.key_upper_bound = max_key;
@@ -630,6 +636,59 @@ void benchmarkFast(const std::filesystem::path dir_path,
         statsfile << regex << "\t";
         matcher.match_one(regex);
         statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
+
+    statsfile.close();
+}
+
+void benchmarkBaseline(const std::filesystem::path dir_path,
+                        const std::vector<std::string> & regexes, 
+                        const std::vector<std::string> & test_regexes, 
+                        const std::vector<std::string> & lines,
+                        const expr_info & expr_info) {
+
+    std::ofstream outfile = open_summary(dir_path);
+
+    std::ostringstream stats_name;
+    // dummy index
+    auto * pi = new lpms_index::LpmsIndex(lines, regexes);
+    pi->set_outfile(outfile);
+
+    auto tr = regexes;
+    if (!test_regexes.empty()) {
+        tr = test_regexes;
+    }
+
+    for (size_t i = 0; i < expr_info.num_repeat; i++) {
+        if (i >= kNumIndexBuilding) {
+            // not re-running the time consuming index afterwards,
+            // filling the empty slots
+            outfile << ",,,,,,,,,,," << std::endl;
+        } else {
+            outfile << "Baseline,,,,,,,,,,," << std::endl;
+        }
+        // matching; add match time to the overall file
+        auto matcher = SimpleQueryMatcher(*pi, tr);
+        matcher.match_all();
+    }
+
+    outfile.close();
+
+    // open stats file
+    stats_name << "Baseline_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
+
+    auto matcher = SimpleQueryMatcher(*pi, tr, false);
+
+    // Get individual stats
+    for (const auto & regex : tr) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << "-1" << std::endl;
     }
 
     statsfile.close();

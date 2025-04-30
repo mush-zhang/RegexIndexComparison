@@ -53,6 +53,9 @@ int main(int argc, char** argv) {
         case selection_type::kFast:
             benchmarkFast(dir_path, regexes, test_regexes, lines, lpms_info);
             break;
+        case selection_type::kNone:
+            benchmarkFast(dir_path, regexes, test_regexes, lines, expr_info);
+            break;
         default:
             // should not have reached here.
             return EXIT_FAILURE;
