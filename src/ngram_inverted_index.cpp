@@ -44,7 +44,7 @@ void NGramInvertedIndex::print_index(bool size_only) const {
     }
 }
 
-void NGramInvertedIndex::wirte_index_keys_to_file(const std::filesystem::path & out_path) const override {
+void NGramInvertedIndex::wirte_index_keys_to_file(const std::filesystem::path & out_path) const {
     std::ofstream outfile;
     // write header
     outfile.open(out_path, std::ios::out);
