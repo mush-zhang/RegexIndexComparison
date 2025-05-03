@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
             benchmarkFast(dir_path, regexes, test_regexes, lines, lpms_info);
             break;
         case selection_type::kNone:
-            benchmarkFast(dir_path, regexes, test_regexes, lines, expr_info);
+            benchmarkBaseline(dir_path, regexes, test_regexes, lines, expr_info);
             break;
         default:
             // should not have reached here.
