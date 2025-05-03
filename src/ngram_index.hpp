@@ -9,6 +9,7 @@
 #include <sstream>
 #include <chrono>
 #include <climits>
+#include <filesystem>
 
 #include "utils/reg_utils.hpp"
 
