@@ -377,6 +377,10 @@ int readWorkload(const expr_info & expr_info,
             regexes = read_file("regex", kPrositeRegex);
             lines = read_directory("data", "data/protein/sequences", max_lines);
             break;
+        case 5:
+            regexes = read_file("regex", kSysyRegex);
+            lines = read_directory("data", "data/extracted", max_lines);
+            break;
         default:
             regexes = read_file("regex", expr_info.reg_file);
             lines = read_file("data", expr_info.data_file, max_lines);
