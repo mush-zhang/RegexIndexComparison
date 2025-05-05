@@ -37,6 +37,8 @@ while getopts ":d:r:q:t:w:k:" opt; do
                 wl_num=3
             elif [ "$OPTARG" == "protein" ]; then
                 wl_num=4
+            elif [ "$OPTARG" == "sys_y" ]; then
+                wl_num=5
             else
                 wl_num=0
             fi
