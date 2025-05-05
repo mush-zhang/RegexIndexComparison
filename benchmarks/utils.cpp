@@ -104,7 +104,7 @@ int parseArgs(int argc, char ** argv,
         return error_return("Missing type of workload used.");
     } else {
         expr_info.wl = std::stoi(wl_string);
-        if (expr_info.wl < 0 || expr_info.wl > 4) {
+        if (expr_info.wl < 0 || expr_info.wl > 5) {
             return error_return("Invalid workload type.");
         } else if (expr_info.wl == 0) {
             expr_info.reg_file = getCmdOption(argv, argv + argc, "-r");
