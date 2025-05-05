@@ -1,4 +1,4 @@
-! /bin/bash
+#! /bin/bash
 
 # sysy
 sysydir=result/sysy_results
