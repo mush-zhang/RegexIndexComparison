@@ -77,6 +77,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
             if (!escaped) {
                 curr_char = c;
             } else {
+                escaped = false;
                 continue;
             }
         } else if (k_special_chars.contains(c)) {
