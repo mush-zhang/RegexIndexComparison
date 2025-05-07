@@ -43,7 +43,7 @@
 # done
 
 # Enron
-kups=( 5 10 15 50 100 200)
+kups=( 5 10 15 50 100 200 500 1000)
 for k in ${kups[*]}; do 
     ./run_expr_free.sh -w enron -k ${k}
 done
