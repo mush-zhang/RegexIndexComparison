@@ -41,23 +41,23 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "start end-to-end" << std::endl;
+    // std::cout << "start end-to-end" << std::endl;
 
-    switch (expr_info.stype) {
-        case selection_type::kFree: 
-            benchmarkFree(dir_path, regexes, test_regexes, lines, free_info);
-            break;
-        case selection_type::kBest:
-            benchmarkBest(dir_path, regexes, test_regexes, lines, best_info);
-            break;
-        case selection_type::kFast:
-            benchmarkFast(dir_path, regexes, test_regexes, lines, lpms_info);
-            break;
-        case selection_type::kNone:
-            benchmarkBaseline(dir_path, regexes, test_regexes, lines, expr_info);
-            break;
-        default:
-            // should not have reached here.
-            return EXIT_FAILURE;
-    } 
+    // switch (expr_info.stype) {
+    //     case selection_type::kFree: 
+    //         benchmarkFree(dir_path, regexes, test_regexes, lines, free_info);
+    //         break;
+    //     case selection_type::kBest:
+    //         benchmarkBest(dir_path, regexes, test_regexes, lines, best_info);
+    //         break;
+    //     case selection_type::kFast:
+    //         benchmarkFast(dir_path, regexes, test_regexes, lines, lpms_info);
+    //         break;
+    //     case selection_type::kNone:
+    //         benchmarkBaseline(dir_path, regexes, test_regexes, lines, expr_info);
+    //         break;
+    //     default:
+    //         // should not have reached here.
+    //         return EXIT_FAILURE;
+    // } 
 }

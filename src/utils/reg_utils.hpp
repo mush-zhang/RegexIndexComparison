@@ -92,7 +92,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 escaped = false;
             } else {
                 if (para_stack.empty() && curr_result.size() > 0) {
-                    result.emplace_back(curr_result);
+                    result.push_back(curr_result);
                     curr_result = "";
                 }
                 para_stack.push(c);
@@ -143,6 +143,9 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
     if (!curr_result.empty()) {
         result.push_back(curr_result);
     }
+#ifndef NDEBUG
+    std::cout << "---- end reading " << reg_str << " into " << result.size() << " lits ------" << std::endl;
+#endif 
     return result;
 }
 
