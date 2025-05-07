@@ -1,5 +1,3 @@
-follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)to(\s+)the(\s+)end
-follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)for
 Subject(\s*)\n
 keep(\s+)going(\s+)straight
 make(\s+a?\s*)direction(s?\s+(from|to)\s+[a-zA-Z\d_]+\s+(from|to)[a-zA-Z\d_]+([ A-Za-z0-9\t])*)

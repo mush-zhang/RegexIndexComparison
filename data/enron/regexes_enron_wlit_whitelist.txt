@@ -25,3 +25,5 @@ Sep(tember)?(\s+\d{1,2})
 Oct(ober)?(\s+\d{1,2})
 Nov(ember)?(\s+\d{1,2})
 Dec(mber)?(\s+\d{1,2})
+follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)to(\s+)the(\s+)end
+follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)for
