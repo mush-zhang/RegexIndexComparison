@@ -383,7 +383,11 @@ int readWorkload(const expr_info & expr_info,
             lines = read_directory("data", "data/extracted", max_lines);
             break;
         case 6:
+#ifndef NDEBUG
+            regexes = read_file("regex", kEnronRegex, 5);
+#else
             regexes = read_file("regex", kEnronRegex);
+#endif
             lines = read_directory("data", "data/enron/maildir", max_lines);
             break;
         default:
