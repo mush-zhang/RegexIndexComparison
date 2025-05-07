@@ -1,9 +1,3 @@
-make(\s+a?\s*)will(\s+)be(\s+(on|to)\s+(the|your)\s+(right|left)([ A-Za-z0-9\t])*)
-let(.{0,15})meet(\s+)at
-I(\s+)am(\s+)
-exit(\s+(onto|at|on)?\s*(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+)))
-merge(\s+(onto|at|on)?\s*(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+)))
-turn(\s+)left(\s+(on)?)to
 bear(\s+)right(\s+)on((to)?)
 take(\s+(the\s+)?(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))([ A-Za-z0-9\t,])*)
 call(\s*)me(.?\s*(\b\w+\b\s*){0,3}\s+(at\s*)?)
