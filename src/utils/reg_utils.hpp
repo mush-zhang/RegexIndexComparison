@@ -116,6 +116,7 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                     }
                     continue;
                 } else {
+                    std::cerr << "Unmatched parathesis: current " << c << ", previous " << para_stack.top() << std::endl;
                     std::cerr << "Unmatched parathesis: different left " << std::endl;
                     return std::vector<std::string>();
                 }
