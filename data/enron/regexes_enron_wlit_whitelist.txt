@@ -27,3 +27,9 @@ Nov(ember)?(\s+\d{1,2})
 Dec(mber)?(\s+\d{1,2})
 follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)to(\s+)the(\s+)end
 follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)for
+Subject(\s*)\n
+keep(\s+)going(\s+)straight
+make(\s+a?\s*)direction(s?\s+(from|to)\s+[a-zA-Z\d_]+\s+(from|to)[a-zA-Z\d_]+([ A-Za-z0-9\t])*)
+make(\s+a?\s*)take(\s+)exit(([ A-Za-z0-9\t])*)
+make(\s+a?\s*)u((\s*-\s*)?)turn(\s+(on|at)([ A-Za-z0-9\t])*)
+make(\s+a?\s*)at(\s+)the(\s+[a-zA-Z\d_]+\s+)light(([ A-Za-z0-9\t])*)

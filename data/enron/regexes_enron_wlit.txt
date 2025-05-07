@@ -1,9 +1,3 @@
-Subject(\s*)\n
-keep(\s+)going(\s+)straight
-make(\s+a?\s*)direction(s?\s+(from|to)\s+[a-zA-Z\d_]+\s+(from|to)[a-zA-Z\d_]+([ A-Za-z0-9\t])*)
-make(\s+a?\s*)take(\s+)exit(([ A-Za-z0-9\t])*)
-make(\s+a?\s*)u((\s*-\s*)?)turn(\s+(on|at)([ A-Za-z0-9\t])*)
-make(\s+a?\s*)at(\s+)the(\s+[a-zA-Z\d_]+\s+)light(([ A-Za-z0-9\t])*)
 make(\s+a?\s*)will(\s+)be(\s+(on|to)\s+(the|your)\s+(right|left)([ A-Za-z0-9\t])*)
 let(.{0,15})meet(\s+)at
 I(\s+)am(\s+)
