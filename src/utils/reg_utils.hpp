@@ -130,8 +130,14 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
                 return std::vector<std::string>();
             }
         } else {
-            // assumes pattern components in parathesis
-            curr_char = c;
+            if (c == 'n' && escaped) {
+                curr_char = '\n';
+            } else if (c == 't' && escaped) {
+                curr_char = '\t';
+            } else {
+                // assumes pattern components in parathesis
+                curr_char = c;
+            }
         }
         escaped = false;
 
