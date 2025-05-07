@@ -24,7 +24,8 @@ inline constexpr const int kNumIndexBuilding = 1;
 inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
-inline constexpr const char * kWebRegex = "data/webpages/regexes_webpages.txt";
+inline constexpr const char * kEnronRegex = "data/enron/regexes_enron_wlit.txt";
+inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 inline constexpr const char * kWebRegexFree = "data/webpages/regexes_webpages_free.txt";
 inline constexpr const char * kPrositeRegex = "data/protein/prosites.txt";
 
@@ -104,7 +105,7 @@ int parseArgs(int argc, char ** argv,
         return error_return("Missing type of workload used.");
     } else {
         expr_info.wl = std::stoi(wl_string);
-        if (expr_info.wl < 0 || expr_info.wl > 5) {
+        if (expr_info.wl < 0 || expr_info.wl > 6) {
             return error_return("Invalid workload type.");
         } else if (expr_info.wl == 0) {
             expr_info.reg_file = getCmdOption(argv, argv + argc, "-r");
@@ -343,7 +344,7 @@ std::vector<std::string> read_directory(const std::string & file_type,
     std::string line;
 
     std::vector<std::string> lines;
-    for (const auto & entry : std::filesystem::directory_iterator(path)) {
+    for (const auto & entry : std::filesystem::recursive_directory_iterator(path)) {
         std::string data_file = entry.path();
         read_file(file_type, data_file, lines, max_lines);
     }
@@ -380,6 +381,10 @@ int readWorkload(const expr_info & expr_info,
         case 5:
             regexes = read_file("regex", kSysyRegex);
             lines = read_directory("data", "data/extracted", max_lines);
+            break;
+        case 6:
+            regexes = read_file("regex", kEnronRegex);
+            lines = read_directory("data", "data/enron/maildir", max_lines);
             break;
         default:
             regexes = read_file("regex", expr_info.reg_file);
