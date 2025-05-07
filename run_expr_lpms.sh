@@ -70,12 +70,12 @@ for t in ${thread_list[*]}; do
     if [ $retVal -ne 0 ]; then
         echo "Timeout"
     fi
-    curr_suffix2="${timeout_suffix}_lpms_t${t}_random_${max_num_ngram}.txt"
-    curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
-    echo ${curr_cmd2}
-    eval "${curr_cmd2}"
-    retVal2=$?
-    if [ $retVal2 -ne 0 ]; then
-        echo "Timeout"
-    fi
+    # curr_suffix2="${timeout_suffix}_lpms_t${t}_random_${max_num_ngram}.txt"
+    # curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
+    # echo ${curr_cmd2}
+    # eval "${curr_cmd2}"
+    # retVal2=$?
+    # if [ $retVal2 -ne 0 ]; then
+    #     echo "Timeout"
+    # fi
 done
