@@ -22,12 +22,11 @@
 #     ./run_expr_best.sh -w protein -k ${k}
 # done
 
-# DB_X
-kups=( 50 100 200 500 1000 )
-for k in ${kups[*]}; do
-    ./run_expr_best.sh -w db_x  -k ${k}
-done
-
+# # DB_X
+# kups=( 50 100 200 500 1000 )
+# for k in ${kups[*]}; do
+#     ./run_expr_best.sh -w db_x  -k ${k}
+# done
 
 # # traffic
 # for k in 5 10 15; do
@@ -43,3 +42,9 @@ done
 #         -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
 #     done
 # done
+
+# Enron
+kups=( 5 10 15 50 100 200)
+for k in ${kups[*]}; do 
+    ./run_expr_best.sh -w enron -k ${k}
+done
