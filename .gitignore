@@ -54,6 +54,7 @@ data/**/*.xml
 !data/regexes_traffic.txt
 !data/webpages/regexes_webpages.txt
 !data/webpages/regexes_webpages_free.txt
+!data/enron/regexes_*.txt
 
 # my test result files
 *Test/*

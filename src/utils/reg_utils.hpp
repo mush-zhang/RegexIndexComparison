@@ -136,6 +136,9 @@ static std::vector<std::string> extract_literals(const std::string & reg_str) {
         if (para_stack.empty()) {
             curr_result += curr_char;
         }
+#ifndef NDEBUG
+        std::cout << curr_result << std::endl;
+#endif  
     }
     if (!curr_result.empty()) {
         result.push_back(curr_result);

@@ -1,0 +1,106 @@
+([a-zA-Z0-9][_a-zA-Z0-9-]*(\.[_a-zA-Z0-9-]+)*)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)\.((([0-9]{1,3})|([a-zA-Z]{2,3})|(aero|coop|info|museum|name)))
+X([\.\-]?\d{4,5})
+x([\.\-]?\d{4,5})
+((\+\s*)?)\((\s*[1-9]\d{2}\s*)\)(\s*[\-\.]?\d{3}[\-\.\s*]?\d{4})
+(\d[.\d]+\s*)mi([les|(ns?)]\s)
+(\d[.\d]+\s*)km(s?\s)
+(\d[.\d]+\s*)h((ou)?)rs(\s)
+(\d[.\d]+\s*)ft(\s)
+((\+?1[\-\.\s]\s*)?)8(\d{2}\s*[\s\-\.][A-Z\d]{3}[\.\-]?[A-Z][A-Z][A-Z][A-Z])
+([A-Z][a-z][a-zA-Z\d_]{1,20}\s*)/(\s*)((([A-Z].{1,20}\s*){1,2}/\s*){1,2}([A-Z]){2,20}(@(.){2,20})?)
+(((0)|(1)|(2)|(3))?[\d]( )*)\-(( )*((0)|(1)|(2)|(3))?[\d])
+((call|dial)-?)in(\s*((#|number)|(.{0,10}:))\s*.{0,10}\s*\(?\s*\d{3,}(-|\d|\.| |\)){0,10})
+toll(\s*((#|number)|(.{0,10}:))\s*.{0,10}\s*\(?\s*\d{3,}(-|\d|\.| |\)){0,10})
+p/c(\s*((#|number)|(.{0,10}:))\s*.{0,10}\s*\(?\s*\d{3,}(-|\d|\.| |\)){0,10})
+Jan(uary)?(\s+\d{1,2})
+Feb(uary)?(\s+\d{1,2})
+Mar(ch)?(\s+\d{1,2})
+Apr(il)?(\s+\d{1,2})
+May(\s+\d{1,2})
+Jun(e)?(\s+\d{1,2})
+Jul(y)?(\s+\d{1,2})
+Aug(ust)?(\s+\d{1,2})
+Sep(tember)?(\s+\d{1,2})
+Oct(ober)?(\s+\d{1,2})
+Nov(ember)?(\s+\d{1,2})
+Dec(mber)?(\s+\d{1,2})
+follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)to(\s+)the(\s+)end
+follow(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)for
+Subject(\s*)\n
+keep(\s+)going(\s+)straight
+make(\s+a?\s*)direction(s?\s+(from|to)\s+[a-zA-Z\d_]+\s+(from|to)[a-zA-Z\d_]+([ A-Za-z0-9\t])*)
+make(\s+a?\s*)take(\s+)exit(([ A-Za-z0-9\t])*)
+make(\s+a?\s*)u((\s*-\s*)?)turn(\s+(on|at)([ A-Za-z0-9\t])*)
+make(\s+a?\s*)at(\s+)the(\s+[a-zA-Z\d_]+\s+)light(([ A-Za-z0-9\t])*)
+make(\s+a?\s*)will(\s+)be(\s+(on|to)\s+(the|your)\s+(right|left)([ A-Za-z0-9\t])*)
+let(.{0,15})meet(\s+)at
+I(\s+)am(\s+)
+exit(\s+(onto|at|on)?\s*(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+)))
+merge(\s+(onto|at|on)?\s*(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+)))
+turn(\s+)left(\s+(on)?)to
+bear(\s+)right(\s+)on((to)?)
+take(\s+(the\s+)?(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))([ A-Za-z0-9\t,])*)
+call(\s*)me(.?\s*(\b\w+\b\s*){0,3}\s+(at\s*)?)
+From(\s+[A-Z][a-z]+([ A-Za-z0-9\t,])*)
+(G|g)ive((\s)*)me((\s)*)a((\s)*)call((\s)*((\b\w+\b)\s*){0,3})
+(ht|f)tp(s?)://([a-zA-Z\d_]+[a-zA-Z\d_\-:&=?/~.<>@:]+[a-zA-Z\d_\-:&=?/~]{2,100})
+my(\s+)name(\s+)is(\s+)
+conference(\s?)code(\s*.{0,2}\s*\d{3,}(-|\d|\.){0,10})
+pass(\s?)code(\s*.{0,2}\s*\d{3,}(-|\d|\.){0,10})
+schedule(\s+)to(\s+)meet(.{0,15})at
+intersection(\s+)of(\s+[A-Z][a-z]+([ A-Za-z0-9\t,])*)
+corner(\s+)of(\s+[A-Z][a-z]+([ A-Za-z0-9\t,])*)
+head(.{0,20}(nor|sou))th(([ A-Za-z0-9\t,])*)
+head(.{0,20}(ea|we))st(([ A-Za-z0-9\t,])*)
+take(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+))\s+)exit(\s*)to
+From:((\s*).{1,40}\s*)\[mailto:(.{5,50})\]
+From:((\s*)(.{1,50}\s*))\n(\s*)To:
+(\w+\s+)talks with(\s+\w+)
+exit(.{0,20}(nor|sou))th
+exit(.{0,20}(ea|we))st
+Start((ing)?\s+)at(([ A-Za-z0-9\t,])*)
+block(.{0,20}(left|right)([ A-Za-z0-9\t,])*)
+reserved(.{0,15})conference(\s+)room
+fax to ((\d){3,10})
+972([\-\.]\d{1,2}[\-\.]\d{7})
+directions(\s+)from(\s+(([A-Za-z]+\s*-?\s*\d+)|(\d+\s*-?\s*[A-Za-z]+)))
+follow(\s+)the(\s+)sign(s?\s+(to|for))/
+Quoting(\s*.{1,120}?):(\s*(\n)+\s*)>(\s*)
+direction(s?\s+)to(\s+)my(\s+)house
+\n(\s*)directions(\s*(\n|(\W+(:|From|To|Via))([ A-Za-z0-9\t,]))*)
+\-\-\-\-\-(\s*)Message(\s)from(\s*.{5,30}\s.{6,40}\s*)on(\s*[A-Z][a-z]{2,8}),(\s*\d{1,2}\s*[A-Z][a-z]{2,8}\s*\d{4}(.|\n){10,18}\s*)\-\-\-\-\-
+(P|p)articipant(\s*(pin)?\s*(access)?\s*)code(\s*.{0,10}\s*\d{3,}(-|\d|\.){0,10})
+(H|h)ost(\s*(pin)?\s*(access)?\s*)code(\s*.{0,10}\s*\d{3,}(-|\d|\.){0,10})
+(M|m)oderator(\s*(pin)?\s*(access)?\s*)code(\s*.{0,10}\s*\d{3,}(-|\d|\.){0,10})
+\[(A|a)ttachment(\s*)deleted(\s*)by(\s*.{1,60}?)\]
+direction(s?\s+)to(\s+)my(\s+)ho(use|me)
+direction(s?\s+)to(\s+)the(\s+)party
+(D|d)riving([ \t]+(D|d))irections(.{0,30}(:|From|To|Via)([ A-Za-z0-9\t,])*)
+(\s*)\-\-\-\-\-(\s+)Original(\s*)Message(\s+)\-\-\-\-\-(\s*(\n{0,3})?\s*)From:(.{1,50}?)
+total(\W{0,2}\w{0,15}\W{0,2}(time|distance)([ A-Za-z0-9\t,])*)
+([A-Za-z]{4,10}.{0,5})becomes(.{0,5}[A-Za-z]{4,10}([ A-Za-z0-9\t,])*)
+Subject(:|\s*\n)
+At(\s+\d{2}):(\d{2}\s+.{1,9}\s+.{1,6}),(\s+)you wrote:
+conference(\s+)call(.{0,10}\s*\(?\s*\d{3,}(-|\d|\.| |\)){0,10})
+Subject:(.*)
+([a-zA-Z\d_]+[a-zA-Z\d_\-:&=?/~.<>@:]+)\.com/([a-zA-Z\d_&?~.<>@:][a-zA-Z\d_\-:&=?/~.<>@:]+[a-zA-Z\d_\-:&=?/~]{2,100})
+([a-zA-Z\d_]+[a-zA-Z\d_\-:&=?/~.<>@:]+)\.edu/([a-zA-Z\d_&?~.<>@:][a-zA-Z\d_\-:&=?/~.<>@:]+[a-zA-Z\d_\-:&=?/~]{2,100})
+([a-zA-Z\d_]+[a-zA-Z\d_\-:&=?/~.<>@:]+)\.org/([a-zA-Z\d_&?~.<>@:][a-zA-Z\d_\-:&=?/~.<>@:]+[a-zA-Z\d_\-:&=?/~]{2,100})
+(E|e)xt(\s*[\.\-\:]?\s*\d{3,5})
+(\d{2,4}(/|\.)\d{2,4}(/|\.)\d{2,4}\s\d{2})\:(\d{2}(\s+(PM|AM))?)
+(\d+(\.\d+)?)\%
+(\d{1,2}):(\d{2}(:\d{2})?\s*)
+To:(\s*[^:]{1,200}\s*)\n((>\s*)*\s*(CC|cc|Cc)):(\s*(\n)?)
+Date:(.{20,80}\s*)\n
+sell(.{0,25}[A-Z]{2,4})
+buy(.{0,25}[A-Z]{2,4})
+([a-zA-Z\d_]+[a-zA-Z\d_\-:&=?/~.<>@:]+)\.(com|edu|org)/([a-zA-Z\d_&?~.<>@:][a-zA-Z\d_\-:&=?/~.<>@:]+[a-zA-Z\d_\-:&=?/~]{2,100})
+jan((uary)?\.?\s\d\d?(st|nd|rd|th)?)
+feb((uary)?\.?\s\d\d?(st|nd|rd|th)?)
+(.{1,30})/(.{1,25})/(.{1,20}(\@.{1,20})?\s*\n(>\s*)*)
+On(\s*(([A-Z][a-z]{2,10},?\s*\d{1,2},?\s*[A-Z][a-z]{2,10}\s*\d{2,4},)|(\d{1,2}/\d{1,2}/\d{1,2},))\s*.{1,100}?\s*)wrote\:
+To(\s*)\n((>\s*)*.{5,1000}?\s*)\n((>\s*)*\s*)cc(\s*)\n
+I(\s*)can(\s*)be((\s)*(\b\w+\b)\s*)at(\s*.?\s*)
+(\s*\s)me(\s*((\b\w+\b)\s+){0,2})
+Thanks(.*\n+)
+Regards(.*\n+)
