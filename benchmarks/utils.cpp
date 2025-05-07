@@ -25,7 +25,7 @@ inline constexpr const char * kTrafficRegex = "data/regexes_traffic.txt";
 inline constexpr const char * kDbxRegex = "data/regexes_dbx.txt";
 inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
 inline constexpr const char * kEnronRegex = "data/enron/regexes_enron_wlit.txt";
-inline constexpr const char * kSysyRegex = "data/regexes_sysy.txt";
+inline constexpr const char * kWebRegex = "data/webpages/regexes_webpages.txt";
 inline constexpr const char * kWebRegexFree = "data/webpages/regexes_webpages_free.txt";
 inline constexpr const char * kPrositeRegex = "data/protein/prosites.txt";
 
