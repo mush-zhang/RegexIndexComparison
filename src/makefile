@@ -8,27 +8,42 @@ RE2_FLAGS=-L/usr/local/lib -lre2
 
 FREE_BASE_DIR=FREE
 FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
-FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
-FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR) $(FREE_MCH_DIR)
-FREE_MCH=$(FREE_MCH_DIR)/free_parser.o
-FREE_IDX=inverted_index.o utils/hash_pair.o $\
+FREE_DIRS=$(FREE_BASE_DIR) $(FREE_IDX_DIR)
+FREE_IDX=simple_query_matcher.o inverted_index.o utils/hash_pair.o $\
 		 $(FREE_IDX_DIR)/free_multigram.o $\
 		 $(FREE_IDX_DIR)/free_presuf.o $\
 		 $(FREE_IDX_DIR)/free_multi_parallel.o
 
+# FREE_ORI_BASE_DIR=FREE_ORIGINAL
+# FREE_ORI_IDX_DIR=$(FREE_ORI_BASE_DIR)/Index
+# FREE_ORI_MCH_DIR=$(FREE_ORI_BASE_DIR)/Matcher
+# FREE_ORI_DIRS=$(FREE_ORI_BASE_DIR) $(FREE_ORI_IDX_DIR) $(FREE_ORI_MCH_DIR)
+# FREE_ORI_MCH=$(FREE_ORI_MCH_DIR)/free_parser.o
+# FREE_ORI_IDX=inverted_index.o utils/hash_pair.o $\
+# 		 $(FREE_ORI_IDX_DIR)/free_multigram.o $\
+# 		 $(FREE_ORI_IDX_DIR)/free_presuf.o $\
+# 		 $(FREE_ORI_IDX_DIR)/free_multi_parallel.o
+
 BEST_BASE_DIR=BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_BASE_DIR) $(BEST_IDX_DIR)
-BEST_IDX=simple_query_matcher.o btree_index.o $\
+BEST_IDX=simple_query_matcher.o inverted_index.o $\
 		 utils/rax/rax.o utils/rax/rc4rand.o $\
 		 $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o
+
+# BEST_BTREE_BASE_DIR=BEST
+# BEST_BTREE_IDX_DIR=$(BEST_BTREE_BASE_DIR)/Index
+# BEST_BTREE_DIRS=$(BEST_BTREE_BASE_DIR) $(BEST_BTREE_IDX_DIR)
+# BEST_BTREE_IDX=simple_query_matcher.o btree_index.o $\
+# 		 utils/rax/rax.o utils/rax/rc4rand.o $\
+# 		 $(BEST_BTREE_IDX_DIR)/best_single.o $(BEST_BTREE_IDX_DIR)/best_parallel.o
 
 LPMS_BASE_DIR=LPMS
 LPMS_IDX_DIR=$(LPMS_BASE_DIR)/Index
 LPMS_DIRS=$(LPMS_BASE_DIR) $(LPMS_IDX_DIR)
 LPMS_IDX=simple_query_matcher.o inverted_index.o $(LPMS_IDX_DIR)/lpms.o
 
-DIRS=. utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS)
+DIRS=. utils $(FREE_DIRS) $(FREE_ORI_DIRS) $(BEST_DIRS) $(BEST_BTREE_DIRS) $(LPMS_DIRS)
 
 GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
@@ -36,13 +51,16 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 .PHONY: all
 all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: $(BEST_BASE_DIR)/test_best.out $\
+	 $(BEST_BTREE_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
+	 $(FREE_ORI_BASE_DIR)/test_free.out $\
 	 $(LPMS_BASE_DIR)/test_lpms.out 
 
 .PHONY: debug
 debug: CPPFLAGS+= -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
+		$(FREE_ORI_BASE_DIR)/test_free.out $\
 		$(LPMS_BASE_DIR)/test_lpms.out 
 
 $(LPMS_BASE_DIR)/test_lpms.out: $(LPMS_IDX) $(LPMS_BASE_DIR)/test_main.cpp
@@ -60,11 +78,17 @@ $(BEST_IDX_DIR)/best_parallel.o: $(BEST_IDX_DIR)/parallelizable.cpp
 $(BEST_IDX_DIR)/best_single.o: $(BEST_IDX_DIR)/single_threaded.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
-$(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_MCH) $(FREE_BASE_DIR)/test_main.cpp
-	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
+# $(BEST_BTREE_BASE_DIR)/test_best.out: $(BEST_BTREE_IDX) $(BEST_BTREE_BASE_DIR)/test_main.cpp
+# 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
-$(FREE_MCH_DIR)/free_parser.o: $(FREE_MCH_DIR)/query_parser.cpp
-	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+# $(BEST_BTREE_IDX_DIR)/best_parallel.o: $(BEST_BTREE_IDX_DIR)/parallelizable.cpp
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+# $(BEST_BTREE_IDX_DIR)/best_single.o: $(BEST_BTREE_IDX_DIR)/single_threaded.cpp
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+$(FREE_BASE_DIR)/test_free.out: $(FREE_IDX) $(FREE_BASE_DIR)/test_main.cpp
+	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
 
 $(FREE_IDX_DIR)/free_multi_parallel.o: $(FREE_IDX_DIR)/parallel_multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
@@ -74,6 +98,21 @@ $(FREE_IDX_DIR)/free_presuf.o: $(FREE_IDX_DIR)/presuf_shell.cpp
  
 $(FREE_IDX_DIR)/free_multigram.o: $(FREE_IDX_DIR)/multigram_index.cpp 
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+# $(FREE_ORI_BASE_DIR)/test_free.out: $(FREE_ORI_IDX) $(FREE_ORI_MCH) $(FREE_ORI_BASE_DIR)/test_main.cpp
+# 	$(CXX) $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
+
+# $(FREE_ORI_MCH_DIR)/free_parser.o: $(FREE_ORI_MCH_DIR)/query_parser.cpp
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+# $(FREE_ORI_IDX_DIR)/free_multi_parallel.o: $(FREE_ORI_IDX_DIR)/parallel_multigram_index.cpp 
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+
+# $(FREE_ORI_IDX_DIR)/free_presuf.o: $(FREE_ORI_IDX_DIR)/presuf_shell.cpp 
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
+ 
+# $(FREE_ORI_IDX_DIR)/free_multigram.o: $(FREE_ORI_IDX_DIR)/multigram_index.cpp 
+# 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) -o  $@
 
 simple_query_matcher.o: simple_query_matcher.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(RE2_FLAGS) $(LDFLAGS) -o  $@
