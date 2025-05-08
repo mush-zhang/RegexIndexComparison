@@ -12,7 +12,6 @@
 #include "../src/FREE/Index/multigram_index.hpp"
 #include "../src/FREE/Index/presuf_shell.hpp"
 #include "../src/FREE/Index/parallel_multigram_index.hpp"
-#include "../src/FREE/Matcher/query_matcher.hpp"
 
 #include "../src/simple_query_matcher.hpp"
 
