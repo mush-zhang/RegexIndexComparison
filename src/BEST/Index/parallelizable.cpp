@@ -190,7 +190,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
             if (k_index_[curr_gram].empty()) {
                 k_index_[curr_gram] = job.gr_list[idx];
             } else if (!(job.gr_list[idx].empty())) {
-                k_index_[curr_gram] = sorted_lists_union(k_index[curr_gram]);
+                k_index_[curr_gram] = sorted_lists_union(k_index_[curr_gram], job.gr_list[idx]);
             } 
         }
     }
