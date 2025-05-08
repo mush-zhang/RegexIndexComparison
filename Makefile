@@ -10,8 +10,7 @@ SRC_DIR=src
 
 FREE_BASE_DIR=$(SRC_DIR)/FREE
 FREE_IDX_DIR=$(FREE_BASE_DIR)/Index
-FREE_MCH_DIR=$(FREE_BASE_DIR)/Matcher
-FREE_DIRS=$(FREE_IDX_DIR) $(FREE_MCH_DIR)
+FREE_DIRS=$(FREE_IDX_DIR)
 
 LPMS_BASE_DIR=$(SRC_DIR)/LPMS
 LPMS_IDX_DIR=$(LPMS_BASE_DIR)/Index
@@ -36,11 +35,20 @@ debug:benchmark.out
 all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: benchmark.out
 
+# benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
+# 			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $\
+# 			   $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $\
+# 			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $\
+# 			   $(FREE_IDX_DIR)/free_multi_parallel.o $(FREE_MCH_DIR)/free_parser.o $\
+# 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
+# 			   $(LPMS_IDX_DIR)/lpms.o $\
+# 			   benchmarks/utils.o benchmarks/benchmark.cpp
+# 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
-			   $(SRC_DIR)/btree_index.o $(SRC_DIR)/inverted_index.o $\
+			   $(SRC_DIR)/inverted_index.o $\
 			   $(SRC_DIR)/simple_query_matcher.o $(SRC_DIR)/utils/hash_pair.o $\
 			   $(FREE_IDX_DIR)/free_multigram.o $(FREE_IDX_DIR)/free_presuf.o $\
-			    $(FREE_IDX_DIR)/free_multi_parallel.o $(FREE_MCH_DIR)/free_parser.o $\
+			   $(FREE_IDX_DIR)/free_multi_parallel.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
 			   $(LPMS_IDX_DIR)/lpms.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
