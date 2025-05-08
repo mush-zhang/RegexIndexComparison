@@ -479,7 +479,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
             pi->write_to_file(",,,,,,,,,,,");
         }
         // matching; add match time to the overall file
-        auto matcher = free_index::QueryMatcher(*pi, tr);
+        auto matcher = SimpleQueryMatcher(*pi, tr);
         matcher.match_all();
     }
 
@@ -495,7 +495,7 @@ void benchmarkFree(const std::filesystem::path dir_path,
     statsfile << kExprHeader << std::endl;
     pi->set_outfile(statsfile);
 
-    auto matcher = free_index::QueryMatcher(*pi, tr, false);
+    auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
     // Get individual stats
     for (const auto & regex : tr) {

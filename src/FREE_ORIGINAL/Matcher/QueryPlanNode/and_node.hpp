@@ -1,9 +1,9 @@
-#ifndef FREE_MATCHER_QUERYPLANNODE_AND_NODE_HPP_
-#define FREE_MATCHER_QUERYPLANNODE_AND_NODE_HPP_
+#ifndef FREE_ORIGINAL_MATCHER_QUERYPLANNODE_AND_NODE_HPP_
+#define FREE_ORIGINAL_MATCHER_QUERYPLANNODE_AND_NODE_HPP_
 
 #include "query_plan_node.hpp"
 
-namespace free_index {
+namespace free_original_index {
 
 class AndNode: public QueryPlanNode {
  public:
@@ -15,6 +15,6 @@ class AndNode: public QueryPlanNode {
     inline static const std::string k_and_node_name_ = "AND";
 };
 
-} // namespace free_index
+} // namespace free_original_index
 
-#endif // FREE_MATCHER_QUERYPLANNODE_AND_NODE_HPP_
+#endif // FREE_ORIGINAL_MATCHER_QUERYPLANNODE_AND_NODE_HPP_

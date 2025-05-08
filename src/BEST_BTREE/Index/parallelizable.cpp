@@ -5,7 +5,7 @@
 #include "parallelizable.hpp"
 #include "../../utils/utils.hpp"
 
-void best_index::ParallelizableIndex::build_qg_list_local(
+void best_btree_index::ParallelizableIndex::build_qg_list_local(
         std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
@@ -18,8 +18,8 @@ void best_index::ParallelizableIndex::build_qg_list_local(
     }
 }
 
-void best_index::ParallelizableIndex::build_job_local(
-        best_index::SingleThreadedIndex::job & job,
+void best_btree_index::ParallelizableIndex::build_job_local(
+        best_btree_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> q_list) {
@@ -40,13 +40,13 @@ void best_index::ParallelizableIndex::build_job_local(
 
 // TODO: add stop token to notify all asyncs once got a false
 //       https://www.geeksforgeeks.org/cpp-20-stop_token-header/
-bool best_index::ParallelizableIndex::multi_all_covered(
+bool best_btree_index::ParallelizableIndex::multi_all_covered(
         const std::set<size_t> & index, 
-        const std::vector<best_index::SingleThreadedIndex::job> & jobs) {
+        const std::vector<best_btree_index::SingleThreadedIndex::job> & jobs) {
     std::vector<std::future<bool>> futures;
     for (int i = 0; i < jobs.size(); i++) {
         futures.push_back(std::async(std::launch::async, 
-            &best_index::ParallelizableIndex::all_covered, this,
+            &best_btree_index::ParallelizableIndex::all_covered, this,
                 std::cref(index), std::cref(jobs[i]), jobs[i].qg_list.size()
         ));
     }
@@ -60,7 +60,7 @@ bool best_index::ParallelizableIndex::multi_all_covered(
 
 // Algorithm 4 in Figure 5
 // Parallelizable greedy gram selection algorightm
-void best_index::ParallelizableIndex::select_grams(int upper_n) {
+void best_btree_index::ParallelizableIndex::select_grams(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
 
     auto query_literals = get_query_literals();
@@ -93,12 +93,12 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
     }
 
     // build gr_list, qg_list, rc for each partition
-    std::vector<best_index::SingleThreadedIndex::job> jobs(cmap.size());
+    std::vector<best_btree_index::SingleThreadedIndex::job> jobs(cmap.size());
     size_t job_idx = 0;
     std::vector<std::thread> job_building_threads;
     for (const auto & [key, q_list] : cmap) {
         job_building_threads.push_back(std::thread(
-            &best_index::ParallelizableIndex::build_job_local, this,
+            &best_btree_index::ParallelizableIndex::build_job_local, this,
                 std::ref(jobs[job_idx++]), std::cref(candidates), 
                 std::cref(query_literals), std::cref(q_list)
         ));
@@ -128,7 +128,7 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
         std::vector<std::thread> threads;
         for (int i = 0; i < jobs.size(); i++) {
             threads.push_back(std::thread(
-                &best_index::ParallelizableIndex::compute_benefit, this,
+                &best_btree_index::ParallelizableIndex::compute_benefit, this,
                     std::ref(benefits_local[i]), std::cref(index), 
                     std::cref(jobs[i]), jobs[i].qg_list.size()
             ));
@@ -181,17 +181,12 @@ void best_index::ParallelizableIndex::select_grams(int upper_n) {
         auto curr_gram = candidates[idx];
         k_index_keys_.insert(curr_gram);
         for (const auto & job : jobs) {
-            // if (!(k_index_[curr_gram].empty())) continue;
-            // k_index_[curr_gram].insert(
-            //     k_index_[curr_gram].end(), 
-            //     job.gr_list[idx].begin(), 
-            //     job.gr_list[idx].end()
-            // );
-            if (k_index_[curr_gram].empty()) {
-                k_index_[curr_gram] = job.gr_list[idx];
-            } else if (!(job.gr_list[idx].empty())) {
-                k_index_[curr_gram] = sorted_lists_union(k_index[curr_gram]);
-            } 
+            if (!(k_index_[curr_gram].empty())) continue;
+            k_index_[curr_gram].insert(
+                k_index_[curr_gram].end(), 
+                job.gr_list[idx].begin(), 
+                job.gr_list[idx].end()
+            );
         }
     }
     auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(

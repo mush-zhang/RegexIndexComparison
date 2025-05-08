@@ -1,12 +1,12 @@
-#ifndef FREE_MATCHER_QUERY_MATCHER_HPP_
-#define FREE_MATCHER_QUERY_MATCHER_HPP_
+#ifndef FREE_ORIGINAL_MATCHER_QUERY_MATCHER_HPP_
+#define FREE_ORIGINAL_MATCHER_QUERY_MATCHER_HPP_
 
 #include <re2/re2.h>
 #include "query_parser.hpp"
 #include "../Index/multigram_index.hpp"
 #include "../Index/presuf_shell.hpp"
 
-namespace free_index {
+namespace free_original_index {
 
 class QueryMatcher {
  public:
@@ -121,6 +121,6 @@ class QueryMatcher {
     }
 };
 
-} // namespace free_index
+} // namespace free_original_index
 
-#endif // FREE_MATCHER_QUERY_MATCHER_HPP_
+#endif // FREE_ORIGINAL_MATCHER_QUERY_MATCHER_HPP_

@@ -103,7 +103,7 @@ size_t argmin(const std::vector<double> & v) {
 }
 
 std::unordered_map<size_t, std::vector<size_t>> 
-best_index::SingleThreadedIndex::k_medians(
+best_btree_index::SingleThreadedIndex::k_medians(
         const std::vector<std::vector<double>> & dist_mtx, 
         int num_queries, int num_clusters) {
 
@@ -207,7 +207,7 @@ best_index::SingleThreadedIndex::k_medians(
 }
 
 std::vector<std::set<std::string>> 
-best_index::SingleThreadedIndex::get_all_multigrams_per_query(
+best_btree_index::SingleThreadedIndex::get_all_multigrams_per_query(
         const std::vector<std::vector<std::string>> & query_literals) {
     auto query_size = query_literals.size();
     std::vector<std::set<std::string>> qg_gram_set(query_size);
@@ -225,7 +225,7 @@ best_index::SingleThreadedIndex::get_all_multigrams_per_query(
 }
 
 std::vector<std::vector<double>> 
-best_index::SingleThreadedIndex::calculate_pairwise_dist(
+best_btree_index::SingleThreadedIndex::calculate_pairwise_dist(
         const std::vector<std::set<std::string>> & qg_gram_set,
         const std::map<std::string, size_t> & pre_suf_count) {
 
@@ -268,7 +268,7 @@ best_index::SingleThreadedIndex::calculate_pairwise_dist(
  *  and thus reducing the space and time complexity as they are both
  *  proportional to |Q|*|R|
  */
-void best_index::SingleThreadedIndex::workload_reduction(
+void best_btree_index::SingleThreadedIndex::workload_reduction(
         std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, size_t> & pre_suf_count) {
     auto qg_gram_set = get_all_multigrams_per_query(query_literals);
@@ -294,7 +294,7 @@ void best_index::SingleThreadedIndex::workload_reduction(
 }
 
 std::map<std::string, size_t> 
-best_index::SingleThreadedIndex::get_all_gram_counts(
+best_btree_index::SingleThreadedIndex::get_all_gram_counts(
         const std::vector<std::vector<std::string>> & query_literals) {
     rax *gram_tree = raxNew();
     // 1. Build suffix tree using all queries
@@ -354,7 +354,7 @@ best_index::SingleThreadedIndex::get_all_gram_counts(
  *       it will take several scans on the dataset; will only be fine if dataset is small
  *       I feel it is similar to FREE in generating prefix free kinda set with threshold limit
  **/
-std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen(
+std::vector<std::string> best_btree_index::SingleThreadedIndex::candidate_gram_set_gen(
         std::vector<std::vector<std::string>> & query_literals,
         std::map<std::string, size_t> & pre_suf_count) {
     
@@ -385,7 +385,7 @@ std::vector<std::string> best_index::SingleThreadedIndex::candidate_gram_set_gen
     return result;
 }
 
-void best_index::SingleThreadedIndex::indexed_grams_in_string(
+void best_btree_index::SingleThreadedIndex::indexed_grams_in_string(
         const std::string & l, 
         const std::vector<std::string> & candidates,
         std::vector<std::set<size_t>> & qg_list, 
@@ -407,7 +407,7 @@ void best_index::SingleThreadedIndex::indexed_grams_in_string(
     }
 }
 
-void best_index::SingleThreadedIndex::indexed_grams_in_literals(
+void best_btree_index::SingleThreadedIndex::indexed_grams_in_literals(
         const std::vector<std::string> & literals, 
         const std::vector<std::string> & candidates,
         std::vector<std::set<size_t>> & qg_list,
@@ -418,9 +418,9 @@ void best_index::SingleThreadedIndex::indexed_grams_in_literals(
     }
 }
 
-bool best_index::SingleThreadedIndex::index_covered(
+bool best_btree_index::SingleThreadedIndex::index_covered(
         const std::set<size_t> & index, 
-        const best_index::SingleThreadedIndex::job & job,
+        const best_btree_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k) {
     for (auto g_idx : index) {
         // the pair (q_k, r_j) is covered by current g iff
@@ -435,9 +435,9 @@ bool best_index::SingleThreadedIndex::index_covered(
 }
 
 // TODO: to speed up, it is possible to store all covered pairs
-bool best_index::SingleThreadedIndex::all_covered(
+bool best_btree_index::SingleThreadedIndex::all_covered(
         const std::set<size_t> & index, 
-        const best_index::SingleThreadedIndex::job & job, 
+        const best_btree_index::SingleThreadedIndex::job & job, 
         size_t query_size) {
     for (size_t k = 0; k < query_size; k++) {
         for (auto j : job.rc) {
@@ -449,10 +449,10 @@ bool best_index::SingleThreadedIndex::all_covered(
     return true;
 }
 
-void best_index::SingleThreadedIndex::compute_benefit(
+void best_btree_index::SingleThreadedIndex::compute_benefit(
         std::vector<long double> & benefit, 
         const std::set<size_t> & index, 
-        const best_index::SingleThreadedIndex::job & job, 
+        const best_btree_index::SingleThreadedIndex::job & job, 
         size_t num_queries) {
     
     std::fill(benefit.begin(), benefit.end(), 0);
@@ -476,7 +476,7 @@ void best_index::SingleThreadedIndex::compute_benefit(
     }
 }
 
-void best_index::SingleThreadedIndex::build_qg_list(
+void best_btree_index::SingleThreadedIndex::build_qg_list(
         std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals) {
@@ -488,7 +488,7 @@ void best_index::SingleThreadedIndex::build_qg_list(
     }
 }
 
-void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job & job, 
+void build_gr_list_rc_helper(best_btree_index::SingleThreadedIndex::job & job, 
         size_t set_idx, size_t r_idx, 
         const std::vector<std::set<size_t>> & rg_list) {
     const std::set<size_t> & set_of_exists_grams = rg_list[set_idx];
@@ -500,8 +500,8 @@ void build_gr_list_rc_helper(best_index::SingleThreadedIndex::job & job,
     }
 }
 
-void best_index::SingleThreadedIndex::build_gr_list_rc(
-        best_index::SingleThreadedIndex::job & job, 
+void best_btree_index::SingleThreadedIndex::build_gr_list_rc(
+        best_btree_index::SingleThreadedIndex::job & job, 
         size_t candidates_size,  
         size_t dataset_size,
         const std::vector<std::set<size_t>> & rg_list) {
@@ -511,8 +511,8 @@ void best_index::SingleThreadedIndex::build_gr_list_rc(
     }
 }
 
-void best_index::SingleThreadedIndex::build_job(
-        best_index::SingleThreadedIndex::job & job,
+void best_btree_index::SingleThreadedIndex::build_job(
+        best_btree_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals) {
 
@@ -528,7 +528,7 @@ void best_index::SingleThreadedIndex::build_job(
 // Improved greedy gram selection algorightm
 //   TODO: no point of seperating select gram and build index;
 //         only do that if we need some consistent interface later for experiments
-void best_index::SingleThreadedIndex::select_grams(int upper_n) {
+void best_btree_index::SingleThreadedIndex::select_grams(int upper_n) {
     auto start = std::chrono::high_resolution_clock::now();
     auto query_literals = get_query_literals();
     auto pre_suf_count = get_all_gram_counts(query_literals);
@@ -539,7 +539,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_n) {
     size_t candidates_size = candidates.size();
     size_t num_queries = query_literals.size();
 
-    best_index::SingleThreadedIndex::job job;
+    best_btree_index::SingleThreadedIndex::job job;
     build_job(job, candidates, query_literals);
 
     /**
@@ -591,7 +591,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_n) {
     // std::map<std::string, size_t> gram_to_candidate_idx_map;
     for (auto idx : index) {
         k_index_keys_.insert(candidates[idx]);
-        k_index_[candidates[idx]] = job.gr_list[idx];
+        k_index_.insert({candidates[idx], job.gr_list[idx]});
     }
 
     auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -604,7 +604,7 @@ void best_index::SingleThreadedIndex::select_grams(int upper_n) {
 }
 
 // Algorithm 2 in Figure 3
-void best_index::SingleThreadedIndex::build_index(int upper_n) {
+void best_btree_index::SingleThreadedIndex::build_index(int upper_n) {
     select_grams();
 }
 

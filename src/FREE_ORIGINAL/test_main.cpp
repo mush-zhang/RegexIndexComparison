@@ -4,7 +4,8 @@
 #include "Index/multigram_index.hpp"
 #include "Index/presuf_shell.hpp"
 #include "Index/parallel_multigram_index.hpp"
-#include "../simple_query_matcher.hpp"
+#include "Matcher/query_parser.hpp"
+#include "Matcher/query_matcher.hpp"
 
 #include <cassert>
 
@@ -80,7 +81,7 @@ void simple_index() {
         "5.fffff"
     });
 
-    auto pi = free_index::MultigramIndex(test_dataset, 1);
+    auto pi = free_original_index::MultigramIndex(test_dataset, 1);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -116,7 +117,7 @@ void simple_index_threshold() {
         "5.fffff"
     });
 
-    auto pi = free_index::MultigramIndex(test_dataset, 0.9);
+    auto pi = free_original_index::MultigramIndex(test_dataset, 0.9);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -150,7 +151,7 @@ void simple_presuf() {
         "5.fffff"
     });
 
-    auto pi = free_index::PresufShell(test_dataset, 0.9);
+    auto pi = free_original_index::PresufShell(test_dataset, 0.9);
 
     // try build index of uni and bigrams only
     pi.build_index(2);
@@ -186,7 +187,7 @@ void simple_multi_parallel() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::ParallelMultigramIndex(test_dataset, threshold, 4);
+    auto pi = free_original_index::ParallelMultigramIndex(test_dataset, threshold, 4);
     pi.build_index(5);
     pi.print_index();
 
@@ -209,7 +210,7 @@ void simple_find_keys() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free_original_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
 
@@ -232,13 +233,13 @@ void simple_query_parser() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free_original_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
 
     std::string reg_query = "(Bill|William)(.*)Clinton";
     
-    auto qp = free_index::QueryParser(pi);
+    auto qp = free_original_index::QueryParser(pi);
 
     // Should be same as Figure 6(b)
     qp.generate_query_plan(reg_query);
@@ -261,11 +262,11 @@ void simple_query_plan_by_index() {
     double threshold;
     make_dataset_with_keys(test_keys, test_dataset, threshold);
 
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free_original_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp = free_index::QueryParser(pi);
+    auto qp = free_original_index::QueryParser(pi);
 
     qp.generate_query_plan(reg_query);
     // Should be same as Figure 7(a)
@@ -280,14 +281,14 @@ void simple_query_plan_by_index() {
 
 void complex_query_parser_traffic() {
     std::vector<std::string> test_dataset;
-    auto pi = free_index::MultigramIndex(test_dataset, 1);
+    auto pi = free_original_index::MultigramIndex(test_dataset, 1);
 
     auto traffic_reg = read_file(kTrafficRegex);
     auto traffic_grams = literals_from_regexes(traffic_reg);
 
     pi.manual_select_grams(traffic_grams);
 
-    auto qp = free_index::QueryParser(pi);
+    auto qp = free_original_index::QueryParser(pi);
 
     for (const auto reg : traffic_reg) {
         std::cout << reg << std::endl;
@@ -305,14 +306,14 @@ void complex_query_parser_traffic() {
 
 void complex_query_parser_webpages() {
     std::vector<std::string> test_dataset;
-    auto pi = free_index::MultigramIndex(test_dataset, 1);
+    auto pi = free_original_index::MultigramIndex(test_dataset, 1);
 
     auto web_reg = read_file(kWebRegexFree);
     auto web_grams = literals_from_regexes(web_reg);
 
     pi.manual_select_grams(web_grams);
 
-    auto qp = free_index::QueryParser(pi);
+    auto qp = free_original_index::QueryParser(pi);
 
     for (const auto reg : web_reg) {
         std::cout << reg << std::endl;
@@ -352,11 +353,11 @@ void simple_lines_by_plan() {
     // test_dataset.push_back("Clinton");
     test_dataset.push_back("Bill.Clinton");
 
-    auto pi1 = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi1 = free_original_index::MultigramIndex(test_dataset, threshold);
     pi1.build_index(5);
     pi1.print_index();
     std::string reg_query = "(Bill|William)(.*)Clinton";
-    auto qp1 = free_index::QueryParser(pi1);
+    auto qp1 = free_original_index::QueryParser(pi1);
 
     qp1.generate_query_plan(reg_query);
     qp1.rewrite_by_index();
@@ -369,11 +370,11 @@ void simple_lines_by_plan() {
     assert(helped1 && compare_lists(idx_list1, {455}) && 
            "Multigram: Line 455 Clinton should be the only result");
 
-    auto pi2 = free_index::PresufShell(test_dataset, threshold);
+    auto pi2 = free_original_index::PresufShell(test_dataset, threshold);
     pi2.build_index(5);
     pi2.print_index();
 
-    auto qp2 = free_index::QueryParser(pi2);
+    auto qp2 = free_original_index::QueryParser(pi2);
 
     qp2.generate_query_plan(reg_query);
     qp2.rewrite_by_index();
@@ -407,12 +408,12 @@ void simple_match_all() {
     }
     test_dataset.push_back("William");
     test_dataset.push_back("Bill.Clinton");
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free_original_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
     std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton", "TDT"};
     std::cout << "start matching" << std::endl;
-    auto matcher = SimpleQueryMatcher(pi, reg_query);
+    auto matcher = free_original_index::QueryMatcher(pi, reg_query);
 
     matcher.match_all();
 }
@@ -437,11 +438,11 @@ void simple_match_one() {
     }
     test_dataset.push_back("William");
     test_dataset.push_back("Bill.Clinton");
-    auto pi = free_index::MultigramIndex(test_dataset, threshold);
+    auto pi = free_original_index::MultigramIndex(test_dataset, threshold);
     pi.build_index(5);
     pi.print_index();
     std::vector<std::string> reg_query = {"(Bill|William)(.*)Clinton"};
-    auto matcher = SimpleQueryMatcher(pi, reg_query);
+    auto matcher = free_original_index::QueryMatcher(pi, reg_query);
     std::cout << "start matching" << std::endl;
 
     matcher.match_one(reg_query[0]);

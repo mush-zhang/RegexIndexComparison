@@ -1,5 +1,5 @@
-#ifndef BEST_INDEX_PARALLELIZABLE_HPP_
-#define BEST_INDEX_PARALLELIZABLE_HPP_
+#ifndef BEST_BTREE_INDEX_PARALLELIZABLE_HPP_
+#define BEST_BTREE_INDEX_PARALLELIZABLE_HPP_
 
 #include <algorithm>
 
@@ -7,12 +7,20 @@
 
 /**Accoriding to Section 3 part 3), we choose a hard-coded value
     of thread/cluster count between |Q|/2 and |Q|/5 **/
-namespace best_index {
+namespace best_btree_index {
 
 class ParallelizableIndex : public SingleThreadedIndex {
  public:
     ParallelizableIndex() = delete;
     ParallelizableIndex(const ParallelizableIndex &&) = delete;
+
+    // ParallelizableIndex(const std::vector<std::string> & dataset, 
+    //            const std::vector<std::string> & queries, 
+    //            double sel_threshold)
+    //   : SingleThreadedIndex(dataset, queries, sel_threshold),
+    //     thread_count_(std::max(2, int(queries.size()/5))) {
+    //         dist_measure_type_ = dist_type::kMaxDevDist2;
+    //     }
     
     ParallelizableIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
@@ -42,15 +50,15 @@ class ParallelizableIndex : public SingleThreadedIndex {
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> & q_list);
 
-    void build_job_local(best_index::SingleThreadedIndex::job & job,
+    void build_job_local(best_btree_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals,
         const std::vector<size_t> q_list);
 
     bool multi_all_covered(const std::set<size_t> & index, 
-        const std::vector<best_index::SingleThreadedIndex::job> & jobs);
+        const std::vector<best_btree_index::SingleThreadedIndex::job> & jobs);
 };
 
-} // namespace best_index
+} // namespace best_btree_index
 
-#endif // BEST_INDEX_PARALLELIZABLE_HPP_
+#endif // BEST_BTREE_INDEX_PARALLELIZABLE_HPP_

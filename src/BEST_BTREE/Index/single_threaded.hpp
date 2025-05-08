@@ -1,12 +1,12 @@
-#ifndef BEST_INDEX_SINGLE_THREADED_HPP_
-#define BEST_INDEX_SINGLE_THREADED_HPP_
+#ifndef BEST_BTREE_INDEX_SINGLE_THREADED_HPP_
+#define BEST_BTREE_INDEX_SINGLE_THREADED_HPP_
 
 #include <map>
 #include <unordered_map>
 
-#include "../../ngram_inverted_index.hpp"
+#include "../../ngram_btree_index.hpp"
 
-namespace best_index {
+namespace best_btree_index {
 
 enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
 
@@ -16,7 +16,7 @@ enum dist_type { kMaxDevDist1, kMaxDevDist2, kMaxDevDist3, kInvalid };
  *       It uses the ARE (false positives related measurement) to measure the.
  *       effectiveness of index
  */
-class SingleThreadedIndex  : public NGramInvertedIndex {
+class SingleThreadedIndex  : public NGramBtreeIndex {
  public:
 
     /**
@@ -39,7 +39,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     SingleThreadedIndex(const std::vector<std::string> & dataset, 
                const std::vector<std::string> & queries, 
                double sel_threshold)
-      : NGramInvertedIndex(dataset, queries),
+      : NGramBtreeIndex(dataset, queries),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(queries.size()) {}
     
@@ -47,7 +47,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
                const std::vector<std::string> & queries, 
                double sel_threshold, long workload_reduced_size,
                dist_type dist_measure_type)
-      : NGramInvertedIndex(dataset, queries),
+      : NGramBtreeIndex(dataset, queries),
         k_threshold_(sel_threshold), 
         k_reduced_queries_size_(workload_reduced_size),
         dist_measure_type_(dist_measure_type) {}
@@ -88,11 +88,11 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     
     void compute_benefit(std::vector<long double> & benefit, 
         const std::set<size_t> & index, 
-        const best_index::SingleThreadedIndex::job & job, 
+        const best_btree_index::SingleThreadedIndex::job & job, 
         size_t num_queries);
     
     bool all_covered(const std::set<size_t> & index,
-        const best_index::SingleThreadedIndex::job & job,  
+        const best_btree_index::SingleThreadedIndex::job & job,  
         size_t query_size);
     
     void indexed_grams_in_string(const std::string & l, 
@@ -106,7 +106,7 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
         std::vector<std::set<size_t>> & g_list,
         size_t idx);
     
-    void build_gr_list_rc(best_index::SingleThreadedIndex::job & job, 
+    void build_gr_list_rc(best_btree_index::SingleThreadedIndex::job & job, 
         size_t candidates_size,  
         size_t dataset_size,
         const std::vector<std::set<size_t>> & rg_list);
@@ -119,19 +119,19 @@ class SingleThreadedIndex  : public NGramInvertedIndex {
     long max_iteration_ = 100;
 
     bool index_covered(const std::set<size_t> & index, 
-        const best_index::SingleThreadedIndex::job & job,
+        const best_btree_index::SingleThreadedIndex::job & job,
         size_t r_j, size_t q_k);
 
     void build_qg_list(std::vector<std::set<size_t>> & qg_list,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals);
     
-    void build_job(best_index::SingleThreadedIndex::job & job,
+    void build_job(best_btree_index::SingleThreadedIndex::job & job,
         const std::vector<std::string> & candidates, 
         const std::vector<std::vector<std::string>> & query_literals);
 
 };
 
-} // namespace best_index
+} // namespace best_btree_index
 
-#endif // BEST_INDEX_SINGLE_THREADED_HPP_
+#endif // BEST_BTREE_INDEX_SINGLE_THREADED_HPP_

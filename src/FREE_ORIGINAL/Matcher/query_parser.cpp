@@ -3,11 +3,11 @@
 #include "query_parser.hpp"
 #include "../../utils/utils.hpp"
 
-using QueryPlanNode = free_index::QueryPlanNode;
-using AndNode = free_index::AndNode;
-using OrNode = free_index::OrNode;
-using NullNode = free_index::NullNode;
-using LiteralNode = free_index::LiteralNode;
+using QueryPlanNode = free_original_index::QueryPlanNode;
+using AndNode = free_original_index::AndNode;
+using OrNode = free_original_index::OrNode;
+using NullNode = free_original_index::NullNode;
+using LiteralNode = free_original_index::LiteralNode;
 
 enum OP { kAnd, kOr };
 
@@ -158,7 +158,7 @@ std::unique_ptr<QueryPlanNode> build_rooted_plan(const std::string & reg_str) {
     return make_const_node(new_reg);
 }
 
-void free_index::QueryParser::generate_query_plan(const std::string & reg_str) {
+void free_original_index::QueryParser::generate_query_plan(const std::string & reg_str) {
     // parse the string and pick out the literal component
     std::string curr_str(reg_str);
     query_plan_.reset(build_rooted_plan(curr_str).release());
@@ -178,7 +178,7 @@ void print_plan_helper(const std::string& prefix,
     }
 }
 
-void free_index::QueryParser::print_plan() {
+void free_original_index::QueryParser::print_plan() {
     std::cout << "#################### BEGIN PLAN #######################" << std::endl;
     print_plan_helper("", query_plan_, false);
     std::cout << "#################### END PLAN #######################" << std::endl;
@@ -216,12 +216,12 @@ void remove_null_node_or(std::unique_ptr<QueryPlanNode> & node) {
 
 void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
     if (!node || node->is_null() ||
-        node->get_type() == free_index::NodeType::kLiteralNode) {
+        node->get_type() == free_original_index::NodeType::kLiteralNode) {
         return;
     }
-    if (node->get_type() == free_index::NodeType::kAndNode) {
+    if (node->get_type() == free_original_index::NodeType::kAndNode) {
         remove_null_node_and(node);
-    } else if (node->get_type() == free_index::NodeType::kOrNode) {
+    } else if (node->get_type() == free_original_index::NodeType::kOrNode) {
         remove_null_node_or(node);
     } else {
         std::cerr << "Invalid node type my friend" << std::endl;
@@ -229,20 +229,20 @@ void remove_null_node(std::unique_ptr<QueryPlanNode> & node) {
 } 
 
 // Remove Null node according to rule in table 2
-void free_index::QueryParser::remove_null() {
+void free_original_index::QueryParser::remove_null() {
     remove_null_node(query_plan_);
 }
 
-void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node) {
+void free_original_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNode> & node) {
     if (!node || node->is_null()) {
         return;
     }
 
-    if (node->get_type() == free_index::NodeType::kAndNode || 
-        node->get_type() == free_index::NodeType::kOrNode) {
+    if (node->get_type() == free_original_index::NodeType::kAndNode || 
+        node->get_type() == free_original_index::NodeType::kOrNode) {
         rewrite_node_by_index(node->left_);
         rewrite_node_by_index(node->right_);
-    } else if (node->get_type() == free_index::NodeType::kLiteralNode) {
+    } else if (node->get_type() == free_original_index::NodeType::kLiteralNode) {
         auto all_keys = k_index_.find_all_keys(node->to_string());
         if (all_keys.empty()) {
             node = make_const_node("");
@@ -259,7 +259,7 @@ void free_index::QueryParser::rewrite_node_by_index(std::unique_ptr<QueryPlanNod
     }
 } 
 
-void free_index::QueryParser::rewrite_by_index() {
+void free_original_index::QueryParser::rewrite_by_index() {
     if (k_index_.empty()) {
         return;
         // std::cerr << "No index provided; plan stays untouched." << std::endl;
@@ -268,34 +268,34 @@ void free_index::QueryParser::rewrite_by_index() {
     rewrote_by_index_ = true;
 }
 
-std::vector<size_t> free_index::QueryParser::get_index_by_node(
+std::vector<size_t> free_original_index::QueryParser::get_index_by_node(
         std::unique_ptr<QueryPlanNode> & node) {
     std::vector<size_t> result;
 
     if (!node || node->is_null() ||
-        node->get_type() == free_index::NodeType::kInvalidNode) {
+        node->get_type() == free_original_index::NodeType::kInvalidNode) {
         return result;
     }
-    if (node->get_type() == free_index::NodeType::kLiteralNode) {
+    if (node->get_type() == free_original_index::NodeType::kLiteralNode) {
         return k_index_.get_line_pos_at(node->to_string());
     }
     auto left_idxs = get_index_by_node(node->left_);
     auto right_idxs = get_index_by_node(node->right_);
 
-    if (node->get_type() == free_index::NodeType::kAndNode) {
+    if (node->get_type() == free_original_index::NodeType::kAndNode) {
         result = sorted_lists_intersection(left_idxs, right_idxs);
-    } else if (node->get_type() == free_index::NodeType::kOrNode) {
+    } else if (node->get_type() == free_original_index::NodeType::kOrNode) {
         result = sorted_lists_union(left_idxs, right_idxs);        
     } 
     return result;
 } 
 
-bool free_index::QueryParser::get_index_by_plan(std::vector<size_t> & container) {
+bool free_original_index::QueryParser::get_index_by_plan(std::vector<size_t> & container) {
     if (!rewrote_by_index_) {
         rewrite_by_index();
     }
     if (!query_plan_ || query_plan_->is_null() ||
-        query_plan_->get_type() == free_index::NodeType::kInvalidNode) {
+        query_plan_->get_type() == free_original_index::NodeType::kInvalidNode) {
         return false; // if helped_by_idx
     }
     auto result = get_index_by_node(query_plan_);

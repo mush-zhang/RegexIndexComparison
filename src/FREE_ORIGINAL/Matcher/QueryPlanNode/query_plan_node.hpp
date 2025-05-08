@@ -1,12 +1,12 @@
-#ifndef FREE_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
-#define FREE_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
+#ifndef FREE_ORIGINAL_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
+#define FREE_ORIGINAL_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
 
 #include <memory>
 #include <string>
 
 #include "types.hpp"
 
-namespace free_index {
+namespace free_original_index {
 
 class QueryPlanNode {
  public:
@@ -25,6 +25,6 @@ class QueryPlanNode {
     inline static const std::string k_generic_node_name_ = "";
 };
 
-} // namespace free_index
+} // namespace free_original_index
 
-#endif // FREE_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_
+#endif // FREE_ORIGINAL_MATCHER_QUERYPLANNODE_QUERY_PLAN_NODE_HPP_

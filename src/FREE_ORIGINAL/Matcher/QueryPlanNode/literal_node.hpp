@@ -1,9 +1,9 @@
-#ifndef FREE_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
-#define FREE_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
+#ifndef FREE_ORIGINAL_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
+#define FREE_ORIGINAL_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
 
 #include "query_plan_node.hpp"
 
-namespace free_index {
+namespace free_original_index {
 
 class LiteralNode: public QueryPlanNode {
  public:
@@ -17,6 +17,6 @@ class LiteralNode: public QueryPlanNode {
     std::string literal_;
 };
 
-} // namespace free_index
+} // namespace free_original_index
 
-#endif // FREE_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
+#endif // FREE_ORIGINAL_MATCHER_QUERYPLANNODE_LITERAL_NODE_HPP_
