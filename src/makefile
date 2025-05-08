@@ -51,16 +51,13 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 .PHONY: all
 all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: $(BEST_BASE_DIR)/test_best.out $\
-	 $(BEST_BTREE_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
-	 $(FREE_ORI_BASE_DIR)/test_free.out $\
 	 $(LPMS_BASE_DIR)/test_lpms.out 
 
 .PHONY: debug
 debug: CPPFLAGS+= -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
-		$(FREE_ORI_BASE_DIR)/test_free.out $\
 		$(LPMS_BASE_DIR)/test_lpms.out 
 
 $(LPMS_BASE_DIR)/test_lpms.out: $(LPMS_IDX) $(LPMS_BASE_DIR)/test_main.cpp
