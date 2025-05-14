@@ -68,6 +68,7 @@ result/*
 notebooks/*
 # except those that are final for presentation
 !notebooks/final_*
+!notebooks/*.drawio
 
 # re2 added file
 *re2/python/LICENSE*
