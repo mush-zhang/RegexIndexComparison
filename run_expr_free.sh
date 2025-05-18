@@ -27,7 +27,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
-            dirname=result/${OPTARG}_free_result4
+            dirname=result/${OPTARG}_free_revision
             echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
@@ -65,8 +65,8 @@ num_repeat=1
 
 # Free
 # for n in 2 4 6 8 10; do
-# for n in 2 4 6; do
-for n in 4 6; do
+for n in 2 4 6; do
+# for n in 4 6; do
     for c in ${sel_list[*]}; do
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
