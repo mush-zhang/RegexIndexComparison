@@ -13,10 +13,10 @@ mkdir -p ${dblpdir}
 # { timeout 3h /usr/bin/time -v ./benchmark.out LPMS -t 16 -w 0 -o ${dblpdir} --relax DETERM -e 1 -k 500 \
 #     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_lpms_t16_determ_500.txt
 
-{ timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 2 -c 0.7 -e 1 -k 150 \
-    -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_free_t16_c0.7_n2_150.txt
-{ timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 2 -c 0.7 -e 1 -k 500 \
-    -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_free_t16_c0.7_n2_500.txt
+# { timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 2 -c 0.7 -e 1 -k 150 \
+#     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_free_t16_c0.7_n2_150.txt
+# { timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 2 -c 0.7 -e 1 -k 500 \
+#     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_free_t16_c0.7_n2_500.txt
 { timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 4 -c 0.5 -e 1 \
     -r data/dblp/small/query1000.txt -d data/dblp/small/authors.txt ; } 2> ${dblpdir}/time_report_free_t16_c0.5_n4_-1.txt
 { timeout 3h /usr/bin/time -v ./benchmark.out FREE -t 16 -w 0 -o ${dblpdir} -n 2 -c 0.2 -e 1 \
