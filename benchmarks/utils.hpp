@@ -12,7 +12,7 @@ inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'Trigram', 'NONE'. \n\
+    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'TRIGRAM', 'NONE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0-6], required \t Workload used. \n\

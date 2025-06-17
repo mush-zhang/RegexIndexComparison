@@ -44,7 +44,7 @@ selection_type get_method(const std::string gs) {
     if (gs == "LPMS") {
         return selection_type::kFast;
     }
-    if (gs == "Trigram") {
+    if (gs == "TRIGRAM") {
         return selection_type::kTrigram;
     }
     if (gs == "NONE") {
