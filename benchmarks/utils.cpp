@@ -675,7 +675,7 @@ void benchmarkTrigram(const std::filesystem::path dir_path,
 
     std::ostringstream stats_name;
     // index building
-    auto * pi = new trigram_index::TrigramInvertedIndex(lines, regexes, trigram_info.num_threads, trigram_info.rtype);
+    auto * pi = new trigram_index::TrigramInvertedIndex(lines, regexes);
     pi->set_thread_count(trigram_info.num_threads);
     pi->set_key_upper_bound(trigram_info.key_upper_bound);
     pi->set_outfile(outfile);
