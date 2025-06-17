@@ -20,7 +20,9 @@ BEST_BASE_DIR=$(SRC_DIR)/BEST
 BEST_IDX_DIR=$(BEST_BASE_DIR)/Index
 BEST_DIRS=$(BEST_IDX_DIR)
 
-DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS)
+TRIGRAM_IDX_DIR=$(SRC_DIR)/Trigram/Index
+
+DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS) $(TRIGRAM_IDX_DIR)
 OBJECT_PATTERNS=*.o
 OBJECTS := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(OBJECT_PATTERNS)))
 
@@ -51,6 +53,7 @@ benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
 			   $(FREE_IDX_DIR)/free_multi_parallel.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
 			   $(LPMS_IDX_DIR)/lpms.o $\
+			   $(TRIGRAM_IDX_DIR)/trigram_inverted_index.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 

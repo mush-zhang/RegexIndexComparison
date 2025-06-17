@@ -12,7 +12,7 @@ inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'NONE'. \n\
+    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'Trigram', 'NONE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0-6], required \t Workload used. \n\
@@ -46,7 +46,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t --relax [DETERM|RANDOM], required \t Type of relaxation method.";
 /*-------------------------------------------------------------------------------------------------------------------*/
 
-enum selection_type { kFast, kBest, kFree, kNone, kInvalid };
+enum selection_type { kFast, kBest, kFree, kTrigram, kNone, kInvalid };
 
 struct expr_info {
     selection_type stype;
@@ -85,6 +85,12 @@ struct lpms_info {
     std::string rtype_str;
 };
 
+struct trigram_info {
+    int num_repeat = 10;
+    long long int key_upper_bound;
+    int num_threads;
+};
+
 std::string getCmdOption(char ** begin, char ** end, const std::string & option);
 
 bool cmdOptionExists(char ** begin, char ** end, const std::string & option);
@@ -95,7 +101,8 @@ std::pair<T, T> getStats(std::vector<T> & arr);
 int parseArgs(int argc, char ** argv, 
              expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
-             lpms_info & lpms_info);
+             lpms_info & lpms_inf,
+             trigram_info & trigram_info);
 
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
@@ -120,6 +127,12 @@ void benchmarkFast(const std::filesystem::path dir_path,
                    const std::vector<std::string> & test_regexes, 
                    const std::vector<std::string> & lines,
                    const lpms_info & lpms_info);
+
+void benchmarkTrigram(const std::filesystem::path dir_path,
+                   const std::vector<std::string> & regexes, 
+                   const std::vector<std::string> & test_regexes, 
+                   const std::vector<std::string> & lines,
+                   const trigram_info & trigram_info);
 
 void benchmarkBaseline(const std::filesystem::path dir_path,
                        const std::vector<std::string> & regexes, 

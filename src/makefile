@@ -43,7 +43,9 @@ LPMS_IDX_DIR=$(LPMS_BASE_DIR)/Index
 LPMS_DIRS=$(LPMS_BASE_DIR) $(LPMS_IDX_DIR)
 LPMS_IDX=simple_query_matcher.o inverted_index.o $(LPMS_IDX_DIR)/lpms.o
 
-DIRS=. utils $(FREE_DIRS) $(FREE_ORI_DIRS) $(BEST_DIRS) $(BEST_BTREE_DIRS) $(LPMS_DIRS)
+TRIGRAM_IDX_DIR=Trigram/Index
+
+DIRS=. utils $(FREE_DIRS) $(FREE_ORI_DIRS) $(BEST_DIRS) $(BEST_BTREE_DIRS) $(LPMS_DIRS) $(TRIGRAM_IDX_DIR)
 
 GARBAGE_PATTERNS=*.o *.out *.hpp.gch
 GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
@@ -52,13 +54,18 @@ GARBAGE := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(GARBAGE_PATTERNS)))
 all: CPPFLAGS+=-DARMA_NO_DEBUG -DNDEBUG -w
 all: $(BEST_BASE_DIR)/test_best.out $\
 	 $(FREE_BASE_DIR)/test_free.out $\
-	 $(LPMS_BASE_DIR)/test_lpms.out 
+	 $(LPMS_BASE_DIR)/test_lpms.out $\
+	 $(TRIGRAM_IDX_DIR)/trigram_inverted_index.o
 
 .PHONY: debug
 debug: CPPFLAGS+= -g
 debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(FREE_BASE_DIR)/test_free.out $\
-		$(LPMS_BASE_DIR)/test_lpms.out 
+		$(LPMS_BASE_DIR)/test_lpms.out $\
+		$(TRIGRAM_IDX_DIR)/trigram_inverted_index.o
+
+$(TRIGRAM_IDX_DIR)/trigram_inverted_index.o: $(TRIGRAM_IDX_DIR)/trigram_inverted_index.cpp
+    $(CXX) $(CXXFLAGS) -c $< $(RE2_FLAGS) $(LDFLAGS) -o $@
 
 $(LPMS_BASE_DIR)/test_lpms.out: $(LPMS_IDX) $(LPMS_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
