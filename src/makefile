@@ -65,7 +65,7 @@ debug:  $(BEST_BASE_DIR)/test_best.out $\
 		$(TRIGRAM_IDX_DIR)/trigram_inverted_index.o
 
 $(TRIGRAM_IDX_DIR)/trigram_inverted_index.o: $(TRIGRAM_IDX_DIR)/trigram_inverted_index.cpp
-    $(CXX) $(CXXFLAGS)  $^ $(RE2_FLAGS) $(LDFLAGS) -o $@
+	$(CXX) -c $(CPPFLAGS)  $^ $(RE2_FLAGS) $(LDFLAGS) -o $@
 
 $(LPMS_BASE_DIR)/test_lpms.out: $(LPMS_IDX) $(LPMS_BASE_DIR)/test_main.cpp
 	$(CXX) $(CPPFLAGS) $^ $(GUROBI_FLAGS) $(RE2_FLAGS) $(LDFLAGS) -o  $@
