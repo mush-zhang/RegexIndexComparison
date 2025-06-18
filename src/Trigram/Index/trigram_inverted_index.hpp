@@ -28,14 +28,6 @@ class TrigramInvertedIndex : public NGramInvertedIndex {
 
     void build_index(int upper_n = 3) override;
 
-    std::vector<std::string> find_all_keys(const std::string & line) const override;
-
-    void print_index(bool size_only = false) const override;
-
-    void wirte_index_keys_to_file(const std::filesystem::path & out_path) const override;
-
-    const std::vector<size_t> & get_line_pos_at(const std::string & key) const override;
-
     bool empty() const override { return k_index_keys_.empty(); }
 
     size_t get_num_keys() const override { return k_index_keys_.size(); }

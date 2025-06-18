@@ -2,6 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <random>
+#include <algorithm>
+#include <chrono>
+#include "../../utils/utils.hpp"
 
 void trigram_index::TrigramInvertedIndex::extract_trigrams(const std::string & line, std::set<std::string> & trigrams) const {
     if (line.size() < 3) return;
@@ -11,17 +15,28 @@ void trigram_index::TrigramInvertedIndex::extract_trigrams(const std::string & l
 }
 
 void trigram_index::TrigramInvertedIndex::build_index(int upper_n) {
+    auto start = std::chrono::high_resolution_clock::now();
+
     // Step 1: Collect all unique trigrams in the dataset (threaded)
     const size_t num_threads = thread_count_; // std::thread::hardware_concurrency();
     std::vector<std::set<std::string>> thread_trigrams(num_threads);
     size_t dataset_size = k_dataset_.size();
+    size_t local_limit = (upper_n > -1) ? (5 * upper_n + num_threads - 1) / num_threads : std::numeric_limits<size_t>::max();
 
     auto collect_trigrams = [&](size_t tid) {
         size_t chunk = (dataset_size + num_threads - 1) / num_threads;
         size_t start = tid * chunk;
         size_t end = std::min(start + chunk, dataset_size);
         for (size_t i = start; i < end; ++i) {
-            extract_trigrams(k_dataset_[i], thread_trigrams[tid]);
+            if (thread_trigrams[tid].size() >= local_limit) break;
+                std::set<std::string> local;
+                extract_trigrams(k_dataset_[i], local);
+                for (const auto& tri : local) {
+                    if (thread_trigrams[tid].size() < local_limit)
+                        thread_trigrams[tid].insert(tri);
+                    else
+                        break;
+            }
         }
     };
 
@@ -30,12 +45,44 @@ void trigram_index::TrigramInvertedIndex::build_index(int upper_n) {
         threads.emplace_back(collect_trigrams, t);
     for (auto &th : threads) th.join();
 
-    // Merge all trigrams into k_index_keys_
+    // Merge all trigrams
+    std::set<std::string> all_trigrams;
     for (const auto &local_set : thread_trigrams)
-        k_index_keys_.insert(local_set.begin(), local_set.end());
+        all_trigrams.insert(local_set.begin(), local_set.end());
+
+    if (upper_n > -1) {
+        // Randomly select upper_n trigrams from all_trigrams
+        std::vector<std::string> trigram_vec(all_trigrams.begin(), all_trigrams.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(trigram_vec.begin(), trigram_vec.end(), g);
+
+        k_index_keys_.clear();
+        for (int i = 0; i < upper_n && i < static_cast<int>(trigram_vec.size()); ++i) {
+            k_index_keys_.insert(trigram_vec[i]);
+        }
+    } else {
+        k_index_keys_ = all_trigrams;
+    }
+    auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
+
+    std::ostringstream log;
+    log << "Trigram," << thread_count_ << "," << upper_n << ",";
+    log << -1 << "," << key_upper_bound_ << ",";
+    log << k_queries_size_ << "," << selection_time << ",";
 
     // Step 2: Fill posting lists (threaded)
     fill_posting();
+
+    auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Index Building End in " << build_time << std::endl;
+    log << build_time << "," << build_time+selection_time << ",";
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+
+    write_to_file(log.str());
 }
 
 void trigram_index::TrigramInvertedIndex::fill_posting() {
@@ -61,7 +108,7 @@ void trigram_index::TrigramInvertedIndex::fill_posting() {
         std::lock_guard<std::mutex> lock(index_mutex_);
         for (const auto & [key, vec] : local_index) {
             auto & posting = k_index_[key];
-            posting.insert(posting.end(), vec.begin(), vec.end());
+            posting = sorted_lists_union(posting, vec);
         }
     };
 
@@ -69,42 +116,4 @@ void trigram_index::TrigramInvertedIndex::fill_posting() {
     for (size_t t = 0; t < num_threads; ++t)
         threads.emplace_back(fill, t);
     for (auto &th : threads) th.join();
-}
-
-std::vector<std::string> trigram_index::TrigramInvertedIndex::find_all_keys(const std::string & line) const {
-    std::set<std::string> trigrams;
-    extract_trigrams(line, trigrams);
-    std::vector<std::string> found;
-    for (const auto & t : trigrams) {
-        if (k_index_keys_.count(t)) found.push_back(t);
-    }
-    return found;
-}
-
-void trigram_index::TrigramInvertedIndex::print_index(bool size_only) const {
-    std::cout << "TrigramInvertedIndex: " << k_index_keys_.size() << " keys" << std::endl;
-    if (!size_only) {
-        for (const auto & key : k_index_keys_) {
-            std::cout << key << ": ";
-            if (k_index_.count(key))
-                std::cout << k_index_.at(key).size() << " lines" << std::endl;
-            else
-                std::cout << "0 lines" << std::endl;
-        }
-    }
-}
-
-void trigram_index::TrigramInvertedIndex::wirte_index_keys_to_file(const std::filesystem::path & out_path) const {
-    std::ofstream outfile(out_path);
-    for (const auto & k : k_index_keys_) {
-        outfile << k << std::endl;
-    }
-}
-
-const std::vector<size_t> & trigram_index::TrigramInvertedIndex::get_line_pos_at(const std::string & key) const {
-    if (auto it = k_index_.find(key); it != k_index_.end()) {
-        return it->second;
-    }
-    static const std::vector<size_t> empty;
-    return empty;
 }
