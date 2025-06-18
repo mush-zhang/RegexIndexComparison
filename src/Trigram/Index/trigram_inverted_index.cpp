@@ -21,7 +21,7 @@ void trigram_index::TrigramInvertedIndex::build_index(int upper_n) {
     const size_t num_threads = thread_count_; // std::thread::hardware_concurrency();
     std::vector<std::set<std::string>> thread_trigrams(num_threads);
     size_t dataset_size = k_dataset_.size();
-    size_t local_limit = (upper_n > -1) ? (5 * upper_n + num_threads - 1) / num_threads : std::numeric_limits<size_t>::max();
+    size_t local_limit = (key_upper_bound_ < LLONG_MAX) ? (5 * key_upper_bound_ + num_threads - 1) / num_threads : std::numeric_limits<size_t>::max();
 
     auto collect_trigrams = [&](size_t tid) {
         size_t chunk = (dataset_size + num_threads - 1) / num_threads;
@@ -50,15 +50,15 @@ void trigram_index::TrigramInvertedIndex::build_index(int upper_n) {
     for (const auto &local_set : thread_trigrams)
         all_trigrams.insert(local_set.begin(), local_set.end());
 
-    if (upper_n > -1) {
-        // Randomly select upper_n trigrams from all_trigrams
+    if (key_upper_bound_ < LLONG_MAX) {
+        // Randomly select key_upper_bound_ trigrams from all_trigrams
         std::vector<std::string> trigram_vec(all_trigrams.begin(), all_trigrams.end());
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(trigram_vec.begin(), trigram_vec.end(), g);
 
         k_index_keys_.clear();
-        for (int i = 0; i < upper_n && i < static_cast<int>(trigram_vec.size()); ++i) {
+        for (int i = 0; i < key_upper_bound_ && i < static_cast<int>(trigram_vec.size()); ++i) {
             k_index_keys_.insert(trigram_vec[i]);
         }
     } else {
