@@ -86,7 +86,7 @@ void trigram_index::TrigramInvertedIndex::build_index(int upper_n) {
 }
 
 void trigram_index::TrigramInvertedIndex::fill_posting() {
-    const size_t num_threads = std::thread::hardware_concurrency();
+    const size_t num_threads = thread_count_; // std::thread::hardware_concurrency();
     size_t dataset_size = k_dataset_.size();
 
     auto fill = [&](size_t tid) {
@@ -104,6 +104,7 @@ void trigram_index::TrigramInvertedIndex::fill_posting() {
                     local_index[trigram].push_back(i);
             }
         }
+        std::cout << "Thread " << tid << " processed lines from " << start << " to " << end << std::endl;
         // Merge local_index into global index
         std::lock_guard<std::mutex> lock(index_mutex_);
         for (const auto & [key, vec] : local_index) {
