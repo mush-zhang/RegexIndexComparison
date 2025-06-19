@@ -104,7 +104,6 @@ void trigram_index::TrigramInvertedIndex::fill_posting() {
                     local_index[trigram].push_back(i);
             }
         }
-        std::cout << "Thread " << tid << " processed lines from " << start << " to " << end << std::endl;
         // Merge local_index into global index
         std::lock_guard<std::mutex> lock(index_mutex_);
         for (const auto & [key, vec] : local_index) {
@@ -115,7 +114,6 @@ void trigram_index::TrigramInvertedIndex::fill_posting() {
                 auto & posting = k_index_[key];
                 posting = sorted_lists_union(posting, vec);
             }
-            std::cout << "Thread " << tid << " added trigram: " << key << " with postings size: " << k_index_[key].size() << std::endl;
         }
     };
 
