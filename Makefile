@@ -1,7 +1,16 @@
 CC=gcc
 CXX=g++
 
-CPPFLAGS=-O3 -std=c++20 -Ofast -march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast -fPIC -flto=auto -Wno-format -Wno-unused-result
+# Detect architecture and set appropriate flags
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_M),arm64)
+    ARCH_FLAGS=-march=native -fomit-frame-pointer -ffp-contract=fast
+else
+    ARCH_FLAGS=-march=native -mfma -mavx -fomit-frame-pointer -ffp-contract=fast
+endif
+
+CFLAGS=-O3 $(ARCH_FLAGS) -fPIC -flto=auto -Wno-format -Wno-unused-result
+CPPFLAGS=-O3 -std=c++20 $(ARCH_FLAGS) -fPIC -flto=auto -Wno-format -Wno-unused-result
 LDFLAGS=-pthread -lstdc++fs
 GUROBI_FLAGS=-I${GUROBI_HOME}/include -L${GUROBI_HOME}/lib -lgurobi_c++ -lgurobi110
 RE2_FLAGS=-L/usr/local/lib -lre2
@@ -22,7 +31,15 @@ BEST_DIRS=$(BEST_IDX_DIR)
 
 TRIGRAM_IDX_DIR=$(SRC_DIR)/Trigram/Index
 
-DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS) $(TRIGRAM_IDX_DIR)
+# VGGRAPH_OPT_BASE_DIR=$(SRC_DIR)/VGGRAPH_OPT
+# VGGRAPH_OPT_IDX_DIR=$(VGGRAPH_OPT_BASE_DIR)/Index
+# VGGRAPH_OPT_DIRS=$(VGGRAPH_OPT_IDX_DIR)
+
+VGGRAPH_GREEDY_BASE_DIR=$(SRC_DIR)/VGGRAPH_GREEDY
+VGGRAPH_GREEDY_IDX_DIR=$(VGGRAPH_GREEDY_BASE_DIR)/Index
+VGGRAPH_GREEDY_DIRS=$(VGGRAPH_GREEDY_IDX_DIR)
+
+DIRS=. $(SRC_DIR)/utils $(FREE_DIRS) $(BEST_DIRS) $(LPMS_DIRS) $(TRIGRAM_IDX_DIR) $(VGGRAPH_GREEDY_DIRS)
 OBJECT_PATTERNS=*.o
 OBJECTS := $(foreach DIR,$(DIRS),$(addprefix $(DIR)/,$(OBJECT_PATTERNS)))
 
@@ -54,11 +71,16 @@ benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
 			   $(BEST_IDX_DIR)/best_single.o $(BEST_IDX_DIR)/best_parallel.o $\
 			   $(LPMS_IDX_DIR)/lpms.o $\
 			   $(TRIGRAM_IDX_DIR)/trigram_inverted_index.o $\
+			   $(VGGRAPH_GREEDY_IDX_DIR)/vggraph_greedy_index.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 
 benchmarks/utils.o: benchmarks/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o  $@
+
+# Rules for C files
+$(SRC_DIR)/utils/rax/%.o: $(SRC_DIR)/utils/rax/%.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
 .PHONY: clean
 clean:

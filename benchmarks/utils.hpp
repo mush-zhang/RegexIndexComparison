@@ -6,13 +6,14 @@
 
 #include "../src/BEST/Index/single_threaded.hpp"
 #include "../src/LPMS/Index/lpms.hpp"
+#include "../src/VGGRAPH_OPT/Index/vggraph_opt_index.hpp"
 
 inline constexpr std::string_view kHeader = "regex\ttime(s)\tnum_match";
 
 inline constexpr std::string_view kUsage = "usage:  \n\
     ./benchmark gram_selection -t num_thread -r input_regex_file -d input_data_file -o output_file [options] \n\
     \t gram_selection: \t Required first argument. Name of the gram selection strategy. \n\
-    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'TRIGRAM', 'NONE'. \n\
+    \t                 \t Options available are 'LPMS', 'BEST', 'FREE', 'TRIGRAM', 'VGGRAPH', 'NONE'. \n\
       general options:\n\
     \t -t [int], required \t Number of threads for gram selection. \n\
     \t -w [0-6], required \t Workload used. \n\
@@ -37,6 +38,9 @@ inline constexpr std::string_view kUsage = "usage:  \n\
       FREE specific options:\n\
     \t -n [int], required \t Upper bound of multi-gram size.\n\
     \t --presuf \t Use presuf shell to generate a gram set that is also suffix-free; default not used.\n\
+      VGGRAPH specific options:\n\
+    \t -n [int], required \t Upper bound of multi-gram size.\n\
+    \t -c [float] \t Selectivity threshold for graph-based selection; default 0.1.\n\
       BEST specific options:\n\
     \t --wl_reduce [int|double] \t Reduce the workload size for gram selection in BEST.\n\
     \t                          \t The value can be a fraction of the whole dataset, or an exact number.\n\
@@ -46,7 +50,7 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t --relax [DETERM|RANDOM], required \t Type of relaxation method.";
 /*-------------------------------------------------------------------------------------------------------------------*/
 
-enum selection_type { kFast, kBest, kFree, kTrigram, kNone, kInvalid };
+enum selection_type { kFast, kBest, kFree, kTrigram, kVGGraph, kNone, kInvalid };
 
 struct expr_info {
     selection_type stype;
@@ -91,6 +95,14 @@ struct trigram_info {
     int num_threads;
 };
 
+struct vggraph_info {
+    int num_repeat = 10;
+    long long int key_upper_bound;
+    int num_threads;
+    float selectivity_threshold = 0.1f;
+    int upper_n = 4;
+};
+
 std::string getCmdOption(char ** begin, char ** end, const std::string & option);
 
 bool cmdOptionExists(char ** begin, char ** end, const std::string & option);
@@ -102,7 +114,8 @@ int parseArgs(int argc, char ** argv,
              expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
              lpms_info & lpms_inf,
-             trigram_info & trigram_info);
+             trigram_info & trigram_info,
+             vggraph_info & vggraph_info);
 
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
@@ -133,6 +146,12 @@ void benchmarkTrigram(const std::filesystem::path dir_path,
                    const std::vector<std::string> & test_regexes, 
                    const std::vector<std::string> & lines,
                    const trigram_info & trigram_info);
+
+void benchmarkVGGraph(const std::filesystem::path dir_path,
+                      const std::vector<std::string> & regexes, 
+                      const std::vector<std::string> & test_regexes, 
+                      const std::vector<std::string> & lines,
+                      const vggraph_info & vggraph_info);
 
 void benchmarkBaseline(const std::filesystem::path dir_path,
                        const std::vector<std::string> & regexes, 
