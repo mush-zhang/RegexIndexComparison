@@ -16,7 +16,7 @@ void VGGraph_Opt::build_index(int upper_n) {
     std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
     
     std::ostringstream log;
-    log << "VGGraphOpt" << k_tag_ << "," << thread_count_ << "," << upper_n << ",";
+    log << "VGGraph-Opt" << "," << thread_count_ << "," << upper_n << ",";
     log << k_threshold_ << "," << key_upper_bound_ << "," << k_queries_size_ << ",";
     log << selection_time << ",";
 

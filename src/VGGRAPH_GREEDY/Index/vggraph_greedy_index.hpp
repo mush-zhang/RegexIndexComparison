@@ -33,7 +33,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
                    int upper_n, 
                    int thread_count)
       : NGramInvertedIndex(dataset),
-        selectivity_threshold_(selectivity_threshold),
+        k_threshold_(selectivity_threshold),
         upper_n_(upper_n),
         thread_count_(thread_count),
         q_min_(2),
@@ -46,7 +46,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
                    int upper_n, 
                    int thread_count)
       : NGramInvertedIndex(dataset, queries),
-        selectivity_threshold_(selectivity_threshold),
+        k_threshold_(selectivity_threshold),
         upper_n_(upper_n),
         thread_count_(thread_count),
         q_min_(2),
@@ -61,7 +61,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
     void select_grams(int upper_n = -1) override;
 
  private:
-    const float selectivity_threshold_;
+    const float k_threshold_;
     const int upper_n_;
     const int thread_count_;
     
