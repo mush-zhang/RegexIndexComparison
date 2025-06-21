@@ -9,14 +9,22 @@
 namespace vggraph_opt_index {
 
 void VGGraph_Opt::build_index(int upper_n) {
+    auto start = std::chrono::high_resolution_clock::now();
+    select_grams(upper_n);
+    auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
+    
+    std::ostringstream log;
+    log << "VGGraphOpt" << k_tag_ << "," << thread_count_ << "," << upper_n << ",";
+    log << k_threshold_ << "," << key_upper_bound_ << "," << k_queries_size_ << ",";
+    log << selection_time << ",";
+
+    start = std::chrono::high_resolution_clock::now();
+
     if (upper_n == -1) {
         upper_n = upper_n_;
     }
-    
-    std::cout << "Building VGGraph_Opt index with selectivity threshold: " 
-              << selectivity_threshold_ << ", upper_n: " << upper_n 
-              << ", thread_count: " << thread_count_ 
-              << ", key_upper_bound: " << key_upper_bound_ << std::endl;
     
     // Step 1: Build the variability graph
     build_variability_graph(upper_n);
@@ -43,46 +51,16 @@ void VGGraph_Opt::build_index(int upper_n) {
         }
     }
     
-    std::cout << "VGGraph_Opt index built with " << k_index_keys_.size() << " n-grams" 
-              << " (bound: " << key_upper_bound_ << ")" << std::endl;
+    auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+
+    std::cout << "Index Building End in " << build_time << std::endl;
+
+    log << build_time << "," << build_time+selection_time << ",";
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+    write_to_file(log.str());
 }
 
-bool VGGraph_Opt::get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
-    container.clear();
-    
-    // Find all keys in the regex
-    std::vector<std::string> found_keys = find_all_keys(reg);
-    
-    if (found_keys.empty()) {
-        return false;
-    }
-    
-    // Get the intersection of all posting lists
-    std::set<size_t> result_set;
-    bool first = true;
-    
-    for (const std::string& key : found_keys) {
-        auto it = k_index_.find(key);
-        if (it != k_index_.end()) {
-            const std::vector<size_t>& posting_list = it->second;
-            
-            if (first) {
-                result_set.insert(posting_list.begin(), posting_list.end());
-                first = false;
-            } else {
-                std::set<size_t> current_set(posting_list.begin(), posting_list.end());
-                std::set<size_t> intersection;
-                std::set_intersection(result_set.begin(), result_set.end(),
-                                    current_set.begin(), current_set.end(),
-                                    std::inserter(intersection, intersection.begin()));
-                result_set = intersection;
-            }
-        }
-    }
-    
-    container.assign(result_set.begin(), result_set.end());
-    return !container.empty();
-}
 
 void VGGraph_Opt::select_grams(int upper_n) {
     // This method is called by build_index, so we don't need to implement it separately

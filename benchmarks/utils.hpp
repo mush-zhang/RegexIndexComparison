@@ -34,13 +34,12 @@ inline constexpr std::string_view kUsage = "usage:  \n\
     \t -e [int] \t Number of experiment repeat runs; default to 10.\n\
     \t -k [int] \t Max number of n-grams selected. The default is LLONG_MAX.\n\
     \t -c [double] \t Selectivity threshold t; prune grams whose occurance is larger than t.\n\
-    \t             \t The default is 0.1 for FREE and for BEST, and not applicable to LPMS.\n\
+    \t             \t The default is 0.1 for FREE, BEST, and VGGraph, and not applicable to LPMS.\n\
       FREE specific options:\n\
     \t -n [int], required \t Upper bound of multi-gram size.\n\
     \t --presuf \t Use presuf shell to generate a gram set that is also suffix-free; default not used.\n\
       VGGRAPH specific options:\n\
     \t -n [int], required \t Upper bound of multi-gram size.\n\
-    \t -c [float] \t Selectivity threshold for graph-based selection; default 0.1.\n\
       BEST specific options:\n\
     \t --wl_reduce [int|double] \t Reduce the workload size for gram selection in BEST.\n\
     \t                          \t The value can be a fraction of the whole dataset, or an exact number.\n\

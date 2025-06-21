@@ -51,8 +51,6 @@ class VGGraph_Opt : public NGramInvertedIndex {
 
     void build_index(int upper_n = -1) override;
     
-    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const override;
-
  protected:
     void select_grams(int upper_n = -1) override;
 

@@ -8,6 +8,18 @@
 namespace vggraph_greedy_index {
 
 void VGGraph_Greedy::build_index(int upper_n) {
+    auto start = std::chrono::high_resolution_clock::now();
+    select_grams(upper_n);
+    auto selection_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
+    std::cout << "Select Grams End in " << selection_time << " s" << std::endl;
+    
+    std::ostringstream log;
+    log << "VGGraph" << k_tag_ << "," << thread_count_ << "," << upper_n << ",";
+    log << k_threshold_ << "," << key_upper_bound_ << "," << k_queries_size_ << ",";
+    log << selection_time << ",";
+
+    start = std::chrono::high_resolution_clock::now();
     if (upper_n == -1) upper_n = upper_n_;
     max_gram_len_ = upper_n;
     
@@ -51,21 +63,14 @@ void VGGraph_Greedy::build_index(int upper_n) {
         current_grams = std::move(next_grams);
         next_index = std::move(new_index);
     }
-}
+    auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
+        std::chrono::high_resolution_clock::now() - start).count();
 
-bool VGGraph_Greedy::get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
-    container.clear();
-    
-    auto keys = find_all_keys(reg);
-    std::set<size_t> result_set;
-    
-    for (const auto& key : keys) {
-        const auto& positions = get_line_pos_at(key);
-        result_set.insert(positions.begin(), positions.end());
-    }
-    
-    container.assign(result_set.begin(), result_set.end());
-    return !container.empty();
+    std::cout << "Index Building End in " << build_time << std::endl;
+
+    log << build_time << "," << build_time+selection_time << ",";
+    log << get_num_keys() << "," << get_bytes_used() << ",";
+    write_to_file(log.str());
 }
 
 void VGGraph_Greedy::select_grams(int upper_n) {
