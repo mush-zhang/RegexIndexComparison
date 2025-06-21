@@ -69,7 +69,7 @@ for n in 2 3  4 6; do
         for t in ${thread_list[*]}; do
             curr_suffix="${timeout_suffix}_vggraph_greedy_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
 
-            curr_cmd="${timeout_prefix} ./benchmark.out VGGRAPH_GREEDY -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+            curr_cmd="${timeout_prefix} ./benchmark.out VGGRAPH -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
             echo ${curr_cmd}
             eval "${curr_cmd}"
             retVal=$?
