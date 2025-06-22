@@ -13,6 +13,7 @@
 #include "../src/FREE/Index/presuf_shell.hpp"
 #include "../src/FREE/Index/parallel_multigram_index.hpp"
 #include "../src/Trigram/Index/trigram_inverted_index.hpp"
+#include "../src/VGGRAPH_GREEDY/Index/vggraph_greedy_index.hpp"
 
 #include "../src/simple_query_matcher.hpp"
 
@@ -46,6 +47,9 @@ selection_type get_method(const std::string gs) {
     }
     if (gs == "TRIGRAM") {
         return selection_type::kTrigram;
+    }
+    if (gs == "VGGRAPH") {
+        return selection_type::kVGGraph;
     }
     if (gs == "NONE") {
         return selection_type::kNone;
@@ -91,7 +95,8 @@ int parseArgs(int argc, char ** argv,
              expr_info & expr_info, 
              free_info & free_info, best_info & best_info, 
              lpms_info & lpms_info, 
-             trigram_info & trigram_info) {
+             trigram_info & trigram_info,
+             vggraph_info & vggraph_info) {
 
     if (argc < 6) {
         return error_return("Missing required arguments.");
@@ -232,6 +237,19 @@ int parseArgs(int argc, char ** argv,
             trigram_info.num_repeat = rep;
             trigram_info.key_upper_bound = max_key;
             trigram_info.num_threads = thread_count;
+            break;
+        }
+        case selection_type::kVGGraph: {
+            vggraph_info.num_repeat = rep;
+            vggraph_info.key_upper_bound = max_key;
+            vggraph_info.num_threads = thread_count;
+            if (n == 0) {
+                return error_return("Missing/Invalid upper bound on n of n-gram.");
+            }
+            vggraph_info.upper_n = n;
+            if (selec > 0 && selec <= 1) {
+                vggraph_info.selectivity_threshold = static_cast<float>(selec);
+            } 
             break;
         }
         default:
@@ -718,6 +736,66 @@ void benchmarkTrigram(const std::filesystem::path dir_path,
     }
 
     statsfile.close();
+}
+
+void benchmarkVGGraph(const std::filesystem::path dir_path,
+                      const std::vector<std::string> & regexes, 
+                      const std::vector<std::string> & test_regexes, 
+                      const std::vector<std::string> & lines,
+                      const vggraph_info & vggraph_info) {
+    std::ofstream outfile = open_summary(dir_path);
+
+    std::ostringstream stats_name;
+    stats_name << "VGGRAPH_";
+    
+    // index building
+    auto pi = new vggraph_greedy_index::VGGraph_Greedy(lines, regexes, 
+                                                 vggraph_info.selectivity_threshold,
+                                                 vggraph_info.upper_n,
+                                                 vggraph_info.num_threads);
+    pi->set_key_upper_bound(vggraph_info.key_upper_bound);
+    pi->set_outfile(outfile);
+    pi->build_index(vggraph_info.upper_n);
+
+    auto tr = regexes;
+    if (!test_regexes.empty()) {
+        tr = test_regexes;
+    }
+
+    for (size_t i = 0; i < vggraph_info.num_repeat; i++) {
+        if (i >= kNumIndexBuilding) {
+            // not re-running the time consuming index afterwards,
+            // filling the empty slots
+            pi->write_to_file(",,,,,,,,,,,");
+        }
+        // matching; add match time to the overall file
+        auto matcher = SimpleQueryMatcher(*pi, tr);
+        matcher.match_all();
+    }
+
+    outfile.close();
+
+    // open stats file
+    stats_name << vggraph_info.num_threads << "_" << vggraph_info.upper_n;
+    stats_name << "_" << vggraph_info.selectivity_threshold << "_";
+    stats_name << vggraph_info.key_upper_bound << "_stats.csv";
+    std::filesystem::path stats_path = dir_path / stats_name.str();
+    std::ofstream statsfile;
+    statsfile.open(stats_path, std::ios::out);
+    statsfile << kExprHeader << std::endl;
+    pi->set_outfile(statsfile);
+
+    auto matcher = SimpleQueryMatcher(*pi, tr, false);
+
+    // Get individual stats
+    for (const auto & regex : tr) {
+        statsfile << regex << "\t";
+        matcher.match_one(regex);
+        statsfile << matcher.get_num_after_filter(regex) << std::endl;
+    }
+
+    statsfile.close();
+    delete pi;
 }
 
 void benchmarkBaseline(const std::filesystem::path dir_path,

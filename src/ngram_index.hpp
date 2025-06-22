@@ -19,7 +19,7 @@ class NGramIndex {
     NGramIndex(const NGramIndex &&) = delete;
     NGramIndex(const std::vector<std::string> & dataset)
       : k_dataset_(dataset), k_dataset_size_(dataset.size()),
-	  	k_queries_(std::vector<std::string>()), k_queries_size_(0) {}
+	  	k_queries_(empty_queries_), k_queries_size_(0) {}
     
 	NGramIndex(const std::vector<std::string> & dataset,
 			  const std::vector<std::string> & queries)
@@ -92,6 +92,7 @@ class NGramIndex {
 
  private:
     std::ostream* outfile_ = &std::cout;
+    inline static const std::vector<std::string> empty_queries_{};
 };
 
 #endif // NGRAM_INDEX_HPP_

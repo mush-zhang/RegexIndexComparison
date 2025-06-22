@@ -16,9 +16,10 @@ int main(int argc, char** argv) {
     best_info best_info;
     lpms_info lpms_info;
     trigram_info trigram_info;
+    vggraph_info vggraph_info;
 
     int status = parseArgs(argc, argv, expr_info, 
-                           free_info, best_info, lpms_info, trigram_info);
+                           free_info, best_info, lpms_info, trigram_info, vggraph_info);
     if (status == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
@@ -56,6 +57,9 @@ int main(int argc, char** argv) {
             break;
         case selection_type::kTrigram:
             benchmarkTrigram(dir_path, regexes, test_regexes, lines, trigram_info);
+            break;
+        case selection_type::kVGGraph:
+            benchmarkVGGraph(dir_path, regexes, test_regexes, lines, vggraph_info);
             break;
         case selection_type::kNone:
             benchmarkBaseline(dir_path, regexes, test_regexes, lines, expr_info);
