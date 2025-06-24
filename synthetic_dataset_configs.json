@@ -1,0 +1,403 @@
+{
+  "synthetic_datasets": {
+    "small_test": {
+      "description": "Small dataset for quick testing and development",
+      "num_documents": 1000,
+      "num_queries": 50,
+      "target_selectivity": 0.1,
+      "avg_doc_length": 100,
+      "alphabet_size": 26
+    },
+    
+    "selectivity_comparison": [
+      {
+        "name": "sel_001",
+        "description": "Ultra-low selectivity (0.1%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.001,
+        "selectivity_variance": 0.0005
+      },
+      {
+        "name": "sel_005",
+        "description": "Very low selectivity (0.5%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.005,
+        "selectivity_variance": 0.002
+      },
+      {
+        "name": "sel_01",
+        "description": "Low selectivity (1%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.01,
+        "selectivity_variance": 0.005
+      },
+      {
+        "name": "sel_05",
+        "description": "Medium-low selectivity (5%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.05,
+        "selectivity_variance": 0.02
+      },
+      {
+        "name": "sel_10",
+        "description": "Medium selectivity (10%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.1,
+        "selectivity_variance": 0.03
+      },
+      {
+        "name": "sel_20",
+        "description": "High selectivity (20%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.2,
+        "selectivity_variance": 0.05
+      },
+      {
+        "name": "sel_30",
+        "description": "Very high selectivity (30%)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.3,
+        "selectivity_variance": 0.08
+      }
+    ],
+    
+    "scalability_datasets": [
+      {
+        "name": "scale_1k",
+        "description": "1K documents for baseline",
+        "num_documents": 1000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_5k",
+        "description": "5K documents",
+        "num_documents": 5000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_10k",
+        "description": "10K documents",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_25k",
+        "description": "25K documents",
+        "num_documents": 25000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_50k",
+        "description": "50K documents",
+        "num_documents": 50000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_100k",
+        "description": "100K documents",
+        "num_documents": 100000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "scale_250k",
+        "description": "250K documents for large-scale testing",
+        "num_documents": 250000,
+        "num_queries": 200,
+        "target_selectivity": 0.08,
+        "avg_doc_length": 300
+      },
+      {
+        "name": "scale_500k",
+        "description": "500K documents for massive scale testing",
+        "num_documents": 500000,
+        "num_queries": 500,
+        "target_selectivity": 0.05,
+        "avg_doc_length": 250,
+        "selectivity_variance": 0.02
+      },
+      {
+        "name": "scale_1m",
+        "description": "1M documents for maximum scale testing",
+        "num_documents": 1000000,
+        "num_queries": 1000,
+        "target_selectivity": 0.03,
+        "avg_doc_length": 200,
+        "selectivity_variance": 0.015
+      }
+    ],
+    
+    "query_set_size_comparison": [
+      {
+        "name": "queries_25",
+        "description": "25 queries",
+        "num_documents": 10000,
+        "num_queries": 25,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_50",
+        "description": "50 queries",
+        "num_documents": 10000,
+        "num_queries": 50,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_100",
+        "description": "100 queries",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_250",
+        "description": "250 queries",
+        "num_documents": 10000,
+        "num_queries": 250,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_500",
+        "description": "500 queries",
+        "num_documents": 10000,
+        "num_queries": 500,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_1000",
+        "description": "1000 queries",
+        "num_documents": 10000,
+        "num_queries": 1000,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "queries_2500",
+        "description": "2500 queries for large query workloads",
+        "num_documents": 25000,
+        "num_queries": 2500,
+        "target_selectivity": 0.08,
+        "selectivity_variance": 0.03
+      },
+      {
+        "name": "queries_5000",
+        "description": "5000 queries for massive query workloads",
+        "num_documents": 50000,
+        "num_queries": 5000,
+        "target_selectivity": 0.06,
+        "selectivity_variance": 0.025
+      }
+    ],
+    
+    "document_length_comparison": [
+      {
+        "name": "docs_short",
+        "description": "Short documents (20-100 chars)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "min_doc_length": 20,
+        "max_doc_length": 100,
+        "avg_doc_length": 50,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "docs_medium",
+        "description": "Medium documents (100-300 chars)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "min_doc_length": 100,
+        "max_doc_length": 300,
+        "avg_doc_length": 200,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "docs_long",
+        "description": "Long documents (300-800 chars)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "min_doc_length": 300,
+        "max_doc_length": 800,
+        "avg_doc_length": 500,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "docs_very_long",
+        "description": "Very long documents (500-1500 chars)",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "min_doc_length": 500,
+        "max_doc_length": 1500,
+        "avg_doc_length": 1000,
+        "target_selectivity": 0.1
+      }
+    ],
+    
+    "alphabet_complexity": [
+      {
+        "name": "simple_alphabet",
+        "description": "Simple 10-character alphabet",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "alphabet_size": 10,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "standard_alphabet",
+        "description": "Standard 26-character alphabet",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "alphabet_size": 26,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "extended_alphabet",
+        "description": "Extended alphabet with digits",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "alphabet_size": 26,
+        "include_digits": true,
+        "target_selectivity": 0.1
+      },
+      {
+        "name": "complex_alphabet",
+        "description": "Complex alphabet with special chars",
+        "num_documents": 10000,
+        "num_queries": 100,
+        "alphabet_size": 26,
+        "include_digits": true,
+        "include_special_chars": true,
+        "target_selectivity": 0.1
+      }
+    ],
+    
+    "benchmark_suite": {
+      "description": "Comprehensive benchmark suite for paper results",
+      "datasets": [
+        {
+          "name": "benchmark_small",
+          "num_documents": 5000,
+          "num_queries": 200,
+          "target_selectivity": 0.05,
+          "description": "Small benchmark dataset"
+        },
+        {
+          "name": "benchmark_medium",
+          "num_documents": 20000,
+          "num_queries": 500,
+          "target_selectivity": 0.08,
+          "description": "Medium benchmark dataset"
+        },
+        {
+          "name": "benchmark_large",
+          "num_documents": 50000,
+          "num_queries": 1000,
+          "target_selectivity": 0.1,
+          "description": "Large benchmark dataset"
+        },
+        {
+          "name": "benchmark_xlarge",
+          "num_documents": 100000,
+          "num_queries": 2000,
+          "target_selectivity": 0.05,
+          "avg_doc_length": 300,
+          "description": "Extra large benchmark dataset"
+        },
+        {
+          "name": "benchmark_massive",
+          "num_documents": 500000,
+          "num_queries": 5000,
+          "target_selectivity": 0.03,
+          "avg_doc_length": 250,
+          "selectivity_variance": 0.02,
+          "description": "Massive scale benchmark dataset"
+        }
+      ]
+    },
+    
+    "stress_test_datasets": {
+      "description": "Datasets designed to stress-test different aspects of indexing",
+      "datasets": [
+        {
+          "name": "stress_ultra_low_selectivity",
+          "num_documents": 50000,
+          "num_queries": 1000,
+          "target_selectivity": 0.0005,
+          "selectivity_variance": 0.0002,
+          "description": "Ultra-low selectivity stress test"
+        },
+        {
+          "name": "stress_ultra_high_selectivity",
+          "num_documents": 20000,
+          "num_queries": 500,
+          "target_selectivity": 0.5,
+          "selectivity_variance": 0.1,
+          "description": "Ultra-high selectivity stress test"
+        },
+        {
+          "name": "stress_massive_queries",
+          "num_documents": 10000,
+          "num_queries": 10000,
+          "target_selectivity": 0.05,
+          "selectivity_variance": 0.02,
+          "description": "Massive query set stress test"
+        },
+        {
+          "name": "stress_huge_documents",
+          "num_documents": 5000,
+          "num_queries": 200,
+          "min_doc_length": 2000,
+          "max_doc_length": 5000,
+          "avg_doc_length": 3000,
+          "target_selectivity": 0.1,
+          "description": "Very large document stress test"
+        },
+        {
+          "name": "stress_tiny_alphabet",
+          "num_documents": 20000,
+          "num_queries": 500,
+          "alphabet_size": 4,
+          "target_selectivity": 0.2,
+          "selectivity_variance": 0.05,
+          "description": "Tiny alphabet stress test"
+        }
+      ]
+    }
+  },
+  
+  "experimental_scenarios": {
+    "index_size_vs_selectivity": {
+      "description": "Study how index size varies with query selectivity",
+      "datasets": "selectivity_comparison",
+      "metrics": ["index_size", "build_time", "query_time"]
+    },
+    
+    "scalability_analysis": {
+      "description": "Analyze how methods scale with dataset size",
+      "datasets": "scalability_datasets", 
+      "metrics": ["build_time", "memory_usage", "query_time"]
+    },
+    
+    "query_workload_impact": {
+      "description": "Study impact of query set size on performance",
+      "datasets": "query_set_size_comparison",
+      "metrics": ["build_time", "index_size", "total_query_time"]
+    },
+    
+    "document_characteristics": {
+      "description": "Study impact of document length on indexing",
+      "datasets": "document_length_comparison",
+      "metrics": ["index_size", "build_time", "selectivity_achieved"]
+    }
+  }
+}

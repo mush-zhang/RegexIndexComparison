@@ -75,6 +75,10 @@ benchmark.out: $(SRC_DIR)/utils/rax/rax.o $(SRC_DIR)/utils/rax/rc4rand.o $\
 			   benchmarks/utils.o benchmarks/benchmark.cpp
 	$(CXX) $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o $@
 
+# Simple regex literal analysis tool (no dependencies)
+analyze_regex_literals_simple.out: analyze_regex_literals_simple.cpp
+	$(CXX) $(CPPFLAGS) $^ -o $@
+
 benchmarks/utils.o: benchmarks/utils.cpp
 	$(CXX) -c $(CPPFLAGS) $^ $(LDFLAGS) $(GUROBI_FLAGS) $(RE2_FLAGS) -o  $@
 
@@ -84,4 +88,4 @@ $(SRC_DIR)/utils/rax/%.o: $(SRC_DIR)/utils/rax/%.c
 
 .PHONY: clean
 clean:
-	rm -f benchmark.out benchmarks/utils.o
+	rm -f benchmark.out analyze_regex_literals.out analyze_regex_literals_simple.out benchmarks/utils.o
