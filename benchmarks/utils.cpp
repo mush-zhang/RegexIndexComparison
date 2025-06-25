@@ -379,6 +379,56 @@ std::vector<std::string> read_directory(const std::string & file_type,
     return lines;
 }
 
+std::vector<std::string> read_enron(int max_files=-1) {
+    std::vector<std::string> data_strings;
+    
+    try {
+        for (const auto & entry : std::filesystem::recursive_directory_iterator("data/enron/maildir")) {
+            // Only process regular files, skip directories
+            if (!entry.is_regular_file()) {
+                continue;
+            }
+            
+            std::string file_path = entry.path();
+            std::ifstream file_in(file_path);
+            
+            if (!file_in.is_open()) {
+                std::cerr << "Could not open Enron file: " << file_path << std::endl;
+                continue;
+            }
+            
+            // Read entire file content as one string, preserving newlines
+            std::string file_content;
+            std::string line;
+            bool first_line = true;
+            
+            while (std::getline(file_in, line)) {
+                if (!first_line) {
+                    file_content += "\n";
+                }
+                // Remove carriage returns but keep the content
+                line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+                file_content += line;
+                first_line = false;
+            }
+            
+            file_in.close();
+            
+            // Add the complete file content as one data string
+            data_strings.push_back(file_content);
+            
+            // Check if we've reached the maximum number of files
+            if (max_files > 0 && data_strings.size() >= max_files) {
+                break;
+            }
+        }
+    } catch (const std::filesystem::filesystem_error& ex) {
+        std::cerr << "Filesystem error while reading Enron directory: " << ex.what() << std::endl;
+    }
+    
+    return data_strings;
+}
+
 int readWorkload(const expr_info & expr_info, 
                  std::vector<std::string> & regexes, 
                  std::vector<std::string> & test_regexes, 
@@ -411,12 +461,8 @@ int readWorkload(const expr_info & expr_info,
             lines = read_directory("data", "data/extracted", max_lines);
             break;
         case 6:
-#ifndef NDEBUG
-            regexes = read_file("regex", kEnronRegex, 5);
-#else
             regexes = read_file("regex", kEnronRegex);
-#endif
-            lines = read_directory("data", "data/enron/maildir", max_lines);
+            lines = read_enron(max_lines);
             break;
         default:
             regexes = read_file("regex", expr_info.reg_file);

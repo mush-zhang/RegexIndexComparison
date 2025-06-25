@@ -122,6 +122,8 @@ int readWorkload(const expr_info & expr_info,
                  std::vector<std::string> & lines,
                  int max_lines=-1);
 
+std::vector<std::string> read_enron(int max_files=-1);
+
 void benchmarkFree(const std::filesystem::path dir_path, 
                    const std::vector<std::string> & regexes, 
                    const std::vector<std::string> & test_regexes, 
