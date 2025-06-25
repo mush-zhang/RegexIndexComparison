@@ -40,7 +40,7 @@ for workload in "${!workload_files[@]}"; do
     if [ -f "$file" ]; then
         output_file="$OUTPUT_DIR/${workload}_literals.csv"
         
-        ./analyze_regex_literals_simple.out -f "$file" -o "$output_file" -v
+        ./analyze_regex_literals_simple.out -f "$file" -o "$output_file" # -v
         
         if [ $? -eq 0 ]; then
             echo "✓ Analysis completed for $workload"

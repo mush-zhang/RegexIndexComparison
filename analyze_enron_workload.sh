@@ -55,8 +55,7 @@ analyze_regex_workload() {
         # Analyze regex literals
         local output_file="$OUTPUT_DIR/${workload_name}_literal_analysis.csv"
         echo "Running literal analysis..."
-        ./analyze_regex_literals_simple.out "$workload_file" > "$output_file"
-        
+        ./analyze_regex_literals_simple.out -f "$workload_file" -o "$output_file" # -v
         if [ -f "$output_file" ]; then
             echo -e "${GREEN}✓ Literal analysis saved to: $output_file${NC}"
             
