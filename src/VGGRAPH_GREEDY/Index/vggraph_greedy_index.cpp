@@ -4,6 +4,7 @@
 #include <future>
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 namespace vggraph_greedy_index {
 
@@ -19,50 +20,6 @@ void VGGraph_Greedy::build_index(int upper_n) {
     log << k_threshold_ << "," << key_upper_bound_ << "," << k_queries_size_ << ",";
     log << selection_time << ",";
 
-    start = std::chrono::high_resolution_clock::now();
-    if (upper_n == -1) upper_n = upper_n_;
-    max_gram_len_ = upper_n;
-    
-    find_alphabet();
-    
-    // Start with minimum n-grams using parallel processing
-    std::unordered_map<std::string, std::vector<size_t>> next_index;
-    std::set<std::string> current_grams;
-
-    // Build initial n-grams in parallel
-    build_initial_ngrams_parallel(next_index, current_grams);
-
-    // Convert selectivity threshold to tau (document count threshold)
-    size_t tau = static_cast<size_t>(k_threshold_ * k_dataset_size_);
-
-    int current_len = q_min_;
-    while (!current_grams.empty()) {
-        std::unordered_map<std::string, std::vector<size_t>> new_index;
-        std::set<std::string> next_grams;
-
-        // Process current grams in parallel
-        process_grams_parallel(current_grams, next_index, new_index, next_grams, tau, current_len);
-
-        // Move to next iteration
-        if (++current_len > max_gram_len_) {
-            // At max length, only filter without extending
-            for (const auto& gram : current_grams) {
-                const auto& positions = next_index[gram];
-                if (positions.size() <= tau) {
-                    k_index_[gram] = positions;
-                    k_index_keys_.insert(gram);
-                    
-                    if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
-                        return;
-                    }
-                }
-            }
-            break; // Final cutoff
-        }
-
-        current_grams = std::move(next_grams);
-        next_index = std::move(new_index);
-    }
     auto build_time = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start).count();
 
@@ -74,32 +31,261 @@ void VGGraph_Greedy::build_index(int upper_n) {
 }
 
 void VGGraph_Greedy::select_grams(int upper_n) {
-    // This method is called by build_index, the actual selection logic is there
-    // Following the reference implementation pattern
-}
-
-void VGGraph_Greedy::find_alphabet() {
-    std::unordered_set<char> char_set;
-    for (const auto& document : k_dataset_) {
-        for (char c : document) {
-            if (std::isprint(c)) {
-                char_set.insert(c);
+    if (upper_n == -1) upper_n = upper_n_;
+    max_gram_len_ = upper_n;
+    
+    // Step 1: Build initial q_min-grams for dynamic tau computation
+    std::unordered_map<std::string, PostingList> gram2posting;
+    build_initial_ngrams_parallel(gram2posting);
+    
+    // Step 2: Compute dynamic tau based on initial gram frequencies
+    size_t tau = dynamic_tau(gram2posting, 0.8); // 80th percentile
+    std::cout << "Dynamic tau = " << tau << " (threshold = " << k_threshold_ << ")" << std::endl;
+    
+    // Step 3: Build VGram index with recursive extension
+    std::set<std::string> temp_index_keys;
+    std::unordered_map<std::string, PostingList> temp_index;
+    build_vgram_index_parallel(tau, temp_index_keys, temp_index);
+    
+    std::cout << "Total grams before set cover: " << temp_index_keys.size() << std::endl;
+    
+    // Step 4: Apply set cover optimization if queries are available
+    if (k_queries_size_ > 0) {
+        auto query_literals = get_query_literals();
+        std::set<std::string> selected_grams_set;
+        
+        // Apply set cover for each query and collect selected grams
+        for (const auto& literals : query_literals) {
+            auto selected = vggraph_greedy_cover(literals, temp_index_keys, temp_index);
+            selected_grams_set.insert(selected.begin(), selected.end());
+        }
+        
+        // Build final index with only selected grams
+        for (const auto& gram : selected_grams_set) {
+            auto it = temp_index.find(gram);
+            if (it != temp_index.end()) {
+                k_index_[gram] = it->second;
+                k_index_keys_.insert(gram);
+                
+                if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
+                    break;
+                }
+            }
+        }
+        
+        std::cout << "Selected grams after set cover: " << k_index_keys_.size() << std::endl;
+    } else {
+        // No queries available, use all generated grams
+        std::cout << "No queries provided, using all generated grams" << std::endl;
+        for (const auto& gram : temp_index_keys) {
+            k_index_[gram] = temp_index[gram];
+            k_index_keys_.insert(gram);
+            
+            if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
+                break;
             }
         }
     }
-    alphabet_.assign(char_set.begin(), char_set.end());
-    std::sort(alphabet_.begin(), alphabet_.end());
+}
+
+void VGGraph_Greedy::recursive_extend(
+    const std::string& gram,
+    const PostingList& rec_ids,
+    size_t tau,
+    std::set<std::string>& index_keys,
+    std::unordered_map<std::string, PostingList>& index_map) {
+    
+    if (gram.size() < q_min_) return;
+    
+    if (rec_ids.size() <= tau || gram.size() >= max_gram_len_) {
+        index_keys.insert(gram);
+        index_map[gram] = rec_ids;
+        return;
+    }
+    
+    std::unordered_map<std::string, PostingList> ext_map;
+    for (RecordId rec_id : rec_ids) {
+        const std::string& rec = k_dataset_[rec_id];
+        for (size_t pos = 0; pos + gram.size() < rec.size(); ++pos) {
+            if (rec.substr(pos, gram.size()) == gram) {
+                std::string ext_gram = gram + rec[pos + gram.size()];
+                ext_map[ext_gram].push_back(rec_id);
+            }
+        }
+    }
+    
+    for (auto& kv : ext_map) {
+        std::sort(kv.second.begin(), kv.second.end());
+        kv.second.erase(std::unique(kv.second.begin(), kv.second.end()), kv.second.end());
+        recursive_extend(kv.first, kv.second, tau, index_keys, index_map);
+    }
+}
+
+void VGGraph_Greedy::build_vgram_index_parallel(
+    size_t tau,
+    std::set<std::string>& index_keys,
+    std::unordered_map<std::string, PostingList>& index_map) {
+    
+    size_t N = k_dataset_size_;
+    size_t chunk = (N + thread_count_ - 1) / thread_count_;
+    std::vector<std::future<void>> futures;
+    std::vector<std::set<std::string>> thread_keys(thread_count_);
+    std::vector<std::unordered_map<std::string, PostingList>> thread_index(thread_count_);
+
+    for (int t = 0; t < thread_count_; ++t) {
+        size_t start = t * chunk;
+        size_t end = std::min(N, (t + 1) * chunk);
+        if (start >= end) break;
+        
+        futures.emplace_back(std::async(std::launch::async, [this, &thread_keys, &thread_index, t, start, end, tau]() {
+            std::unordered_map<std::string, PostingList> initial_grams;
+            
+            // Build initial q_min-grams for this chunk
+            for (RecordId rec_id = start; rec_id < end; ++rec_id) {
+                const std::string& rec = k_dataset_[rec_id];
+                for (size_t i = 0; i + q_min_ <= rec.size(); ++i) {
+                    std::string gram = rec.substr(i, q_min_);
+                    initial_grams[gram].push_back(rec_id);
+                }
+            }
+            
+            // Apply recursive extension for each initial gram
+            for (auto& kv : initial_grams) {
+                std::sort(kv.second.begin(), kv.second.end());
+                kv.second.erase(std::unique(kv.second.begin(), kv.second.end()), kv.second.end());
+                recursive_extend(kv.first, kv.second, tau, thread_keys[t], thread_index[t]);
+            }
+        }));
+    }
+    
+    // Wait for all threads to complete
+    for (auto& fut : futures) {
+        fut.get();
+    }
+
+    // Merge results from all threads
+    for (int t = 0; t < thread_count_; ++t) {
+        merge_index_maps(index_keys, index_map, thread_keys[t], thread_index[t]);
+    }
+    
+    // De-duplicate all posting lists
+    for (auto& kv : index_map) {
+        std::sort(kv.second.begin(), kv.second.end());
+        kv.second.erase(std::unique(kv.second.begin(), kv.second.end()), kv.second.end());
+    }
+}
+
+void VGGraph_Greedy::merge_index_maps(
+    std::set<std::string>& out_keys,
+    std::unordered_map<std::string, PostingList>& out_index,
+    const std::set<std::string>& in_keys,
+    const std::unordered_map<std::string, PostingList>& in_index) {
+    
+    for (const auto& gram : in_keys) {
+        out_keys.insert(gram);
+        auto& plist = out_index[gram];
+        auto it = in_index.find(gram);
+        if (it != in_index.end()) {
+            plist.insert(plist.end(), it->second.begin(), it->second.end());
+        }
+    }
+}
+
+std::vector<std::string> VGGraph_Greedy::vggraph_greedy_cover(
+    const std::vector<std::string>& literals,
+    const std::set<std::string>& index_keys,
+    const std::unordered_map<std::string, PostingList>& index_map) {
+    
+    size_t total_chars = 0;
+    std::vector<size_t> lit_offsets;
+    for (const auto& lit : literals) {
+        lit_offsets.push_back(total_chars);
+        total_chars += lit.size();
+    }
+    
+    std::unordered_map<std::string, std::vector<size_t>> gram2cover;
+    for (const auto& gram : index_keys) {
+        std::vector<size_t> covered;
+        for (size_t li = 0; li < literals.size(); ++li) {
+            const std::string& lit = literals[li];
+            for (size_t i = 0; i + gram.size() <= lit.size(); ++i) {
+                if (lit.substr(i, gram.size()) == gram) {
+                    for (size_t k = 0; k < gram.size(); ++k) {
+                        covered.push_back(lit_offsets[li] + i + k);
+                    }
+                }
+            }
+        }
+        if (!covered.empty()) {
+            gram2cover[gram] = std::move(covered);
+        }
+    }
+    
+    std::vector<bool> covered(total_chars, false);
+    size_t uncovered = total_chars;
+    std::vector<std::string> selected;
+    
+    while (uncovered > 0) {
+        double best_score = std::numeric_limits<double>::max();
+        std::string best_gram;
+        
+        for (const auto& kv : gram2cover) {
+            const auto& gram = kv.first;
+            auto index_it = index_map.find(gram);
+            if (index_it == index_map.end()) continue;
+            
+            size_t cost = index_it->second.size();
+            size_t gain = 0;
+            for (size_t pos : kv.second) {
+                if (!covered[pos]) ++gain;
+            }
+            if (gain == 0) continue;
+            
+            double score = static_cast<double>(cost) / gain;
+            if (score < best_score) {
+                best_score = score;
+                best_gram = gram;
+            }
+        }
+        
+        if (best_gram.empty()) break;
+        
+        for (size_t pos : gram2cover[best_gram]) {
+            if (!covered[pos]) {
+                covered[pos] = true;
+                --uncovered;
+            }
+        }
+        selected.push_back(best_gram);
+    }
+    
+    return selected;
+}
+
+size_t VGGraph_Greedy::dynamic_tau(
+    const std::unordered_map<std::string, PostingList>& grams, 
+    double quantile) {
+    
+    std::vector<size_t> sizes;
+    for (const auto& kv : grams) {
+        sizes.push_back(kv.second.size());
+    }
+    std::sort(sizes.begin(), sizes.end());
+    
+    if (sizes.empty()) return 10;
+    
+    size_t idx = static_cast<size_t>(sizes.size() * quantile);
+    if (idx >= sizes.size()) idx = sizes.size() - 1;
+    
+    return sizes[idx];
 }
 
 void VGGraph_Greedy::build_initial_ngrams_parallel(
-    std::unordered_map<std::string, std::vector<size_t>>& next_index,
-    std::set<std::string>& current_grams) {
+    std::unordered_map<std::string, PostingList>& initial_grams) {
     
-    // Thread-safe containers for collecting results
-    std::vector<std::unordered_map<std::string, std::vector<size_t>>> thread_indices(thread_count_);
+    std::vector<std::unordered_map<std::string, PostingList>> thread_grams(thread_count_);
     std::vector<std::thread> threads;
     
-    // Divide work among threads
     size_t chunk_size = (k_dataset_size_ + thread_count_ - 1) / thread_count_;
     
     for (int t = 0; t < thread_count_; ++t) {
@@ -107,17 +293,8 @@ void VGGraph_Greedy::build_initial_ngrams_parallel(
         size_t end = std::min(start + chunk_size, k_dataset_size_);
         if (start >= end) break;
         
-        threads.emplace_back([this, &thread_indices, t, start, end]() {
-            auto& local_index = thread_indices[t];
-            for (size_t i = start; i < end; ++i) {
-                std::string text = k_dataset_[i];
-                if (append_terminal_) text += "$";
-                
-                for (size_t j = 0; j + q_min_ <= text.size(); ++j) {
-                    std::string gram = text.substr(j, q_min_);
-                    local_index[gram].push_back(i);
-                }
-            }
+        threads.emplace_back([this, &thread_grams, t, start, end]() {
+            process_chunk_for_initial_grams(start, end, thread_grams[t]);
         });
     }
     
@@ -127,126 +304,33 @@ void VGGraph_Greedy::build_initial_ngrams_parallel(
     }
     
     // Merge results from all threads
-    for (const auto& local_index : thread_indices) {
-        for (const auto& entry : local_index) {
+    for (const auto& local_grams : thread_grams) {
+        for (const auto& entry : local_grams) {
             const std::string& gram = entry.first;
-            const std::vector<size_t>& positions = entry.second;
+            const PostingList& positions = entry.second;
             
-            next_index[gram].insert(next_index[gram].end(), positions.begin(), positions.end());
-            current_grams.insert(gram);
+            initial_grams[gram].insert(initial_grams[gram].end(), positions.begin(), positions.end());
         }
     }
     
     // Sort and remove duplicates for each gram
-    for (auto& entry : next_index) {
+    for (auto& entry : initial_grams) {
         auto& vec = entry.second;
         std::sort(vec.begin(), vec.end());
         vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
     }
 }
 
-void VGGraph_Greedy::process_grams_parallel(
-    const std::set<std::string>& current_grams,
-    const std::unordered_map<std::string, std::vector<size_t>>& next_index,
-    std::unordered_map<std::string, std::vector<size_t>>& new_index,
-    std::set<std::string>& next_grams,
-    size_t tau,
-    int current_len) {
+void VGGraph_Greedy::process_chunk_for_initial_grams(
+    size_t start, size_t end,
+    std::unordered_map<std::string, PostingList>& thread_grams) {
     
-    std::mutex new_index_mutex;
-    std::mutex next_grams_mutex;
-    std::mutex final_index_mutex;
-    
-    // Convert grams to vector for parallel processing
-    std::vector<std::string> grams_vec(current_grams.begin(), current_grams.end());
-    std::vector<std::thread> threads;
-    
-    size_t chunk_size = (grams_vec.size() + thread_count_ - 1) / thread_count_;
-    
-    for (int t = 0; t < thread_count_; ++t) {
-        size_t start = t * chunk_size;
-        size_t end = std::min(start + chunk_size, grams_vec.size());
-        if (start >= end) break;
-        
-        threads.emplace_back([this, &grams_vec, &next_index, &new_index, &next_grams, 
-                             &new_index_mutex, &next_grams_mutex, &final_index_mutex,
-                             start, end, tau, current_len]() {
-            
-            // Local containers for this thread
-            std::unordered_map<std::string, std::vector<size_t>> local_new_index;
-            std::set<std::string> local_next_grams;
-            
-            for (size_t i = start; i < end; ++i) {
-                const std::string& gram = grams_vec[i];
-                const auto& positions = next_index.at(gram);
-                
-                if (positions.size() > tau) {
-                    // Too frequent - extend if possible
-                    if (current_len < max_gram_len_) {
-                        for (char c : alphabet_) {
-                            std::string ext_gram = gram + c;
-                            
-                            // Only check documents where the prefix gram exists
-                            for (size_t doc_id : positions) {
-                                std::string text = k_dataset_[doc_id];
-                                if (append_terminal_) text += "$";
-                                
-                                // Check if extended gram exists in this document
-                                if (text.find(ext_gram) != std::string::npos) {
-                                    local_new_index[ext_gram].push_back(doc_id);
-                                }
-                            }
-                            
-                            // Remove duplicates and sort
-                            if (!local_new_index[ext_gram].empty()) {
-                                auto& vec = local_new_index[ext_gram];
-                                std::sort(vec.begin(), vec.end());
-                                vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-                                local_next_grams.insert(ext_gram);
-                            }
-                        }
-                    }
-                } else {
-                    // Acceptable gram - keep it in final index
-                    std::lock_guard<std::mutex> lock(final_index_mutex);
-                    k_index_[gram] = positions;
-                    k_index_keys_.insert(gram);
-                    
-                    // Apply key upper bound if set
-                    if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
-                        return; // This thread stops when limit is reached
-                    }
-                }
-            }
-            
-            // Merge local results into global containers
-            {
-                std::lock_guard<std::mutex> lock(new_index_mutex);
-                for (auto& entry : local_new_index) {
-                    const std::string& gram = entry.first;
-                    auto& vec = entry.second;
-                    
-                    new_index[gram].insert(new_index[gram].end(), vec.begin(), vec.end());
-                }
-            }
-            
-            {
-                std::lock_guard<std::mutex> lock(next_grams_mutex);
-                next_grams.insert(local_next_grams.begin(), local_next_grams.end());
-            }
-        });
-    }
-    
-    // Wait for all threads to complete
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    
-    // Final cleanup: sort and remove duplicates for extended grams
-    for (auto& entry : new_index) {
-        auto& vec = entry.second;
-        std::sort(vec.begin(), vec.end());
-        vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+    for (RecordId rec_id = start; rec_id < end; ++rec_id) {
+        const std::string& rec = k_dataset_[rec_id];
+        for (size_t i = 0; i + q_min_ <= rec.size(); ++i) {
+            std::string gram = rec.substr(i, q_min_);
+            thread_grams[gram].push_back(rec_id);
+        }
     }
 }
 

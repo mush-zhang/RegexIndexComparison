@@ -5,9 +5,9 @@
  * VGGraph_Greedy: Greedy Variability Graph-based N-gram Selection
  * 
  * This implementation provides a greedy solution for n-gram selection using
- * iterative extension of frequent n-grams. The algorithm starts with minimum
- * length n-grams and extends those that are too frequent, keeping those that
- * meet the selectivity threshold.
+ * recursive extension of frequent n-grams with set cover optimization.
+ * The algorithm builds variable-length n-grams and selects an optimal subset
+ * to cover query literals using a greedy set cover approach.
  */
 
 #include <unordered_map>
@@ -18,6 +18,8 @@
 #include <mutex>
 #include <string>
 #include <algorithm>
+#include <future>
+#include <limits>
 
 #include "../../ngram_inverted_index.hpp"
 
@@ -37,8 +39,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
         upper_n_(upper_n),
         thread_count_(thread_count),
         q_min_(2),
-        max_gram_len_(upper_n),
-        append_terminal_(false) {}
+        max_gram_len_(upper_n) {}
     
     VGGraph_Greedy(const std::vector<std::string> & dataset, 
                    const std::vector<std::string> & queries,
@@ -50,8 +51,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
         upper_n_(upper_n),
         thread_count_(thread_count),
         q_min_(2),
-        max_gram_len_(upper_n),
-        append_terminal_(false) {}
+        max_gram_len_(upper_n) {}
     
     ~VGGraph_Greedy() {}
 
@@ -65,30 +65,49 @@ class VGGraph_Greedy : public NGramInvertedIndex {
     const int upper_n_;
     const int thread_count_;
     
-    // Greedy algorithm parameters (following VGramIndex pattern)
-    int q_min_;
-    int max_gram_len_;
-    bool append_terminal_;
-    std::string alphabet_;
+    // Greedy algorithm parameters
+    size_t q_min_;
+    size_t max_gram_len_;
     
-    // Extension tracking for greedy growth (optional, for debugging)
-    std::unordered_map<std::string, std::set<std::string>> gram_ext_map_;
+    // Type aliases for compatibility with reference implementation
+    using RecordId = size_t;
+    using PostingList = std::vector<RecordId>;
 
     // Core greedy algorithm methods (following reference implementation)
-    void find_alphabet();
+    void recursive_extend(
+        const std::string& gram,
+        const PostingList& rec_ids,
+        size_t tau,
+        std::set<std::string>& index_keys,
+        std::unordered_map<std::string, PostingList>& index_map);
     
+    void build_vgram_index_parallel(
+        size_t tau,
+        std::set<std::string>& index_keys,
+        std::unordered_map<std::string, PostingList>& index_map);
+    
+    void merge_index_maps(
+        std::set<std::string>& out_keys,
+        std::unordered_map<std::string, PostingList>& out_index,
+        const std::set<std::string>& in_keys,
+        const std::unordered_map<std::string, PostingList>& in_index);
+    
+    std::vector<std::string> vggraph_greedy_cover(
+        const std::vector<std::string>& literals,
+        const std::set<std::string>& index_keys,
+        const std::unordered_map<std::string, PostingList>& index_map);
+    
+    size_t dynamic_tau(
+        const std::unordered_map<std::string, PostingList>& grams, 
+        double quantile = 0.8);
+
     // Parallel processing methods
     void build_initial_ngrams_parallel(
-        std::unordered_map<std::string, std::vector<size_t>>& next_index,
-        std::set<std::string>& current_grams);
-    
-    void process_grams_parallel(
-        const std::set<std::string>& current_grams,
-        const std::unordered_map<std::string, std::vector<size_t>>& next_index,
-        std::unordered_map<std::string, std::vector<size_t>>& new_index,
-        std::set<std::string>& next_grams,
-        size_t tau,
-        int current_len);
+        std::unordered_map<std::string, PostingList>& initial_grams);
+        
+    void process_chunk_for_initial_grams(
+        size_t start, size_t end,
+        std::unordered_map<std::string, PostingList>& thread_grams);
 };
 
 } // namespace vggraph_greedy_index
