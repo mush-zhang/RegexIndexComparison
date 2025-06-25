@@ -379,7 +379,7 @@ std::vector<std::string> read_directory(const std::string & file_type,
     return lines;
 }
 
-std::vector<std::string> read_enron(int max_files=-1) {
+std::vector<std::string> read_enron(int max_files) {
     std::vector<std::string> data_strings;
     
     try {
