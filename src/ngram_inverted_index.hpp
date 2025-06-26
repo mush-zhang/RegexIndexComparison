@@ -25,7 +25,7 @@ class NGramInvertedIndex : public NGramIndex {
 
     virtual void build_index(int upper_n) {}
 
-    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
+    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const override final{
         std::cerr << "should not be called" << std::endl;
         return true;
     };

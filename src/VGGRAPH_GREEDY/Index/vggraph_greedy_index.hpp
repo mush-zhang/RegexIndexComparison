@@ -73,18 +73,12 @@ class VGGraph_Greedy : public NGramInvertedIndex {
     using RecordId = size_t;
     using PostingList = std::vector<RecordId>;
 
-    // Core greedy algorithm methods (following reference implementation)
-    void recursive_extend(
-        const std::string& gram,
-        const PostingList& rec_ids,
-        size_t tau,
-        std::set<std::string>& index_keys,
-        std::unordered_map<std::string, PostingList>& index_map);
-    
-    void build_vgram_index_parallel(
-        size_t tau,
-        std::set<std::string>& index_keys,
-        std::unordered_map<std::string, PostingList>& index_map);
+    // Core greedy algorithm methods (iterative approach with pruning)
+    void extend_selected_grams(
+        const std::unordered_map<std::string, PostingList>& current_grams,
+        const std::set<std::string>& selected_grams,
+        std::unordered_map<std::string, PostingList>& next_grams,
+        size_t tau);
     
     void merge_index_maps(
         std::set<std::string>& out_keys,
@@ -99,7 +93,7 @@ class VGGraph_Greedy : public NGramInvertedIndex {
     
     size_t dynamic_tau(
         const std::unordered_map<std::string, PostingList>& grams, 
-        double quantile = 0.8);
+        double quantile);
 
     // Parallel processing methods
     void build_initial_ngrams_parallel(
@@ -108,6 +102,12 @@ class VGGraph_Greedy : public NGramInvertedIndex {
     void process_chunk_for_initial_grams(
         size_t start, size_t end,
         std::unordered_map<std::string, PostingList>& thread_grams);
+        
+    void extend_grams_parallel(
+        const std::unordered_map<std::string, PostingList>& current_grams,
+        const std::set<std::string>& grams_to_extend,
+        std::unordered_map<std::string, PostingList>& extended_grams,
+        size_t tau);
 };
 
 } // namespace vggraph_greedy_index

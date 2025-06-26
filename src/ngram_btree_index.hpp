@@ -30,7 +30,7 @@ class NGramBtreeIndex : public NGramIndex {
 
     long long int get_bytes_used() const override;
 
-    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const {
+    bool get_all_idxs(const std::string & reg, std::vector<size_t> & container) const override final{
         std::cerr << "should not be called" << std::endl;
         return true;
     };
