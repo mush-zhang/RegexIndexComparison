@@ -57,7 +57,7 @@ void VGGraph_Greedy::select_grams(int upper_n) {
                 filtered_grams[entry.first] = entry.second;
             }
         }
-                
+
         // Apply set cover optimization if queries are available
         if (k_queries_size_ > 0 && !filtered_grams.empty()) {
             auto query_literals = get_query_literals();
@@ -65,7 +65,6 @@ void VGGraph_Greedy::select_grams(int upper_n) {
             for (const auto& entry : filtered_grams) {
                 gram_keys.insert(entry.first);
             }
-            
             std::set<std::string> selected_this_round;
             
             // Apply set cover for each query and collect selected grams
@@ -107,7 +106,7 @@ void VGGraph_Greedy::select_grams(int upper_n) {
             std::unordered_map<std::string, PostingList> next_grams;
             extend_selected_grams(current_grams, selected_grams_cumulative, next_grams, tau);
             current_grams = std::move(next_grams);
-                        
+       
             if (current_grams.empty()) {
                 break;
             }
