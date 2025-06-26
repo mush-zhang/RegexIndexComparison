@@ -71,6 +71,7 @@ void VGGraph_Greedy::select_grams(int upper_n) {
             for (const auto& literals : query_literals) {
                 auto selected = vggraph_greedy_cover(literals, gram_keys, filtered_grams);
                 selected_this_round.insert(selected.begin(), selected.end());
+                std::cout << "Selected " << selected.size() << " grams for query" << std::endl;
             }
                         
             // Add selected grams to cumulative set
