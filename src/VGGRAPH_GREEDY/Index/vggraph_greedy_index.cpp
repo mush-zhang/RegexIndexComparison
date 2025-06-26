@@ -71,9 +71,9 @@ void VGGraph_Greedy::select_grams(int upper_n) {
             for (const auto& literals : query_literals) {
                 auto selected = vggraph_greedy_cover(literals, gram_keys, filtered_grams);
                 selected_this_round.insert(selected.begin(), selected.end());
-                std::cout << "Selected " << selected.size() << " grams for query" << std::endl;
             }
-                        
+            std::cout << "Selected " << selected_this_round.size() << " grams for query" << std::endl;
+
             // Add selected grams to cumulative set
             selected_grams_cumulative.insert(selected_this_round.begin(), selected_this_round.end());
             
@@ -89,6 +89,8 @@ void VGGraph_Greedy::select_grams(int upper_n) {
                     }
                 }
             }
+            std::cout << "Cumulative selected grams: " << selected_grams_cumulative.size() << std::endl;
+            std::cout << "Current gram length: " << k_index_keys_.size() << std::endl;
         } else {
             // No queries available, use all filtered grams
             for (const auto& entry : filtered_grams) {
