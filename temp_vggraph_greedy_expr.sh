@@ -19,11 +19,11 @@
 # done
 
 
-# Protein with key upper bounds
-kups=( 50 100 200 500 1000 )
-for k in ${kups[*]}; do
-    ./run_expr_vggraph_greedy.sh -w protein -k ${k}
-done
+# # Protein with key upper bounds
+# kups=( 50 100 200 500 1000 )
+# for k in ${kups[*]}; do
+#     ./run_expr_vggraph_greedy.sh -w protein -k ${k}
+# done
 
 # ./run_expr_vggraph_greedy.sh -w traffic 
 
@@ -35,16 +35,16 @@ done
 
 # ./run_expr_vggraph_greedy.sh -w sys_y
 
-# webpage with key upper bounds
-kups=( 5 10 50 100 )
-for k in ${kups[*]}; do 
-    ./run_expr_vggraph_greedy.sh -w webpages -k ${k}
-done
+# # webpage with key upper bounds
+# kups=( 5 10 50 100 )
+# for k in ${kups[*]}; do 
+#     ./run_expr_vggraph_greedy.sh -w webpages -k ${k}
+# done
 
-# DB_X with key upper bounds
-for k in ${kups[*]}; do
-    ./run_expr_vggraph_greedy.sh -w db_x -k ${k}
-done
+# # DB_X with key upper bounds
+# for k in ${kups[*]}; do
+#     ./run_expr_vggraph_greedy.sh -w db_x -k ${k}
+# done
 
 # traffic with key upper bounds
 for k in 5 10 15; do
