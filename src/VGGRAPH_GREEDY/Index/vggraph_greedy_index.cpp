@@ -72,7 +72,7 @@ void VGGraph_Greedy::select_grams(int upper_n) {
                 auto selected = vggraph_greedy_cover(literals, gram_keys, filtered_grams);
                 selected_this_round.insert(selected.begin(), selected.end());
             }
-                        
+
             // Add selected grams to cumulative set
             selected_grams_cumulative.insert(selected_this_round.begin(), selected_this_round.end());
             
@@ -83,11 +83,12 @@ void VGGraph_Greedy::select_grams(int upper_n) {
                     k_index_[gram] = it->second;
                     k_index_keys_.insert(gram);
                     
-                    if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
+                    if (key_upper_bound_ > 0 && k_index_keys_.size() >= key_upper_bound_) {
                         return;
                     }
                 }
             }
+
         } else {
             // No queries available, use all filtered grams
             for (const auto& entry : filtered_grams) {
@@ -95,7 +96,7 @@ void VGGraph_Greedy::select_grams(int upper_n) {
                 k_index_keys_.insert(entry.first);
                 selected_grams_cumulative.insert(entry.first);
                 
-                if (key_upper_bound_ > 0 && k_index_keys_.size() >= static_cast<size_t>(key_upper_bound_)) {
+                if (key_upper_bound_ > 0 && k_index_keys_.size() >= key_upper_bound_) {
                     return;
                 }
             }

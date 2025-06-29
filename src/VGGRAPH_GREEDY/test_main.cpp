@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
     auto end_time = std::chrono::high_resolution_clock::now();
     auto build_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
+    index.print_index(false);
     std::cout << "Index build time: " << build_duration.count() << " ms" << std::endl;
     std::cout << "Index size: " << index.get_num_keys() << " n-grams" << std::endl;
     std::cout << "Memory usage: " << index.get_bytes_used() << " bytes" << std::endl;
