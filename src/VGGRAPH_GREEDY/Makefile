@@ -6,7 +6,7 @@ LDFLAGS = -pthread
 RE2_FLAGS = -L/usr/local/lib -lre2
 
 # Base files needed
-BASE_OBJECTS = ../ngram_inverted_index.o ../simple_query_matcher.o # ../utils/utils.o
+BASE_OBJECTS = ../ngram_inverted_index.o ../simple_query_matcher.o # `11../utils/utils.o
 
 # VGGraph_Greedy specific files
 VGGRAPH_GREEDY_OBJECTS = Index/vggraph_greedy_index.o

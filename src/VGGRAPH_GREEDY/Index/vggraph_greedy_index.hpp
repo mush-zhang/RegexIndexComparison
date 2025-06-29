@@ -42,6 +42,17 @@ class VGGraph_Greedy : public NGramInvertedIndex {
         q_min_(2),
         max_gram_len_(upper_n) {}
     
+    VGGraph_Greedy(const std::vector<std::string> & dataset, 
+                   float selectivity_threshold, 
+                   int upper_n, 
+                   int thread_count)
+      : NGramInvertedIndex(dataset),
+        k_threshold_(selectivity_threshold),
+        upper_n_(upper_n),
+        thread_count_(thread_count),
+        q_min_(2),
+        max_gram_len_(upper_n) {}
+    
     ~VGGraph_Greedy() {}
 
     void build_index(int upper_n = -1) override;
