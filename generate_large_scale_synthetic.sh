@@ -89,12 +89,14 @@ def run_direct_generation():
             'jupyter', 'nbconvert', '--to', 'python', 
             'notebooks/preprocess_synthetic.ipynb', '--output', 'temp_synthetic_gen'
         ], check=True)
-        
+        print("Converted notebook to Python module: temp_synthetic_gen.py")
+
         # Load and execute the generated python module
         spec = importlib.util.spec_from_file_location("temp_synthetic_gen", "temp_synthetic_gen.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        
+        print("Loaded synthetic data generation module")
+
         # Run the large-scale generation
         print("Running large-scale synthetic data generation...")
         results = module.generate_large_scale_benchmarks()
