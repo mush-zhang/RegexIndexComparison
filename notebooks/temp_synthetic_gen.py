@@ -593,7 +593,7 @@ class ConfigurableSyntheticGenerator:
         self.alphabets = {}
         self.dataset_cache = {}  # Cache for datasets
         self.compiled_patterns = {}  # Cache for compiled regex patterns
-        self.max_workers = min(mp.cpu_count(), 8)  # Limit threads for memory efficiency
+        self.max_workers = min(mp.cpu_count(), 16)  # Limit threads for memory efficiency
         self.lock = Lock()
         self._initialize_alphabets()
         print(f"Initialized generator with {self.max_workers} worker threads")
