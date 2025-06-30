@@ -10,6 +10,7 @@
 #include <chrono>
 #include <climits>
 #include <filesystem>
+#include <mutex>
 
 #include "utils/reg_utils.hpp"
 
@@ -72,7 +73,15 @@ class NGramIndex {
 
     void set_outfile(std::ofstream & outfile) { outfile_ = &outfile; }
 
-    void write_to_file(const std::string & str) const { *outfile_ << str; }   
+    void write_to_file(const std::string & str) const { 
+        std::lock_guard<std::mutex> lock(file_mutex_);
+        *outfile_ << str; 
+    }
+
+    void write_to_file_line(const std::string & str) const {
+        std::lock_guard<std::mutex> lock(file_mutex_);
+        *outfile_ << str << std::endl;
+    }   
 
  protected:
     virtual void select_grams(int upper_n) {};
@@ -92,6 +101,7 @@ class NGramIndex {
 
  private:
     std::ostream* outfile_ = &std::cout;
+    mutable std::mutex file_mutex_;  // Mutex for thread-safe file writing
     inline static const std::vector<std::string> empty_queries_{};
 };
 

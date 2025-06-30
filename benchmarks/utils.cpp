@@ -571,12 +571,8 @@ void benchmarkFree(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    // Get individual stats using parallel processing
+    matcher.collect_parallel_stats(tr, free_info.num_threads);
 
     statsfile.close();
 }
@@ -663,12 +659,8 @@ void benchmarkBest(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    // Get individual stats using parallel processing
+    matcher.collect_parallel_stats(tr, best_info.num_threads);
 
     statsfile.close();
 }
@@ -718,12 +710,8 @@ void benchmarkFast(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    // Get individual stats using parallel processing
+    matcher.collect_parallel_stats(tr, lpms_info.num_threads);
 
     statsfile.close();
 }
@@ -774,12 +762,8 @@ void benchmarkTrigram(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    // Get individual stats using parallel processing
+    matcher.collect_parallel_stats(tr, trigram_info.num_threads);
 
     statsfile.close();
 }
@@ -833,12 +817,8 @@ void benchmarkVGGraph(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << matcher.get_num_after_filter(regex) << std::endl;
-    }
+    // Get individual stats using parallel processing
+    matcher.collect_parallel_stats(tr, vggraph_info.num_threads);
 
     statsfile.close();
     delete pi;
@@ -887,12 +867,8 @@ void benchmarkBaseline(const std::filesystem::path dir_path,
 
     auto matcher = SimpleQueryMatcher(*pi, tr, false);
 
-    // Get individual stats
-    for (const auto & regex : tr) {
-        statsfile << regex << "\t";
-        matcher.match_one(regex);
-        statsfile << "-1" << std::endl;
-    }
+    // Get individual stats using parallel processing for baseline
+    matcher.collect_parallel_stats_baseline(tr, 1);  // Use single thread for baseline since no indexing
 
     statsfile.close();
 }
