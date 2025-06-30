@@ -5,13 +5,13 @@ mkdir -p ${synthetic_dir}
 for selectivity in 0.001 0.005 0.010 0.02 0.05 0.1 0.2 0.5; do
     ./run_expr_baseline.sh -d data/configurable_synthetics/dataset_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
     -r data/configurable_synthetics/queries_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
-    -$W$ synthetic_${datasetSize}
+    -w synthetic_${datasetSize}
     ./run_expr_best.sh -d data/configurable_synthetics/dataset_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
     -r data/configurable_synthetics/queries_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
-    -r synthetic_${datasetSize}
+    -w synthetic_${datasetSize}
     ./run_expr_free.sh -d data/configurable_synthetics/dataset_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
     -r data/configurable_synthetics/queries_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
-    -r synthetic_${datasetSize}
+    -w synthetic_${datasetSize}
     ./run_expr_lpms.sh -d data/configurable_synthetics/dataset_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
     -r data/configurable_synthetics/queries_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
     -w synthetic_${datasetSize}
@@ -38,6 +38,6 @@ for querySize in 500 1000 2000 5000; do
     -d data/configurable_synthetics/queries_alph16_data${datasetSize}_qs${querySize}_sel0.005.txt \
     -w synthetic_${datasetSize}
     ./run_expr_vggraph_greedy.sh -d data/configurable_synthetics/dataset_alph16_data${datasetSize}_qs${querySize}_sel0.005.txt \
-    -d data/configurable_synthetics/queries_alph16_data${datasetSize}_qs${querySize}_sel0.005.txt \
+    -r data/configurable_synthetics/queries_alph16_data${datasetSize}_qs${querySize}_sel0.005.txt \
     -w synthetic_${datasetSize}
 done
