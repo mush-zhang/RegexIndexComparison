@@ -152,9 +152,7 @@ void SimpleQueryMatcher::collect_parallel_stats(const std::vector<std::string> &
     
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(
         std::chrono::high_resolution_clock::now() - start_time).count();
-    std::cout << "Parallel stats collection completed in " << elapsed << " seconds" << std::endl;
-}
-
+    
 void SimpleQueryMatcher::match_one_parallel_baseline(const std::string & reg, size_t index) {
     auto start = std::chrono::high_resolution_clock::now();
     
