@@ -67,7 +67,7 @@ result/*
 # exploration notebooks
 notebooks/*
 # except those that are final for presentation
-!notebooks/final_*
+!notebooks/revision2_*
 !notebooks/*.drawio
 !notebooks/temp_synthetic_gen.py
 
