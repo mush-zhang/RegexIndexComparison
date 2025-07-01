@@ -2,7 +2,6 @@
 
 datasetSize=50000
 querySize=500
-selectivity=0.020
 
 for selectivity in '0.001' '0.005' '0.010' '0.020' '0.050' '0.100' '0.200' '0.500'; do
     ./run_expr_baseline.sh -d data/configurable_synthetic/dataset_alph16_data${datasetSize}_qs500_sel${selectivity}.txt \
@@ -29,6 +28,7 @@ for selectivity in '0.001' '0.005' '0.010' '0.020' '0.050' '0.100' '0.200' '0.50
         -w synthetic2_${datasetSize}_${querySize}_${selectivity} -k ${k}
     done
 done
+selectivity=0.020
 
 for querySize in 500 1000 2000 5000; do
     ./run_expr_baseline.sh -d data/configurable_synthetic/dataset_alph16_data${datasetSize}_qs${querySize}_sel0.020.txt \
