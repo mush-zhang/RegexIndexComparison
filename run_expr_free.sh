@@ -55,7 +55,7 @@ if [ "$wl_num" == "0" ]; then
     extra="${extra}-r ${regex_file} -d ${data_file}"
 fi
 
-timeout_prefix="{ timeout 3h /usr/bin/time -v "
+timeout_prefix="{ timeout 1h /usr/bin/time -v "
 timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
