@@ -44,6 +44,33 @@ std::vector<std::string> read_file_lines(const std::string& filename) {
     return lines;
 }
 
+// Function to read a single file as one string (like read_enron method)
+std::string read_file_as_string(const std::string& filename) {
+    std::ifstream file(filename);
+    
+    if (!file.is_open()) {
+        return ""; // Return empty string if file can't be opened
+    }
+    
+    // Read entire file content as one string, preserving newlines
+    std::string file_content;
+    std::string line;
+    bool first_line = true;
+    
+    while (std::getline(file, line)) {
+        if (!first_line) {
+            file_content += "\n";
+        }
+        // Remove carriage returns but keep the content
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+        file_content += line;
+        first_line = false;
+    }
+    
+    file.close();
+    return file_content;
+}
+
 // Function to read all lines from a directory recursively (like read_directory in utils.cpp)
 std::vector<std::string> read_directory_lines(const std::string& path, int max_lines = -1) {
     std::vector<std::string> all_lines;
@@ -78,6 +105,43 @@ std::vector<std::string> read_directory_lines(const std::string& path, int max_l
               << ", Total lines: " << all_lines.size() << std::endl;
     
     return all_lines;
+}
+
+// Function to read all files from a directory as individual strings (like read_enron method)
+std::vector<std::string> read_directory_as_strings(const std::string& path, int max_files = -1) {
+    std::vector<std::string> all_strings;
+    
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "Error: Directory " << path << " does not exist" << std::endl;
+        return all_strings;
+    }
+    
+    std::cout << "Reading files from directory as individual strings: " << path << std::endl;
+    
+    size_t file_count = 0;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
+        if (entry.is_regular_file()) {
+            file_count++;
+            if (file_count % 100 == 0) {
+                std::cout << "Processed " << file_count << " files, " 
+                          << all_strings.size() << " documents so far..." << std::endl;
+            }
+            
+            std::string file_content = read_file_as_string(entry.path());
+            if (!file_content.empty()) {
+                all_strings.push_back(file_content);
+            }
+            
+            if (max_files > 0 && static_cast<int>(all_strings.size()) >= max_files) {
+                break;
+            }
+        }
+    }
+    
+    std::cout << "Finished reading. Total files: " << file_count 
+              << ", Total documents: " << all_strings.size() << std::endl;
+    
+    return all_strings;
 }
 
 // Function to analyze dataset statistics
@@ -249,6 +313,8 @@ void print_usage() {
     std::cout << "  -n <name>       Dataset name (default: from directory name)\n";
     std::cout << "  -o <file>       Output CSV file (optional)\n";
     std::cout << "  -m <max_lines>  Maximum lines to process (default: no limit)\n";
+    std::cout << "  --enron         Use Enron-style reading (each file as one document)\n";
+    std::cout << "  --sysy          Analyze Sysy dataset (reads data/tagged_data.csv)\n";
     std::cout << "  -h              Show this help\n";
 }
 
@@ -258,12 +324,23 @@ int main(int argc, char* argv[]) {
     std::string dataset_name;
     std::string output_file;
     int max_lines = -1;
+    bool use_enron_reading = false;
+    bool is_sysy = false;
     
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-h" || arg == "--help") {
-            print_usage();
+            std::cout << "Usage: ./analyze_dataset_stats [OPTIONS]\n";
+            std::cout << "Options:\n";
+            std::cout << "  -d <dir>        Directory to analyze (default: data/enron/maildir)\n";
+            std::cout << "  -f <file>       Single file to analyze\n";
+            std::cout << "  -n <name>       Dataset name (default: from directory name)\n";
+            std::cout << "  -o <file>       Output CSV file (optional)\n";
+            std::cout << "  -m <max_lines>  Maximum lines to process (default: no limit)\n";
+            std::cout << "  --enron         Use Enron-style reading (each file as one document)\n";
+            std::cout << "  --sysy          Analyze Sysy dataset (line-by-line reading)\n";
+            std::cout << "  -h              Show this help\n";
             return 0;
         } else if (arg == "-d" && i + 1 < argc) {
             data_path = argv[++i];
@@ -275,6 +352,14 @@ int main(int argc, char* argv[]) {
             output_file = argv[++i];
         } else if (arg == "-m" && i + 1 < argc) {
             max_lines = std::stoi(argv[++i]);
+        } else if (arg == "--enron") {
+            use_enron_reading = true;
+        } else if (arg == "--sysy") {
+            use_enron_reading = false;  // Sysy uses line-by-line reading
+            is_sysy = true;
+        } else {
+            std::cerr << "Unknown argument: " << arg << std::endl;
+            return 1;
         }
     }
     
@@ -287,23 +372,60 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    // Read data
-    std::vector<std::string> lines;
-    if (!single_file.empty()) {
-        std::cout << "Analyzing single file: " << single_file << std::endl;
-        lines = read_file_lines(single_file);
-    } else {
-        std::cout << "Analyzing directory: " << data_path << std::endl;
-        lines = read_directory_lines(data_path, max_lines);
+    // Auto-detect Enron reading if analyzing enron directory
+    if (!use_enron_reading && data_path.find("enron") != std::string::npos) {
+        use_enron_reading = true;
+        std::cout << "Auto-detected Enron dataset, using file-per-document reading mode." << std::endl;
     }
     
-    if (lines.empty()) {
+    // Override for Sysy dataset - use specific file
+    if (is_sysy) {
+        data_path = "data/tagged_data.csv";
+        std::cout << "Sysy dataset detected, using single file: " << data_path << std::endl;
+    }
+    
+    // Read data
+    std::vector<std::string> data_to_analyze;
+    
+    if (!single_file.empty()) {
+        std::cout << "Analyzing single file: " << single_file << std::endl;
+        if (use_enron_reading) {
+            std::string content = read_file_as_string(single_file);
+            if (!content.empty()) {
+                data_to_analyze.push_back(content);
+            }
+        } else {
+            data_to_analyze = read_file_lines(single_file);
+        }
+    } else if (is_sysy || data_path.find(".csv") != std::string::npos) {
+        // Handle single file (Sysy or CSV files)
+        std::cout << "Analyzing single file: " << data_path << std::endl;
+        if (use_enron_reading) {
+            std::string content = read_file_as_string(data_path);
+            if (!content.empty()) {
+                data_to_analyze.push_back(content);
+            }
+        } else {
+            data_to_analyze = read_file_lines(data_path);
+        }
+    } else {
+        std::cout << "Analyzing directory: " << data_path << std::endl;
+        if (use_enron_reading) {
+            std::cout << "Using Enron-style reading (each file as one document)..." << std::endl;
+            data_to_analyze = read_directory_as_strings(data_path, max_lines);
+        } else {
+            std::cout << "Using line-by-line reading..." << std::endl;
+            data_to_analyze = read_directory_lines(data_path, max_lines);
+        }
+    }
+    
+    if (data_to_analyze.empty()) {
         std::cerr << "Error: No data found to analyze" << std::endl;
         return 1;
     }
     
     // Analyze statistics
-    DatasetStats stats = analyze_dataset(lines, dataset_name);
+    DatasetStats stats = analyze_dataset(data_to_analyze, dataset_name);
     
     // Print results
     print_detailed_stats(stats);

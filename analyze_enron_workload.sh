@@ -138,6 +138,15 @@ analyze_regex_workload "$DATA_DIR/regexes_traffic.txt" "traffic"
 analyze_regex_workload "$DATA_DIR/webpages/regexes_webpages.txt" "webpages"
 analyze_regex_workload "$DATA_DIR/webpages/regexes_webpages_free.txt" "webpages_free"
 
+# Run Python dataset analysis for comprehensive statistics
+echo -e "${BLUE}=== COMPREHENSIVE DATASET ANALYSIS ===${NC}"
+if command -v python3 &> /dev/null; then
+    echo "Running comprehensive Python analysis..."
+    python3 analyze_datasets.py --all --verbose --output "$OUTPUT_DIR/comprehensive_dataset_stats.json"
+else
+    echo -e "${YELLOW}⚠ Python3 not found, skipping comprehensive analysis${NC}"
+fi
+
 # Summary
 echo -e "${BLUE}=== ANALYSIS SUMMARY ===${NC}"
 echo "Analysis complete! Results saved in: $OUTPUT_DIR"

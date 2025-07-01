@@ -458,7 +458,7 @@ int readWorkload(const expr_info & expr_info,
             break;
         case 5:
             regexes = read_file("regex", kSysyRegex);
-            lines = read_directory("data", "data/extracted", max_lines);
+            lines = read_file("data", "data/tagged_data.csv", max_lines);
             break;
         case 6:
             regexes = read_file("regex", kEnronRegex);
