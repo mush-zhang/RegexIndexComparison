@@ -352,6 +352,10 @@ def main():
             print("Using Enron-specific file reading (each file as one document)")
             data_strings = read_enron_directory(args.dataset_path, args.max_files)
             stats = analyze_dataset_statistics(data_strings, "Enron", is_enron=True)
+        elif args.dataset_type == 'sysy':
+            print("Using Sysy-specific file reading (line-by-line)")
+            data_strings = read_directory_line_by_line(args.dataset_path, args.max_files)
+            stats = analyze_dataset_statistics(data_strings, "Sysy", is_enron=False)
         else:
             print("Using line-by-line file reading")
             data_strings = read_directory_line_by_line(args.dataset_path, args.max_files)

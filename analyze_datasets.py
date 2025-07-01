@@ -98,18 +98,18 @@ def analyze_enron_dataset(data_path, max_files=-1, verbose=False):
         'reading_method': 'file-per-document'
     }
 
-def analyze_sysy_dataset(data_path, max_files=-1, verbose=False):
+def analyze_sysy_dataset(data_path, max_lines=-1, verbose=False):
     """
-    Analyze Sysy dataset using file-per-document reading
+    Analyze Sysy dataset using line-by-line reading (like utils.cpp read_directory)
     """
     if not os.path.exists(data_path):
         print(f"Sysy directory not found: {data_path}")
         return None
     
     print(f"Analyzing Sysy dataset: {data_path}")
-    print("Using file-per-document reading (same as Enron)...")
+    print("Using line-by-line reading (like utils.cpp read_directory)...")
     
-    data_strings = []
+    all_lines = []
     alphabet = set()
     total_chars = 0
     
@@ -120,30 +120,38 @@ def analyze_sysy_dataset(data_path, max_files=-1, verbose=False):
             
             # Only process regular files
             if os.path.isfile(filepath):
-                content = read_file_as_string(filepath)
-                if content:  # Only add non-empty content
-                    data_strings.append(content)
-                    total_chars += len(content)
+                try:
+                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                        for line in f:
+                            line = line.rstrip('\n\r')
+                            all_lines.append(line)
+                            total_chars += len(line)
+                            
+                            # Add characters to alphabet
+                            alphabet.update(line)
+                            
+                            if max_lines > 0 and len(all_lines) >= max_lines:
+                                break
                     
-                    # Add characters to alphabet
-                    alphabet.update(content)
+                    file_count += 1
+                    if verbose and file_count % 1000 == 0:
+                        print(f"  Processed {file_count} files, {len(all_lines)} lines...")
                     
-                file_count += 1
-                if verbose and file_count % 1000 == 0:
-                    print(f"  Processed {file_count} files, {len(data_strings)} non-empty documents...")
-                
-                # Check if we've reached the maximum number of files
-                if max_files > 0 and len(data_strings) >= max_files:
-                    break
+                    if max_lines > 0 and len(all_lines) >= max_lines:
+                        break
+                        
+                except Exception as e:
+                    if verbose:
+                        print(f"Error reading {filepath}: {e}")
         
-        if max_files > 0 and len(data_strings) >= max_files:
+        if max_lines > 0 and len(all_lines) >= max_lines:
             break
     
     if verbose:
-        print(f"Finished reading Sysy. Total files: {file_count}, Total documents: {len(data_strings)}")
+        print(f"Finished reading Sysy. Total files: {file_count}, Total lines: {len(all_lines)}")
     
     # Calculate statistics
-    num_strings = len(data_strings)
+    num_strings = len(all_lines)
     avg_length = total_chars / num_strings if num_strings > 0 else 0
     alphabet_size = len(alphabet)
     
@@ -155,7 +163,7 @@ def analyze_sysy_dataset(data_path, max_files=-1, verbose=False):
         'avg_string_length': avg_length,
         'alphabet_size': alphabet_size,
         'alphabet': sorted(list(alphabet)),
-        'reading_method': 'file-per-document'
+        'reading_method': 'line-by-line'
     }
 
 def analyze_generic_dataset(data_path, dataset_name, max_files=-1, verbose=False):
@@ -283,7 +291,8 @@ def main():
     parser.add_argument('--sysy', help='Path to Sysy dataset directory (e.g., data/extracted)')
     parser.add_argument('--dataset', help='Path to generic dataset directory')
     parser.add_argument('--dataset-name', help='Name for generic dataset (required with --dataset)')
-    parser.add_argument('--max-files', type=int, default=-1, help='Maximum number of files to process')
+    parser.add_argument('--max-files', type=int, default=-1, help='Maximum number of files to process for Enron/generic datasets')
+    parser.add_argument('--max-lines', type=int, default=-1, help='Maximum number of lines to process for Sysy dataset')
     parser.add_argument('--output', help='Output file to save statistics (JSON format)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
     parser.add_argument('--all', action='store_true', help='Analyze all available datasets')
@@ -311,7 +320,8 @@ def main():
     # Analyze Sysy dataset
     if args.sysy or args.all:
         sysy_path = args.sysy if args.sysy else "data/extracted"
-        sysy_stats = analyze_sysy_dataset(sysy_path, args.max_files, args.verbose)
+        max_lines = getattr(args, 'max_lines', -1) if hasattr(args, 'max_lines') else -1
+        sysy_stats = analyze_sysy_dataset(sysy_path, max_lines, args.verbose)
         if sysy_stats:
             print_dataset_stats(sysy_stats)
             all_stats.append(sysy_stats)

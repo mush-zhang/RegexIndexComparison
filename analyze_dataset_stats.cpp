@@ -314,7 +314,7 @@ void print_usage() {
     std::cout << "  -o <file>       Output CSV file (optional)\n";
     std::cout << "  -m <max_lines>  Maximum lines to process (default: no limit)\n";
     std::cout << "  --enron         Use Enron-style reading (each file as one document)\n";
-    std::cout << "  --sysy          Analyze Sysy dataset (same as --enron for now)\n";
+    std::cout << "  --sysy          Analyze Sysy dataset (reads data/tagged_data.csv)\n";
     std::cout << "  -h              Show this help\n";
 }
 
@@ -339,7 +339,7 @@ int main(int argc, char* argv[]) {
             std::cout << "  -o <file>       Output CSV file (optional)\n";
             std::cout << "  -m <max_lines>  Maximum lines to process (default: no limit)\n";
             std::cout << "  --enron         Use Enron-style reading (each file as one document)\n";
-            std::cout << "  --sysy          Analyze Sysy dataset (same as --enron for now)\n";
+            std::cout << "  --sysy          Analyze Sysy dataset (line-by-line reading)\n";
             std::cout << "  -h              Show this help\n";
             return 0;
         } else if (arg == "-d" && i + 1 < argc) {
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--enron") {
             use_enron_reading = true;
         } else if (arg == "--sysy") {
-            use_enron_reading = true;
+            use_enron_reading = false;  // Sysy uses line-by-line reading
             is_sysy = true;
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
@@ -378,6 +378,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Auto-detected Enron dataset, using file-per-document reading mode." << std::endl;
     }
     
+    // Override for Sysy dataset - use specific file
+    if (is_sysy) {
+        data_path = "data/tagged_data.csv";
+        std::cout << "Sysy dataset detected, using single file: " << data_path << std::endl;
+    }
+    
     // Read data
     std::vector<std::string> data_to_analyze;
     
@@ -390,6 +396,17 @@ int main(int argc, char* argv[]) {
             }
         } else {
             data_to_analyze = read_file_lines(single_file);
+        }
+    } else if (is_sysy || data_path.find(".csv") != std::string::npos) {
+        // Handle single file (Sysy or CSV files)
+        std::cout << "Analyzing single file: " << data_path << std::endl;
+        if (use_enron_reading) {
+            std::string content = read_file_as_string(data_path);
+            if (!content.empty()) {
+                data_to_analyze.push_back(content);
+            }
+        } else {
+            data_to_analyze = read_file_lines(data_path);
         }
     } else {
         std::cout << "Analyzing directory: " << data_path << std::endl;

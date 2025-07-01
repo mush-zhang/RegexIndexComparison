@@ -25,8 +25,9 @@ python3 analyze_datasets.py --sysy data/extracted
 # Analyze both datasets and compare
 python3 analyze_datasets.py --all --verbose
 
-# Analyze with file limit and save results
+# Analyze with limits and save results
 python3 analyze_datasets.py --enron data/enron/maildir --max-files 1000 --output enron_stats.json
+python3 analyze_datasets.py --sysy data/extracted --max-lines 10000 --output sysy_stats.json
 
 # Analyze a custom dataset
 python3 analyze_datasets.py --dataset path/to/data --dataset-name "MyDataset"
@@ -69,7 +70,10 @@ make analyze_dataset_stats.out
 ./analyze_dataset_stats.out -d data/enron/maildir
 
 # Force Enron-style reading for any dataset
-./analyze_dataset_stats.out -d data/extracted --enron -n "Sysy"
+./analyze_dataset_stats.out -d data/some_dataset --enron -n "SomeDataset"
+
+# Analyze Sysy dataset with line-by-line reading
+./analyze_dataset_stats.out -d data/extracted --sysy -n "Sysy"
 
 # Analyze with output file
 ./analyze_dataset_stats.out -d data/enron/maildir -o enron_stats.csv
@@ -97,13 +101,13 @@ Shell script that runs comprehensive analysis of Enron and other workloads.
 ## File Reading Methods
 
 ### Enron-Style Reading
-- **Used for:** Enron emails, Sysy dataset, and other document collections
+- **Used for:** Enron emails and other document collections
 - **Method:** Each file becomes one string in the dataset
 - **Preserves:** Internal newlines within documents
 - **Example:** An email file with multiple lines becomes one long string with embedded `\n` characters
 
 ### Line-by-Line Reading  
-- **Used for:** Traditional text datasets
+- **Used for:** Sysy dataset, traditional text datasets, and most other workloads
 - **Method:** Each line in each file becomes a separate string
 - **Example:** A file with 10 lines becomes 10 separate strings in the dataset
 
