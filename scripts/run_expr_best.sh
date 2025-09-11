@@ -1,13 +1,11 @@
 #! /bin/bash
 
 thread_list=( 16 )
-extra=""
 
 unset -v wl_num
 unset -v dirname
 extra=""
 max_num_ngram=-1
-
 while getopts ":d:r:q:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
@@ -27,7 +25,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
-            dirname=result/${OPTARG}_vggraph_greedy_revision
+            dirname=result/${OPTARG}_best_result4
             echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
@@ -49,7 +47,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             ;;
     esac
 done
-: ${wl_num:?Missing -w}
+: ${wl_num:?Missing -h}
 
 if [ "$wl_num" == "0" ]; then
     extra="${extra}-r ${regex_file} -d ${data_file}"
@@ -60,25 +58,36 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-# sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
-sel_list=( 0.7 0.5 0.15 0.1 )
-num_repeat=1
-
-# VGGraph_Greedy
-# for n in 2 3  4 6; do
-for n in 2 3 ; do
+sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
+num_repeat=10
+red_list=( 0.1 0.2 0.5 0.85 )
+# Best
+for t in ${thread_list[*]}; do
     for c in ${sel_list[*]}; do
-        for t in ${thread_list[*]}; do
-            curr_suffix="${timeout_suffix}_vggraph_greedy_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
-
-            curr_cmd="${timeout_prefix} ./benchmark.out VGGRAPH -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-            echo ${curr_cmd}
-            eval "${curr_cmd}"
-            retVal=$?
-            if [ $retVal -ne 0 ]; then
-                echo "Timeout"
-                break
-            fi
-        done
+        curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
+        curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
+        echo ${curr_cmd}
+        eval "${curr_cmd}"
+        retVal=$?
+        if [ $retVal -ne 0 ]; then
+            echo "Timeout"
+            break
+        fi
     done
 done
+
+# for t in ${thread_list[*]}; do
+#     for c in ${sel_list[*]}; do
+#         curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}_${max_num_ngram}.txt"
+#         for red in ${red_list[*]}; do
+#             curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
+#             echo ${curr_cmd}
+#             eval "${curr_cmd}"
+#             retVal=$?
+#             if [ $retVal -ne 0 ]; then
+#                 echo "Timeout"
+#                 break
+#             fi
+#         done
+#     done
+# done

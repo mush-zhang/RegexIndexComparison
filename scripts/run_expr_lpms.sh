@@ -25,7 +25,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
-            dirname=result/${OPTARG}_best_result4
+            dirname=result/${OPTARG}_lpms_result4
             echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
@@ -58,38 +58,24 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-# sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
-# sel_list=( 0.7 0.5 0.2 0.1 0.05 0.02 )
-sel_list=( 0.7 0.5 0.1)
-num_repeat=1
-red_list=( 0.1 0.2 0.5 0.85 )
-# Best
-for t in ${thread_list[*]}; do
-    for c in ${sel_list[*]}; do
-        curr_suffix="${timeout_suffix}_best_t${t}_c${c}_${max_num_ngram}.txt"
-        curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-        echo ${curr_cmd}
-        eval "${curr_cmd}"
-        retVal=$?
-        if [ $retVal -ne 0 ]; then
-            echo "Timeout"
-            break
-        fi
-    done
-done
+num_repeat=10
 
-# for t in ${thread_list[*]}; do
-#     for c in ${sel_list[*]}; do
-#         curr_suffix="${timeout_suffix}_best_t${t}_red${red}_c${c}_${max_num_ngram}.txt"
-#         for red in ${red_list[*]}; do
-#             curr_cmd="${timeout_prefix} ./benchmark.out BEST -t ${t} -w ${wl_num} -o ${dirname} -c ${c} -e ${num_repeat}  --wl_reduce ${red} ${extra} ${curr_suffix}"
-#             echo ${curr_cmd}
-#             eval "${curr_cmd}"
-#             retVal=$?
-#             if [ $retVal -ne 0 ]; then
-#                 echo "Timeout"
-#                 break
-#             fi
-#         done
-#     done
-# done
+# Fast
+for t in ${thread_list[*]}; do
+    curr_suffix="${timeout_suffix}_lpms_t${t}_determ_${max_num_ngram}.txt"
+    curr_cmd="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax DETERM -e ${num_repeat} ${extra} ${curr_suffix}"
+    echo ${curr_cmd}
+    eval "${curr_cmd}"
+    retVal=$?
+    if [ $retVal -ne 0 ]; then
+        echo "Timeout"
+    fi
+    # curr_suffix2="${timeout_suffix}_lpms_t${t}_random_${max_num_ngram}.txt"
+    # curr_cmd2="${timeout_prefix} ./benchmark.out LPMS -t ${t} -w ${wl_num} -o ${dirname} --relax RANDOM -e ${num_repeat} ${extra} ${curr_suffix2}"
+    # echo ${curr_cmd2}
+    # eval "${curr_cmd2}"
+    # retVal2=$?
+    # if [ $retVal2 -ne 0 ]; then
+    #     echo "Timeout"
+    # fi
+done

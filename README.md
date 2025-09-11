@@ -18,14 +18,10 @@ sudo make install
 
 - sudo apt install python3-pip
 
-- pip3 install warcio
-
 ### Data
 
 #### Webpage
 
-<!-- Use python packages `warcio` to read the packets
-`pip install warcio google-re2 wget`  -->
 
 ```
 pushd data/webpages

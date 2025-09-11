@@ -1,13 +1,11 @@
 #! /bin/bash
 
 thread_list=( 16 )
-extra=""
 
 unset -v wl_num
 unset -v dirname
 extra=""
 max_num_ngram=-1
-
 while getopts ":d:r:q:t:w:k:" opt; do
     case "${opt}" in
         d) echo "Option -d is triggered  with value $OPTARG"
@@ -27,7 +25,7 @@ while getopts ":d:r:q:t:w:k:" opt; do
             max_num_ngram=${OPTARG}
             ;;
         w) echo "Option -w is triggered with value $OPTARG"
-            dirname=result/${OPTARG}_free_revision
+            dirname=result/${OPTARG}_trigram_result
             echo "$OPTARG"
             if [ "$OPTARG" == "traffic" ]; then
                 wl_num=1
@@ -60,36 +58,15 @@ timeout_suffix="; } 2> ${dirname}/time_report"
 
 echo ${dirname}
 mkdir -p ${dirname} 
-# sel_list=( 0.7 0.5 0.2 0.15 0.12 0.1 0.05 0.02 )
-sel_list=( 0.7 0.5 0.15 0.1)
-num_repeat=1
+num_repeat=10
 
-# Free
-# for n in 2 4 6 8 10; do
-for n in 3 4; do
-# for n in 4 6; do
-    for c in ${sel_list[*]}; do
-        for t in ${thread_list[*]}; do
-            curr_suffix="${timeout_suffix}_free_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
-
-            curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-            echo ${curr_cmd}
-            eval "${curr_cmd}"
-            retVal=$?
-            if [ $retVal -ne 0 ]; then
-                echo "Timeout"
-                break
-            fi
-            # curr_suffix="${timeout_suffix}_free-presuf_t${t}_c${c}_n${n}_${max_num_ngram}.txt"
-
-            # curr_cmd="${timeout_prefix} ./benchmark.out FREE -t ${t} -w ${wl_num} -o ${dirname} -n ${n} --presuf -c ${c} -e ${num_repeat} ${extra} ${curr_suffix}"
-            # echo ${curr_cmd}
-            # eval "${curr_cmd}"
-            # retVal=$?
-            # if [ $retVal -ne 0 ]; then
-            #     echo "Timeout"
-            #     break
-            # fi
-        done
-    done
+for t in ${thread_list[*]}; do
+    curr_suffix="${timeout_suffix}_trigram_t${t}_${max_num_ngram}.txt"
+    curr_cmd="${timeout_prefix} ./benchmark.out TRIGRAM -t ${t} -w ${wl_num} -o ${dirname} -e ${num_repeat} ${extra} ${curr_suffix}"
+    echo ${curr_cmd}
+    eval "${curr_cmd}"
+    retVal=$?
+    if [ $retVal -ne 0 ]; then
+        echo "Timeout"
+    fi
 done

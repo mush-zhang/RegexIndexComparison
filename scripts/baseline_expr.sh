@@ -11,6 +11,13 @@
 # # traffic
 ./run_expr_baseline.sh -w traffic
 
+# dblp
+for qcount in 1000; do
+    ./run_expr_baseline.sh -w dblp_small_${qcount} \
+    -r data/dblp/small/query${qcount}.txt \
+    -d data/dblp/small/authors.txt -k ${k}
+done
+
 # robust
 for rob_wl in 1 2 3 4; do
     for perc in 10 30 50; do
@@ -19,12 +26,4 @@ for rob_wl in 1 2 3 4; do
         -q data/synthetic/expr4/queries/Rob0${rob_wl}_test_queries_2pct.txt \
         -d data/synthetic/expr4/datasets/Rob0${rob_wl}.txt
     done
-done
-
-# dblp
-# for qcount in 1000 2000; do
-for qcount in 1000; do
-    ./run_expr_baseline.sh -w dblp_small_${qcount} \
-    -r data/dblp/small/query${qcount}.txt \
-    -d data/dblp/small/authors.txt -k ${k}
 done
